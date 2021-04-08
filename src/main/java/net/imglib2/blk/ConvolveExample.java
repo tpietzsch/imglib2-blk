@@ -1,20 +1,24 @@
 package net.imglib2.blk;
 
+import java.util.Arrays;
 import net.imglib2.algorithm.convolution.kernel.Kernel1D;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.util.Intervals;
 
 public class ConvolveExample
 {
-	private final Kernel1D[] kernels;
+	final int[] sourceSize;
+	final double[] source;
 
-	private final int[] targetSizeX;
-	private final int[] targetSizeY;
-	private final int[] targetSizeZ;
+	final Kernel1D[] kernels;
 
-	private final double[] targetX;
-	private final double[] targetY;
-	private final double[] targetZ;
+	final int[] targetSizeX;
+	final int[] targetSizeY;
+	final int[] targetSizeZ;
+
+	final double[] targetX;
+	final double[] targetY;
+	final double[] targetZ;
 
 	public static void main( String[] args )
 	{
@@ -33,6 +37,8 @@ public class ConvolveExample
 
 	public ConvolveExample( final int[] targetSize, final double[] sigmas, final double[] source, final int[] expectedSourceSize )
 	{
+		this.source = source;
+
 		kernels = Kernel1D.symmetric( Gauss3.halfkernels( sigmas ) );
 
 		targetSizeZ = targetSize;
@@ -46,7 +52,7 @@ public class ConvolveExample
 				targetSizeY[ 1 ] + kernels[ 1 ].size() - 1,
 				targetSizeY[ 2 ]
 		};
-		final int[] sourceSize = new int[] {
+		sourceSize = new int[] {
 				targetSizeX[ 0 ] + kernels[ 0 ].size() - 1,
 				targetSizeX[ 1 ],
 				targetSizeX[ 2 ]
@@ -62,11 +68,28 @@ public class ConvolveExample
 		targetX = new double[ ( int ) Intervals.numElements( targetSizeX ) ];
 		targetY = new double[ ( int ) Intervals.numElements( targetSizeY ) ];
 		targetZ = new double[ ( int ) Intervals.numElements( targetSizeZ ) ];
+	}
 
+	public void compute()
+	{
+		convolveX();
+		convolveY();
+		convolveZ();
+	}
+
+	public void convolveX()
+	{
 		convolveX( source, sourceSize, targetX, targetSizeX, kernels[ 0 ] );
-		convolveY( targetX, targetSizeX, targetY, targetSizeY, kernels[ 1 ] );
-		convolveZ( targetY, targetSizeY, targetZ, targetSizeZ, kernels[ 2 ] );
+	}
 
+	public void convolveY()
+	{
+		convolveY( targetX, targetSizeX, targetY, targetSizeY, kernels[ 1 ] );
+	}
+
+	public void convolveZ()
+	{
+		convolveZ( targetY, targetSizeY, targetZ, targetSizeZ, kernels[ 2 ] );
 	}
 
 	// sx, sy, sz    : current position in source
@@ -77,13 +100,15 @@ public class ConvolveExample
 	// txl, tyl, tzl : target size
 	// kl            : kernel size
 
-	private void convolveX(
+	private static void convolveX(
 			final double[] source,
 			final int[] sourceSize,
 			final double[] target,
 			final int[] targetSize,
 			final Kernel1D kernel1D )
 	{
+		Arrays.fill( target, 0 );
+
 		final int sxl = sourceSize[ 0 ];
 		final int syl = sourceSize[ 1 ];
 
@@ -101,13 +126,15 @@ public class ConvolveExample
 						target[ z * tyl * txl + y * txl + x ] += kernel[ k ] * source[ z * syl * sxl + y * sxl + ( x + k ) ];
 	}
 
-	private void convolveY(
+	private static void convolveY(
 			final double[] source,
 			final int[] sourceSize,
 			final double[] target,
 			final int[] targetSize,
 			final Kernel1D kernel1D )
 	{
+		Arrays.fill( target, 0 );
+
 		final int sxl = sourceSize[ 0 ];
 		final int syl = sourceSize[ 1 ];
 
@@ -125,13 +152,15 @@ public class ConvolveExample
 						target[ z * tyl * txl + y * txl + x ] += kernel[ k ] * source[ z * syl * sxl + ( y + k ) * sxl + x ];
 	}
 
-	private void convolveZ(
+	private static void convolveZ(
 			final double[] source,
 			final int[] sourceSize,
 			final double[] target,
 			final int[] targetSize,
 			final Kernel1D kernel1D )
 	{
+		Arrays.fill( target, 0 );
+
 		final int sxl = sourceSize[ 0 ];
 		final int syl = sourceSize[ 1 ];
 
