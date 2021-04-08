@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
 public class ConvolveBenchmark
 {
 	final double[] sigmas = { 8, 8, 8 };
-//	final int[] targetSize = { 68, 68, 48 };
-	final int[] targetSize = { 128, 128, 128 };
+	final int[] targetSize = { 68, 68, 48 };
+//	final int[] targetSize = { 128, 128, 128 };
 
 	final RandomSourceData sourceData = new RandomSourceData( targetSize, sigmas );
 	final ExpectedResults gauss3 = new ExpectedResults( targetSize, sigmas, sourceData.source, sourceData.sourceSize );

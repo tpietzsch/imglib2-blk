@@ -81,6 +81,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
+		<scijava.jvm.version>11</scijava.jvm.version>
 		<imglib2.version>5.11.1</imglib2.version>
 		<imglib2-roi.version>0.11.0</imglib2-roi.version>
 	</properties>

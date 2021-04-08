@@ -153,19 +153,29 @@ public class ConvolveExample
 		final double[] kernel = kernel1D.fullKernel();
 		final int kl = kernel.length;
 
+		final double[] sourceCopy = new double[ txl ];
+		final double[] targetCopy = new double[ txl ];
+
 		for ( int z = 0; z < tzl; ++z )
 			for ( int y = 0; y < tyl; ++y )
 			{
 				final int tzy = z * tyl * txl + y * txl;
 				final int szy = z * syl * sxl + y * sxl;
+				Arrays.fill( targetCopy, 0 );
 				for ( int k = 0; k < kl; ++k )
-					line( source, target, txl, kernel[ k ], tzy, szy + k * kstep );
+				{
+					System.arraycopy( source, szy + k * kstep, sourceCopy, 0, sourceCopy.length );
+					line( sourceCopy, targetCopy, txl, kernel[ k ] );
+//					line( source, target, txl, kernel[ k ], tzy, szy + k * kstep );
+				}
+				System.arraycopy( targetCopy, 0, target, tzy, targetCopy.length );
 			}
 	}
 
-	private static void line( final double[] source, final double[] target, final int txl, final double v, final int tzy, final int szy )
+	private static void line( final double[] source, final double[] target, final int txl, final double v )
 	{
 		for ( int x = 0; x < txl; ++x )
-			target[ tzy + x ] += v * source[ szy + x ];
+			target[ x ] = Math.fma( v, source[ x ], target[ x ] );
+//			target[ x ] += v * source[ x ];
 	}
 }
