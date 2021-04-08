@@ -107,23 +107,8 @@ public class ConvolveExample
 			final int[] targetSize,
 			final Kernel1D kernel1D )
 	{
-		Arrays.fill( target, 0 );
-
-		final int sxl = sourceSize[ 0 ];
-		final int syl = sourceSize[ 1 ];
-
-		final int txl = targetSize[ 0 ];
-		final int tyl = targetSize[ 1 ];
-		final int tzl = targetSize[ 2 ];
-
-		final double[] kernel = kernel1D.fullKernel();
-		final int kl = kernel.length;
-
-		for ( int x = 0; x < txl; ++x )
-			for ( int y = 0; y < tyl; ++y )
-				for ( int z = 0; z < tzl; ++z )
-					for ( int k = 0; k < kl; ++k )
-						target[ z * tyl * txl + y * txl + x ] += kernel[ k ] * source[ z * syl * sxl + y * sxl + ( x + k ) ];
+		final int kstep = 1;
+		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
 	}
 
 	private static void convolveY(
@@ -133,23 +118,8 @@ public class ConvolveExample
 			final int[] targetSize,
 			final Kernel1D kernel1D )
 	{
-		Arrays.fill( target, 0 );
-
-		final int sxl = sourceSize[ 0 ];
-		final int syl = sourceSize[ 1 ];
-
-		final int txl = targetSize[ 0 ];
-		final int tyl = targetSize[ 1 ];
-		final int tzl = targetSize[ 2 ];
-
-		final double[] kernel = kernel1D.fullKernel();
-		final int kl = kernel.length;
-
-		for ( int x = 0; x < txl; ++x )
-			for ( int y = 0; y < tyl; ++y )
-				for ( int z = 0; z < tzl; ++z )
-					for ( int k = 0; k < kl; ++k )
-						target[ z * tyl * txl + y * txl + x ] += kernel[ k ] * source[ z * syl * sxl + ( y + k ) * sxl + x ];
+		final int kstep = sourceSize[ 0 ];
+		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
 	}
 
 	private static void convolveZ(
@@ -158,6 +128,18 @@ public class ConvolveExample
 			final double[] target,
 			final int[] targetSize,
 			final Kernel1D kernel1D )
+	{
+		final int kstep = sourceSize[ 1 ] * sourceSize[ 0 ];
+		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
+	}
+
+	private static void convolve(
+			final double[] source,
+			final int[] sourceSize,
+			final double[] target,
+			final int[] targetSize,
+			final Kernel1D kernel1D,
+			final int kstep )
 	{
 		Arrays.fill( target, 0 );
 
@@ -171,10 +153,19 @@ public class ConvolveExample
 		final double[] kernel = kernel1D.fullKernel();
 		final int kl = kernel.length;
 
-		for ( int x = 0; x < txl; ++x )
+		for ( int z = 0; z < tzl; ++z )
 			for ( int y = 0; y < tyl; ++y )
-				for ( int z = 0; z < tzl; ++z )
-					for ( int k = 0; k < kl; ++k )
-						target[ z * tyl * txl + y * txl + x ] += kernel[ k ] * source[ ( z + k ) * syl * sxl + y * sxl + x ];
+			{
+				final int tzy = z * tyl * txl + y * txl;
+				final int szy = z * syl * sxl + y * sxl;
+				for ( int k = 0; k < kl; ++k )
+					line( source, target, txl, kernel[ k ], tzy, szy + k * kstep );
+			}
+	}
+
+	private static void line( final double[] source, final double[] target, final int txl, final double v, final int tzy, final int szy )
+	{
+		for ( int x = 0; x < txl; ++x )
+			target[ tzy + x ] += v * source[ szy + x ];
 	}
 }
