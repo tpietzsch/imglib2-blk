@@ -22,8 +22,8 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.util.concurrent.TimeUnit;
 
 @State( Scope.Benchmark )
-@Warmup( iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS )
-@Measurement( iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS )
+@Warmup( iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS )
+@Measurement( iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS )
 @BenchmarkMode( Mode.AverageTime )
 @OutputTimeUnit( TimeUnit.MILLISECONDS )
 @Fork( 1 )
@@ -44,31 +44,31 @@ public class ConvolveBenchmark
 		System.out.println( "targetSizeZ = " + Intervals.numElements( convolve.targetSizeZ ));
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void benchmarkGauss3()
 	{
 		gauss3.compute();
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void benchmarkConvolve()
 	{
 		convolve.compute();
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void benchmarkConvolveX()
 	{
 		convolve.convolveX();
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void benchmarkConvolveY()
 	{
 		convolve.convolveY();
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void benchmarkConvolveZ()
 	{
 		convolve.convolveZ();
