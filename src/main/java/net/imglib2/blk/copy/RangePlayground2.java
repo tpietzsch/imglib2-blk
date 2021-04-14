@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class RangePlayground
+public class RangePlayground2
 {
 	enum Direction
 	{
