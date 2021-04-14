@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static net.imglib2.blk.copy.RangePlayground2.Direction.BACKWARD;
+import static net.imglib2.blk.copy.RangePlayground2.Direction.FORWARD;
+
 public class RangePlayground2
 {
 	enum Direction
@@ -66,7 +69,7 @@ public class RangePlayground2
 		while ( bw > 0 )
 		{
 			final int w = Math.min( bw, cellWidth( gx, cw, iw ) - cx );
-			final Range range = new Range( gx, cx, w, Direction.FORWARD, x );
+			final Range range = new Range( gx, cx, w, FORWARD, x );
 			System.out.println( "range = " + range );
 			ranges.add( range );
 
@@ -74,6 +77,78 @@ public class RangePlayground2
 			x += w;
 			++gx;
 			cx = 0;
+		}
+		return ranges;
+	}
+
+	static List< Range >  findRanges_mirror_double(
+			int bx, // start of block in source coordinates (in pixels)
+			int bw, // width of block to copy (in pixels)
+			int iw, // source image width (in pixels)
+			int cw  // source cell width (in pixels)
+	)
+	{
+		List< Range > ranges = new ArrayList<>();
+
+		final int pi = 2 * iw;
+		bx = ( bx < 0 )
+				? ( bx + 1 ) % pi + pi - 1
+				: bx % pi;
+		Direction dir = FORWARD;
+		if ( bx >= iw )
+		{
+			bx = pi - 1 - bx;
+			dir = BACKWARD;
+		}
+
+		int gx = bx / cw;
+		int cx = bx - ( gx * cw );
+		int x = 0;
+		while ( bw > 0 )
+		{
+			if ( dir == FORWARD)
+			{
+				final int gxw = cellWidth( gx, cw, iw );
+				final int w = Math.min( bw, gxw - cx );
+				final Range range = new Range( gx, cx, w, FORWARD, x );
+				System.out.println( "range = " + range );
+				ranges.add( range );
+
+				bw -= w;
+				x += w;
+
+				if ( ++gx * cw >= iw ) // moving out of bounds
+				{
+					--gx;
+					cx = gxw - 1;
+					dir = BACKWARD;
+				}
+				else
+				{
+					cx = 0;
+				}
+			}
+			else // dir == BACKWARD
+			{
+				final int w = Math.min( bw, cx + 1 );
+				final Range range = new Range( gx, cx, w, BACKWARD, x );
+				System.out.println( "range = " + range );
+				ranges.add( range );
+
+				bw -= w;
+				x += w;
+
+				if ( gx == 0 ) // moving into bounds
+				{
+					cx = 0;
+					dir = FORWARD;
+				}
+				else
+				{
+					cx = cellWidth( --gx, cw, iw ) - 1;
+				}
+			}
+
 		}
 		return ranges;
 	}
@@ -95,24 +170,31 @@ public class RangePlayground2
 		for ( Range range : ranges )
 		{
 			final int[] cell = data[ range.gridx ];
-			for ( int i = 0; i < range.w; ++i )
-				dest[ x++ ] = cell[ i + range.cellx];
+			if ( range.dir == FORWARD )
+			{
+				for ( int i = 0; i < range.w; ++i )
+					dest[ x++ ] = cell[ range.cellx + i ];
+			}
+			else
+			{
+				for ( int i = 0; i < range.w; ++i )
+					dest[ x++ ] = cell[ range.cellx - i ];
+			}
 		}
 	}
 
 	public static void main( String[] args )
 	{
 		int[][] data = {
-				{ 0, 1, 2, 3, 4 },
-				{ 5, 6, 7, 8, 9 },
-				{ 10, 11, 12, 13, 14 }
+				{ 0, 1, 2, 3 },
+				{ 4, 5 }
 		};
-		final int iw = 15;
-		final int cw = 5;
+		final int iw = 6;
+		final int cw = 4;
 
-		final int[] dest = new int[ 9 ];
+		final int[] dest = new int[ 12 ];
 		final int bw = dest.length;
-		final List< Range > ranges = findRanges( 3, bw, iw, cw );
+		final List< Range > ranges = findRanges_mirror_double( -8, bw, iw, cw );
 
 		copy( ranges, data, dest );
 		System.out.println( "dest = " + Arrays.toString( dest ) );
