@@ -24,7 +24,9 @@ public class CellImgBlocks
 
 	private FindRanges findRanges;
 
+	private final List< Range >[] rangesPerDimension;
 	private final Range[] ranges;
+	private final RangeCopier copier;
 
 	public enum ExtensionMethod
 	{
@@ -73,6 +75,8 @@ public class CellImgBlocks
 		}
 
  		ranges = new Range[ n ];
+		rangesPerDimension = new List[ n ];
+		copier = new RangeCopier();
 	}
 
 	@FunctionalInterface
@@ -89,19 +93,15 @@ public class CellImgBlocks
 	public void copy( final int[] srcPos, final byte[] dest, final int[] size )
 	{
 		// find ranges
-		final List< Range >[] rangesPerDimension = new List[ n ];
 		for ( int d = 0; d < n; ++d )
 			rangesPerDimension[ d ] = findRanges.findRanges( srcPos[ d ], size[ d ], srcDims[ d ], cellGrid.cellDimension( d ) );
 
 		// copy data
-		final RangeCopier copier = new RangeCopier();
 		copier.setupDestSize( size );
-		copy1( rangesPerDimension, copier, dest, n - 1 );
-
-		// TODO: rangesPerDimension, copier should be fields, not passed as parameters
+		copy1( dest, n - 1 );
 	}
 
-	private void copy1( final List< Range >[] rangesPerDimension, final RangeCopier copier, final byte[] dest, final int d )
+	private void copy1( final byte[] dest, final int d )
 	{
 		for ( Range range : rangesPerDimension[ d ] )
 		{
@@ -110,7 +110,7 @@ public class CellImgBlocks
 			if ( range.dir == CONSTANT )
 				copier.fill( dest, d );
 			else if ( d > 0 )
-				copy1( rangesPerDimension, copier, dest, d - 1 );
+				copy1( dest, d - 1 );
 			else
 				copier.copy( dest );
 		}
@@ -195,7 +195,7 @@ public class CellImgBlocks
 			for ( int i = 0; i < length; ++i )
 				dest[ destPos + i ] = src[ srcPos + i * cstep ];
 		}
-
+	
 		void fill( final byte[] dest, final int dConst )
 		{
 			final int dOffset = doffsets[ dConst ];
