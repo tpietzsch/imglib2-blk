@@ -37,6 +37,7 @@ public class CellImgBlocks
 		this( cellImg, extensionMethod, ( byte ) 0 );
 	}
 
+	// TODO: CONSTANT extension method should have value parameter. Would be good use-case for sealed classes instead of enum.
 	public CellImgBlocks( final AbstractCellImg< ?, ?, ? extends Cell< ? >, ? > cellImg, ExtensionMethod extensionMethod, final byte oobValue )
 	{
 		this.cellImg = cellImg;
@@ -118,6 +119,8 @@ public class CellImgBlocks
 		private final RandomAccess< ? extends Cell< ? > > cells = cellImg.getCells().randomAccess();
 
 		private final int[] dsteps = new int[ n ];
+		private final int[] doffsets = new int[ n + 1 ];
+		private final int[] cdims = new int[ n ];
 		private final int[] csteps = new int[ n ];
 		private final int[] lengths = new int[ n ];
 
@@ -130,22 +133,25 @@ public class CellImgBlocks
 
 		void copy( final Range[] ranges, final byte[] dest )
 		{
-			int sOffset = 0;
-			int dOffset = 0;
-			csteps[ 0 ] = 1;
-			for ( int d = 0; d < n; ++d )
+			for ( int d = n - 1; d >= 0; --d )
 			{
 				final Range r = ranges[ d ];
 				cells.setPosition( r.gridx, d ); // TODO: this could be done outside, because r will often stay the same for d > 0
 				lengths[ d ] = r.w; // TODO: this could be done outside, because r will often stay the same for d > 0
+				doffsets[ d ] = doffsets[ d + 1 ] + dsteps[ d ] * r.x; // doffsets[ n ] == 0
+				cdims[ d ] = cellGrid.getCellDimension( d, r.gridx );
+			}
 
+			int sOffset = 0;
+			csteps[ 0 ] = 1;
+			for ( int d = 0; d < n; ++d )
+			{
+				final Range r = ranges[ d ];
 				if ( d < n - 1 )
 				{
-					final int cdim = cellGrid.getCellDimension( d, r.gridx );
-					csteps[ d + 1 ] = csteps[ d ] * cdim;
+					csteps[ d + 1 ] = csteps[ d ] * cdims[ d ];
 				}
 				sOffset += csteps[ d ] * r.cellx;
-				dOffset += dsteps[ d ] * r.x;
 
 				switch( r.dir )
 				{
@@ -157,6 +163,8 @@ public class CellImgBlocks
 					break;
 				}
 			}
+
+			int dOffset = doffsets[ 0 ];
 
 			// TODO: generic type:
 			//    Object           ArrayDataAccess< A >
@@ -193,8 +201,7 @@ public class CellImgBlocks
 		void fill( final Range[] ranges, final byte[] dest, final int dConst )
 		{
 			int dOffset = 0;
-			int d = n - 1;
-			for (; d >= dConst; --d )
+			for ( int d = n - 1; d >= dConst; --d )
 			{
 				final Range r = ranges[ d ];
 				cells.setPosition( r.gridx, d ); // TODO: this could be done outside, because r will often stay the same for d > 0
