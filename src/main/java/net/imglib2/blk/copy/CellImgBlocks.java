@@ -133,6 +133,8 @@ public class CellImgBlocks
 
 		void copy( final Range[] ranges, final byte[] dest )
 		{
+			// TODO: When updating the Range for dim d, do the loop body for only that d.
+			//       This should automatically work if the loops are nested from highest to lowest dimension
 			for ( int d = n - 1; d >= 0; --d )
 			{
 				final Range r = ranges[ d ];
@@ -142,17 +144,15 @@ public class CellImgBlocks
 				cdims[ d ] = cellGrid.getCellDimension( d, r.gridx );
 			}
 
-			int sOffset = 0;
 			csteps[ 0 ] = 1;
+			for ( int d = 0; d < n - 1; ++d )
+				csteps[ d + 1 ] = csteps[ d ] * cdims[ d ];
+
+			int sOffset = 0;
 			for ( int d = 0; d < n; ++d )
 			{
 				final Range r = ranges[ d ];
-				if ( d < n - 1 )
-				{
-					csteps[ d + 1 ] = csteps[ d ] * cdims[ d ];
-				}
 				sOffset += csteps[ d ] * r.cellx;
-
 				switch( r.dir )
 				{
 				case BACKWARD:
@@ -209,7 +209,6 @@ public class CellImgBlocks
 				dOffset += dsteps[ d ] * r.x;
 			}
 			lengths[ dConst ] *= dsteps[ dConst ];
-
 
 			if ( n - 1 > dConst )
 				fill1( dest, dOffset, n - 1, dConst );
