@@ -28,8 +28,8 @@ import static net.imglib2.blk.copy.CellImgBlocks.ExtensionMethod.CONSTANT;
 import static net.imglib2.blk.copy.CellImgBlocks.ExtensionMethod.MIRROR_SINGLE;
 
 @State( Scope.Benchmark )
-@Warmup( iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS )
-@Measurement( iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS )
+@Warmup( iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS )
+@Measurement( iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS )
 @BenchmarkMode( Mode.AverageTime )
 @OutputTimeUnit( TimeUnit.MILLISECONDS )
 @Fork( 1 )
@@ -39,7 +39,7 @@ public class CopyBenchmark
 	private final int[] srcDimensions = { 2000, 2000 };
 	private final int[] destDimensions = { 100, 100 };
 	private final int[] pos = { 64, 100 };
-	private final int[] oobPos = { -32, -32 };
+	private final int[] oobPos = { -64, -64 };
 
 	private final CellImg< UnsignedByteType, ? > cellImg;
 
@@ -69,7 +69,7 @@ public class CopyBenchmark
 	}
 
 	@Benchmark
-	public void benchmarkLoopBuilderOob()
+	public void benchmarkLoopBuilderOobMirrorSingle()
 	{
 		final long[] min = Util.int2long( oobPos );
 		final long[] max = min.clone();
@@ -82,6 +82,19 @@ public class CopyBenchmark
 	}
 
 	@Benchmark
+	public void benchmarkLoopBuilderOobConstant()
+	{
+		final long[] min = Util.int2long( oobPos );
+		final long[] max = min.clone();
+		for ( int d = 0; d < max.length; d++ )
+			max[ d ] += destDimensions[ d ] - 1;
+		LoopBuilder
+				.setImages( Views.interval( Views.extendZero( cellImg ), min, max), destArrayImg )
+				.multiThreaded( false )
+				.forEachPixel( (i,o) -> o.set( i.get() ) );
+	}
+
+	@Benchmark
 	public void benchmarkCellImgBlocks()
 	{
 		final CellImgBlocks blocks = new CellImgBlocks( cellImg, CONSTANT );
@@ -89,9 +102,16 @@ public class CopyBenchmark
 	}
 
 	@Benchmark
-	public void benchmarkCellImgBlocksOob()
+	public void benchmarkCellImgBlocksOobMirrorSingle()
 	{
 		final CellImgBlocks blocks = new CellImgBlocks( cellImg, MIRROR_SINGLE );
+		blocks.copy( oobPos, dest, destDimensions );
+	}
+
+	@Benchmark
+	public void benchmarkCellImgBlocksOobConstant()
+	{
+		final CellImgBlocks blocks = new CellImgBlocks( cellImg, CONSTANT, ( byte ) 0 );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 

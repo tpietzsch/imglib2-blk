@@ -1,5 +1,6 @@
 package net.imglib2.blk.copy;
 
+import java.util.Arrays;
 import java.util.List;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
@@ -193,8 +194,15 @@ public class CellImgBlocks
 		{
 			final int length = lengths[ 0 ];
 			final int cstep = csteps[ 0 ];
-			for ( int i = 0; i < length; ++i )
-				dest[ destPos + i ] = src[ srcPos + i * cstep ];
+			if ( cstep == 1 )
+			{
+				System.arraycopy( src, srcPos, dest, destPos, length );
+			}
+			else
+			{
+				for ( int i = 0; i < length; ++i )
+					dest[ destPos + i ] = src[ srcPos + i * cstep ];
+			}
 		}
 
 		void fill( final byte[] dest, final int dConst )
@@ -223,8 +231,9 @@ public class CellImgBlocks
 		private void fill0( final byte[] dest, final int destPos, final int dConst )
 		{
 			final int length = lengths[ dConst ];
-			for ( int i = 0; i < length; ++i )
-				dest[ destPos + i ] = oobValue;
+			Arrays.fill( dest, destPos, destPos + length, oobValue );
+//			for ( int i = 0; i < length; ++i )
+//				dest[ destPos + i ] = oobValue;
 		}
 	}
 }
