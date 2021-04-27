@@ -24,6 +24,8 @@ public class CellImgBlocks
 
 	private FindRanges findRanges;
 
+	private final Range[] ranges;
+
 	public enum ExtensionMethod
 	{
 		CONSTANT,
@@ -69,6 +71,8 @@ public class CellImgBlocks
 			findRanges = Ranges::findRanges_mirror_double;
 			break;
 		}
+
+ 		ranges = new Range[ n ];
 	}
 
 	@FunctionalInterface
@@ -89,29 +93,26 @@ public class CellImgBlocks
 		for ( int d = 0; d < n; ++d )
 			rangesPerDimension[ d ] = findRanges.findRanges( srcPos[ d ], size[ d ], srcDims[ d ], cellGrid.cellDimension( d ) );
 
-		for ( int d = 0; d < n; ++d )
-			System.out.println( String.format( "rangesPerDimension[%d].size() = %d", d, rangesPerDimension[ d ].size() ) );
-
 		// copy data
-		final Range[] ranges = new Range[ n ];
 		final RangeCopier copier = new RangeCopier();
 		copier.setupDestSize( size );
-		copy1( rangesPerDimension, ranges, copier, dest, n - 1 );
-		// TODO: rangesPerDimension, ranges, copier should be fields, not passed as parameters
+		copy1( rangesPerDimension, copier, dest, n - 1 );
+
+		// TODO: rangesPerDimension, copier should be fields, not passed as parameters
 	}
 
-	private void copy1( final List< Range >[] rangesPerDimension, final Range[] ranges, final RangeCopier copier, final byte[] dest, final int d )
+	private void copy1( final List< Range >[] rangesPerDimension, final RangeCopier copier, final byte[] dest, final int d )
 	{
 		for ( Range range : rangesPerDimension[ d ] )
 		{
 			ranges[ d ] = range;
-			copier.updateRange( ranges, d );
+			copier.updateRange( d );
 			if ( range.dir == CONSTANT )
-				copier.fill( ranges, dest, d );
+				copier.fill( dest, d );
 			else if ( d > 0 )
-				copy1( rangesPerDimension, ranges, copier, dest, d - 1 );
+				copy1( rangesPerDimension, copier, dest, d - 1 );
 			else
-				copier.copy( ranges, dest );
+				copier.copy( dest );
 		}
 	}
 
@@ -132,16 +133,16 @@ public class CellImgBlocks
 				dsteps[ d + 1 ] = dsteps[ d ] * size[ d ];
 		}
 
-		void updateRange( final Range[] ranges, final int d )
+		void updateRange( final int d )
 		{
 			final Range r = ranges[ d ];
-			cells.setPosition( r.gridx, d ); // TODO: this could be done outside, because r will often stay the same for d > 0
-			lengths[ d ] = r.w; // TODO: this could be done outside, because r will often stay the same for d > 0
+			cells.setPosition( r.gridx, d );
+			lengths[ d ] = r.w;
 			doffsets[ d ] = doffsets[ d + 1 ] + dsteps[ d ] * r.x; // doffsets[ n ] == 0
 			cdims[ d ] = cellGrid.getCellDimension( d, r.gridx );
 		}
 
-		void copy( final Range[] ranges, final byte[] dest )
+		void copy( final byte[] dest )
 		{
 			csteps[ 0 ] = 1;
 			for ( int d = 0; d < n - 1; ++d )
@@ -195,7 +196,7 @@ public class CellImgBlocks
 				dest[ destPos + i ] = src[ srcPos + i * cstep ];
 		}
 
-		void fill( final Range[] ranges, final byte[] dest, final int dConst )
+		void fill( final byte[] dest, final int dConst )
 		{
 			final int dOffset = doffsets[ dConst ];
 			lengths[ dConst ] *= dsteps[ dConst ];
