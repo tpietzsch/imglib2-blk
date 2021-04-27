@@ -105,6 +105,7 @@ public class CellImgBlocks
 		for ( Range range : rangesPerDimension[ d ] )
 		{
 			ranges[ d ] = range;
+			copier.updateRange( ranges, d );
 			if ( range.dir == CONSTANT )
 				copier.fill( ranges, dest, d );
 			else if ( d > 0 )
@@ -131,19 +132,17 @@ public class CellImgBlocks
 				dsteps[ d + 1 ] = dsteps[ d ] * size[ d ];
 		}
 
+		void updateRange( final Range[] ranges, final int d )
+		{
+			final Range r = ranges[ d ];
+			cells.setPosition( r.gridx, d ); // TODO: this could be done outside, because r will often stay the same for d > 0
+			lengths[ d ] = r.w; // TODO: this could be done outside, because r will often stay the same for d > 0
+			doffsets[ d ] = doffsets[ d + 1 ] + dsteps[ d ] * r.x; // doffsets[ n ] == 0
+			cdims[ d ] = cellGrid.getCellDimension( d, r.gridx );
+		}
+
 		void copy( final Range[] ranges, final byte[] dest )
 		{
-			// TODO: When updating the Range for dim d, do the loop body for only that d.
-			//       This should automatically work if the loops are nested from highest to lowest dimension
-			for ( int d = n - 1; d >= 0; --d )
-			{
-				final Range r = ranges[ d ];
-				cells.setPosition( r.gridx, d ); // TODO: this could be done outside, because r will often stay the same for d > 0
-				lengths[ d ] = r.w; // TODO: this could be done outside, because r will often stay the same for d > 0
-				doffsets[ d ] = doffsets[ d + 1 ] + dsteps[ d ] * r.x; // doffsets[ n ] == 0
-				cdims[ d ] = cellGrid.getCellDimension( d, r.gridx );
-			}
-
 			csteps[ 0 ] = 1;
 			for ( int d = 0; d < n - 1; ++d )
 				csteps[ d + 1 ] = csteps[ d ] * cdims[ d ];
@@ -164,7 +163,7 @@ public class CellImgBlocks
 				}
 			}
 
-			int dOffset = doffsets[ 0 ];
+			final int dOffset = doffsets[ 0 ];
 
 			// TODO: generic type:
 			//    Object           ArrayDataAccess< A >
@@ -196,18 +195,9 @@ public class CellImgBlocks
 				dest[ destPos + i ] = src[ srcPos + i * cstep ];
 		}
 
-		// TODO: split Copier and Filler, or unify better
-
 		void fill( final Range[] ranges, final byte[] dest, final int dConst )
 		{
-			int dOffset = 0;
-			for ( int d = n - 1; d >= dConst; --d )
-			{
-				final Range r = ranges[ d ];
-				cells.setPosition( r.gridx, d ); // TODO: this could be done outside, because r will often stay the same for d > 0
-				lengths[ d ] = r.w; // TODO: this could be done outside, because r will often stay the same for d > 0
-				dOffset += dsteps[ d ] * r.x;
-			}
+			final int dOffset = doffsets[ dConst ];
 			lengths[ dConst ] *= dsteps[ dConst ];
 
 			if ( n - 1 > dConst )
