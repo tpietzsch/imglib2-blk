@@ -9,10 +9,13 @@ import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 
+import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
+
 public class CellImgBlocks
 {
 	private final AbstractCellImg< ?, ?, ?, ? > cellImg;
 	private final ExtensionMethod extensionMethod;
+	private final byte oobValue;
 
 	private final CellGrid cellGrid;
 	private final int n;
@@ -23,6 +26,7 @@ public class CellImgBlocks
 
 	public enum ExtensionMethod
 	{
+		CONSTANT,
 		BORDER,
 		MIRROR_SINGLE,
 		MIRROR_DOUBLE
@@ -30,8 +34,14 @@ public class CellImgBlocks
 
 	public CellImgBlocks( final AbstractCellImg< ?, ?, ? extends Cell< ? >, ? > cellImg, ExtensionMethod extensionMethod )
 	{
+		this( cellImg, extensionMethod, ( byte ) 0 );
+	}
+
+	public CellImgBlocks( final AbstractCellImg< ?, ?, ? extends Cell< ? >, ? > cellImg, ExtensionMethod extensionMethod, final byte oobValue )
+	{
 		this.cellImg = cellImg;
 		this.extensionMethod = extensionMethod;
+		this.oobValue = oobValue;
 
 		cellGrid = cellImg.getCellGrid();
 		n = cellGrid.numDimensions();
@@ -45,6 +55,9 @@ public class CellImgBlocks
 
 		switch ( extensionMethod )
 		{
+		case CONSTANT:
+			findRanges = Ranges::findRanges_constant;
+			break;
 		case BORDER:
 			findRanges = Ranges::findRanges_border;
 			break;
@@ -52,7 +65,6 @@ public class CellImgBlocks
 			findRanges = Ranges::findRanges_mirror_single;
 			break;
 		case MIRROR_DOUBLE:
-		default:
 			findRanges = Ranges::findRanges_mirror_double;
 			break;
 		}
@@ -92,7 +104,9 @@ public class CellImgBlocks
 		for ( Range range : rangesPerDimension[ d ] )
 		{
 			ranges[ d ] = range;
-			if ( d > 0 )
+			if ( range.dir == CONSTANT )
+				copier.fill( ranges, dest, d );
+			else if ( d > 0 )
 				copy1( rangesPerDimension, ranges, copier, dest, d - 1 );
 			else
 				copier.copy( ranges, dest );
@@ -122,8 +136,8 @@ public class CellImgBlocks
 			for ( int d = 0; d < n; ++d )
 			{
 				final Range r = ranges[ d ];
-				cells.setPosition( r.gridx, d );
-				lengths[ d ] = r.w;
+				cells.setPosition( r.gridx, d ); // TODO: this could be done outside, because r will often stay the same for d > 0
+				lengths[ d ] = r.w; // TODO: this could be done outside, because r will often stay the same for d > 0
 
 				if ( d < n - 1 )
 				{
@@ -172,6 +186,47 @@ public class CellImgBlocks
 			final int cstep = csteps[ 0 ];
 			for ( int i = 0; i < length; ++i )
 				dest[ destPos + i ] = src[ srcPos + i * cstep ];
+		}
+
+		// TODO: split Copier and Filler, or unify better
+
+		void fill( final Range[] ranges, final byte[] dest, final int dConst )
+		{
+			int dOffset = 0;
+			int d = n - 1;
+			for (; d >= dConst; --d )
+			{
+				final Range r = ranges[ d ];
+				cells.setPosition( r.gridx, d ); // TODO: this could be done outside, because r will often stay the same for d > 0
+				lengths[ d ] = r.w; // TODO: this could be done outside, because r will often stay the same for d > 0
+				dOffset += dsteps[ d ] * r.x;
+			}
+			lengths[ dConst ] *= dsteps[ dConst ];
+
+
+			if ( n - 1 > dConst )
+				fill1( dest, dOffset, n - 1, dConst );
+			else
+				fill0( dest, dOffset, dConst );
+		}
+
+		private void fill1( final byte[] dest, final int destPos, final int d, final int dConst )
+		{
+			final int length = lengths[ d ];
+			final int dstep = dsteps[ d ];
+			if ( d > dConst + 1 )
+				for ( int i = 0; i < length; ++i )
+					fill1( dest, destPos + i * dstep, d - 1, dConst );
+			else
+				for ( int i = 0; i < length; ++i )
+					fill0( dest, destPos + i * dstep, dConst );
+		}
+
+		private void fill0( final byte[] dest, final int destPos, final int dConst )
+		{
+			final int length = lengths[ dConst ];
+			for ( int i = 0; i < length; ++i )
+				dest[ destPos + i ] = oobValue;
 		}
 	}
 }

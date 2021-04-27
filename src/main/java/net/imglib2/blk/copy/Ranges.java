@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static net.imglib2.blk.copy.Ranges.Direction.BACKWARD;
+import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 import static net.imglib2.blk.copy.Ranges.Direction.FORWARD;
 import static net.imglib2.blk.copy.Ranges.Direction.STAY;
 
@@ -54,6 +55,60 @@ public class Ranges
 					", x=" + x +
 					'}';
 		}
+	}
+
+	/**
+	 * Split the requested interval into ranges covering (possibly partial)
+	 * cells of the input image. The requested interval is given by start
+	 * coordinate {@code bx} (in the extended source image) and size of the
+	 * block to copy {@code bw}, in a particular dimension. The full size of the
+	 * (non-extended) image in this dimension is given by {@code iw}, the size
+	 * of a (non-truncated) cell in this dimension is given by {@code cw}.
+	 * <p>
+	 * Out-of-bounds values are set to a constant.
+	 */
+	public static List< Range >  findRanges_constant(
+			int bx, // start of block in source coordinates (in pixels)
+			int bw, // width of block to copy (in pixels)
+			int iw, // source image width (in pixels)
+			int cw  // source cell width (in pixels)
+	)
+	{
+		List< Range > ranges = new ArrayList<>();
+
+		if ( bw <= 0 )
+			return ranges;
+
+		int x = 0;
+		if ( bx < 0 )
+		{
+			int w = Math.min( bw, -bx );
+			ranges.add( new Range( -1, -1, w, CONSTANT, x ) );
+			bw -= w;
+			bx += w; // = 0
+			x += w;
+		}
+
+		if ( bw <= 0 )
+			return ranges;
+
+		int gx = bx / cw;
+		int cx = bx - ( gx * cw );
+		while ( bw > 0 && bx < iw )
+		{
+			final int w = Math.min( bw, cellWidth( gx, cw, iw ) - cx );
+			ranges.add( new Range( gx, cx, w, FORWARD, x ) );
+			bw -= w;
+			bx += w;
+			x += w;
+			++gx;
+			cx = 0;
+		}
+
+		if ( bw > 0 )
+			ranges.add( new Range( -1, -1, bw, CONSTANT, x ) );
+
+		return ranges;
 	}
 
 	/**

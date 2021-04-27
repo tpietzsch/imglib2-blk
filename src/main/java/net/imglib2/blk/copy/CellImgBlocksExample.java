@@ -18,8 +18,8 @@ public class CellImgBlocksExample
 {
 	public static void main( String[] args )
 	{
-		final String fn = "/Users/pietzsch/workspace/data/DrosophilaWing.tif";
-//		final String fn = "/Users/pietzsch/workspace/data/leafcrop.tif";
+//		final String fn = "/Users/pietzsch/workspace/data/DrosophilaWing.tif";
+		final String fn = "/Users/pietzsch/workspace/data/leafcrop.tif";
 		final ImagePlus imp = IJ.openImage( fn );
 		final Img< UnsignedByteType > img = ImageJFunctions.wrapByte( imp );
 
@@ -36,15 +36,15 @@ public class CellImgBlocksExample
 		final CellGrid cellGrid = cellImg.getCellGrid();
 //		System.out.println( "cellGrid = " + cellGrid );
 
-		final int ox = -300;
-		final int oy = -300;
-		final int bw = 1000;
-		final int bh = 1000;
+//		final int ox = -300;
+//		final int oy = -300;
+//		final int bw = 1000;
+//		final int bh = 1000;
 
-//		final int ox = 54;
-//		final int oy = 54;
-//		final int bw = 84;
-//		final int bh = 84;
+		final int ox = 54;
+		final int oy = 54;
+		final int bw = 84;
+		final int bh = 84;
 
 		Bdv bdv = null;
 		for ( CellImgBlocks.ExtensionMethod method : CellImgBlocks.ExtensionMethod.values() )
@@ -52,7 +52,7 @@ public class CellImgBlocksExample
 			final byte[] data = new byte[ bw * bh ];
 			final Img< UnsignedByteType > output = ArrayImgs.unsignedBytes( data, bw, bh );
 
-			final CellImgBlocks blocks = new CellImgBlocks( cellImg, method );
+			final CellImgBlocks blocks = new CellImgBlocks( cellImg, method, ( byte ) 128 );
 			blocks.copy( new int[] { ox, oy }, data, new int[] { bw, bh } );
 
 			bdv = BdvFunctions.show(
