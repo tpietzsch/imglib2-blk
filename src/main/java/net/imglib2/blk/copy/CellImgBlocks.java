@@ -24,6 +24,7 @@ public class CellImgBlocks
 
 	private FindRanges findRanges;
 
+	// TODO: the following fields would be required per thread to make CellImgBlocks threadsafe
 	private final List< Range >[] rangesPerDimension;
 	private final Range[] ranges;
 	private final RangeCopier copier;
@@ -195,7 +196,7 @@ public class CellImgBlocks
 			for ( int i = 0; i < length; ++i )
 				dest[ destPos + i ] = src[ srcPos + i * cstep ];
 		}
-	
+
 		void fill( final byte[] dest, final int dConst )
 		{
 			final int dOffset = doffsets[ dConst ];
