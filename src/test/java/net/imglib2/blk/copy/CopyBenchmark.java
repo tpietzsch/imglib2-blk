@@ -35,11 +35,11 @@ import static net.imglib2.blk.copy.CellImgBlocks.ExtensionMethod.MIRROR_SINGLE;
 @Fork( 1 )
 public class CopyBenchmark
 {
-	private final int[] cellDimensions = { 64, 64 };
-	private final int[] srcDimensions = { 2000, 2000 };
-	private final int[] destDimensions = { 100, 100 };
-	private final int[] pos = { 64, 100 };
-	private final int[] oobPos = { -64, -64 };
+	private final int[] cellDimensions = { 64, 64, 64 };
+	private final int[] srcDimensions = { 2000, 2000, 1000 };
+	private final int[] destDimensions = { 100, 100, 100 };
+	private final int[] pos = { 64, 100, 100 };
+	private final int[] oobPos = { -64, -64, -64 };
 
 	private final CellImg< UnsignedByteType, ? > cellImg;
 

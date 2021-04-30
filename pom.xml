@@ -85,6 +85,7 @@
 		<enforcer.skip>true</enforcer.skip> <!-- because enforcer doesn't want java version 16 -->
 
 		<imglib2.version>5.11.1</imglib2.version>
+		<imglib2-ij.version>2.0.0-beta-47-SNAPSHOT</imglib2-ij.version>
 		<imglib2-roi.version>0.11.0</imglib2-roi.version>
 	</properties>
 
