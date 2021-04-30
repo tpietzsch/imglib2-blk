@@ -81,7 +81,9 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
-<!--		<scijava.jvm.version>11</scijava.jvm.version>-->
+		<scijava.jvm.version>16</scijava.jvm.version>
+		<enforcer.skip>true</enforcer.skip> <!-- because enforcer doesn't want java version 16 -->
+
 		<imglib2.version>5.11.1</imglib2.version>
 		<imglib2-roi.version>0.11.0</imglib2-roi.version>
 	</properties>
