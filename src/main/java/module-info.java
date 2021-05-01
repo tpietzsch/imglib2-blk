@@ -5,5 +5,7 @@ module net.imglib2.blk {
 	requires ij;
 	requires net.imglib2.ij;
 	requires net.imglib2.cache;
-	requires bdv.util;
+	requires bdv.vistools;
+	requires com.formdev.flatlaf;
+	requires java.desktop;
 }

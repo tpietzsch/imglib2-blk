@@ -1,7 +1,7 @@
 package net.imglib2.blk.copy;
 
-import bdv.util.Bdv;
-import bdv.util.BdvFunctions;
+import bdv.vistools.Bdv;
+import bdv.vistools.BdvFunctions;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.img.Img;
