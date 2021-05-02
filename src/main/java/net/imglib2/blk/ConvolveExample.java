@@ -241,22 +241,47 @@ public class ConvolveExample
 		final double[] kernel = kernel1D.fullKernel();
 		final int kl = kernel.length;
 
-		final double[] sourceCopy = new double[ til ];
-		final double[] targetCopy = new double[ til ];
+		final int bw = 32;
+		final double[] sourceCopy = new double[ bw ];
+		final double[] targetCopy = new double[ bw ];
+		final int nBlocks = til / bw;
+		final int trailing = til - nBlocks * bw;
 
 		for ( int o = 0; o < ol; ++o )
 		{
 			final int to = o * til;
 			final int so = o * sil;
-			Arrays.fill( targetCopy, 0 );
-			for ( int k = 0; k < kl; ++k )
+
+			for ( int b = 0; b < nBlocks; ++b )
 			{
-				// NB: Copy data to make auto-vectorization happen.
-				// See https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow
-				System.arraycopy( source, so + k * kstep, sourceCopy, 0, til );
-				line( sourceCopy, targetCopy, til, kernel[ k ] );
+				final int tob = to + b * bw;
+				final int sob = so + b * bw;
+
+				Arrays.fill( targetCopy, 0 );
+				for ( int k = 0; k < kl; ++k )
+				{
+					// NB: Copy data to make auto-vectorization happen.
+					// See https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow
+					System.arraycopy( source, sob + k * kstep, sourceCopy, 0, bw );
+					line( sourceCopy, targetCopy, bw, kernel[ k ] );
+				}
+				System.arraycopy( targetCopy, 0, target, tob, bw );
 			}
-			System.arraycopy( targetCopy, 0, target, to, til );
+			if ( trailing > 0 )
+			{
+				final int tob = to + nBlocks * bw;
+				final int sob = so + nBlocks * bw;
+
+				Arrays.fill( targetCopy, 0 );
+				for ( int k = 0; k < kl; ++k )
+				{
+					// NB: Copy data to make auto-vectorization happen.
+					// See https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow
+					System.arraycopy( source, sob + k * kstep, sourceCopy, 0, trailing );
+					line( sourceCopy, targetCopy, trailing, kernel[ k ] );
+				}
+				System.arraycopy( targetCopy, 0, target, tob, trailing );
+			}
 		}
 	}
 
