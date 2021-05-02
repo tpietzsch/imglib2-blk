@@ -109,7 +109,12 @@ public class ConvolveExample
 	{
 //		System.out.println( "ConvolveExample.convolveX" );
 		final int kstep = 1;
-		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
+//		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
+
+		final int ol = sourceSize[ 1 ] * sourceSize[ 2 ];
+		final int til = targetSize[ 0 ];
+		final int sil = sourceSize[ 0 ];
+		convolve2( source, target, kernel1D, ol, til, sil, kstep );
 
 //		final int[] sourceSizeExt = sourceSize.clone();
 //		sourceSizeExt[ 1 ] *= sourceSizeExt[ 2 ];
@@ -129,7 +134,12 @@ public class ConvolveExample
 	{
 //		System.out.println( "ConvolveExample.convolveY" );
 		final int kstep = sourceSize[ 0 ];
-		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
+//		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
+
+		final int ol = sourceSize[ 2 ];
+		final int til = targetSize[ 0 ] * targetSize[ 1 ];
+		final int sil = sourceSize[ 0 ] * sourceSize[ 1 ];
+		convolve2( source, target, kernel1D, ol, til, sil, kstep );
 
 //		final int[] sourceSizeExt = sourceSize.clone();
 //		sourceSizeExt[ 0 ] *= sourceSizeExt[ 1 ];
@@ -151,7 +161,12 @@ public class ConvolveExample
 	{
 //		System.out.println( "ConvolveExample.convolveZ" );
 		final int kstep = sourceSize[ 1 ] * sourceSize[ 0 ];
-		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
+//		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
+
+		final int ol = 1;
+		final int til = targetSize[ 0 ] * targetSize[ 1 ] * targetSize[ 2 ];
+		final int sil = sourceSize[ 0 ] * sourceSize[ 1 ] * sourceSize[ 2 ];
+		convolve2( source, target, kernel1D, ol, til, sil, kstep );
 
 //		final int[] sourceSizeExt = sourceSize.clone();
 //		sourceSizeExt[ 1 ] *= sourceSizeExt[ 2 ];
@@ -213,4 +228,37 @@ public class ConvolveExample
 //			target[ x ] = Math.fma( v, source[ x ], target[ x ] );
 			target[ x ] += v * source[ x ];
 	}
+
+	private static void convolve2(
+			final double[] source,
+			final double[] target,
+			final Kernel1D kernel1D,
+			final int ol,
+			final int til,
+			final int sil, // == til + kernel.length - 1 (?) // no, not really...
+			final int kstep )
+	{
+		final double[] kernel = kernel1D.fullKernel();
+		final int kl = kernel.length;
+
+		final double[] sourceCopy = new double[ til ];
+		final double[] targetCopy = new double[ til ];
+
+		for ( int o = 0; o < ol; ++o )
+		{
+			final int to = o * til;
+			final int so = o * sil;
+			Arrays.fill( targetCopy, 0 );
+			for ( int k = 0; k < kl; ++k )
+			{
+				// NB: Copy data to make auto-vectorization happen.
+				// See https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow
+				System.arraycopy( source, so + k * kstep, sourceCopy, 0, til );
+				line( sourceCopy, targetCopy, til, kernel[ k ] );
+			}
+			System.arraycopy( targetCopy, 0, target, to, til );
+		}
+	}
+
+
 }
