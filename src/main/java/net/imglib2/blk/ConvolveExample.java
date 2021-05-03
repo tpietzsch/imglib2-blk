@@ -109,20 +109,12 @@ public class ConvolveExample
 	{
 //		System.out.println( "ConvolveExample.convolveX" );
 		final int kstep = 1;
-//		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
+		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
 
-		final int ol = sourceSize[ 1 ] * sourceSize[ 2 ];
-		final int til = targetSize[ 0 ];
-		final int sil = sourceSize[ 0 ];
-		convolve2( source, target, kernel1D, ol, til, sil, kstep );
-
-//		final int[] sourceSizeExt = sourceSize.clone();
-//		sourceSizeExt[ 1 ] *= sourceSizeExt[ 2 ];
-//		sourceSizeExt[ 2 ] = 1;
-//		final int[] targetSizeExt = targetSize.clone();
-//		targetSizeExt[ 1 ] *= targetSizeExt[ 2 ];
-//		targetSizeExt[ 2 ] = 1;
-//		convolve( source, sourceSizeExt, target, targetSizeExt, kernel1D, kstep );
+//		final int ol = sourceSize[ 1 ] * sourceSize[ 2 ];
+//		final int til = targetSize[ 0 ];
+//		final int sil = sourceSize[ 0 ];
+//		convolve2( source, target, kernel1D, ol, til, sil, kstep );
 	}
 
 	private static void convolveY(
@@ -134,22 +126,12 @@ public class ConvolveExample
 	{
 //		System.out.println( "ConvolveExample.convolveY" );
 		final int kstep = sourceSize[ 0 ];
-//		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
+		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
 
-		final int ol = sourceSize[ 2 ];
-		final int til = targetSize[ 0 ] * targetSize[ 1 ];
-		final int sil = sourceSize[ 0 ] * sourceSize[ 1 ];
-		convolve2( source, target, kernel1D, ol, til, sil, kstep );
-
-//		final int[] sourceSizeExt = sourceSize.clone();
-//		sourceSizeExt[ 0 ] *= sourceSizeExt[ 1 ];
-//		sourceSizeExt[ 1 ] = sourceSizeExt[ 2 ];
-//		sourceSizeExt[ 2 ] = 1;
-//		final int[] targetSizeExt = targetSize.clone();
-//		targetSizeExt[ 0 ] *= targetSizeExt[ 1 ];
-//		targetSizeExt[ 1 ] = targetSizeExt[ 2 ];
-//		targetSizeExt[ 2 ] = 1;
-//		convolve( source, sourceSizeExt, target, targetSizeExt, kernel1D, kstep );
+//		final int ol = sourceSize[ 2 ];
+//		final int til = targetSize[ 0 ] * targetSize[ 1 ];
+//		final int sil = sourceSize[ 0 ] * sourceSize[ 1 ];
+//		convolve2( source, target, kernel1D, ol, til, sil, kstep );
 	}
 
 	private static void convolveZ(
@@ -161,20 +143,12 @@ public class ConvolveExample
 	{
 //		System.out.println( "ConvolveExample.convolveZ" );
 		final int kstep = sourceSize[ 1 ] * sourceSize[ 0 ];
-//		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
+		convolve( source, sourceSize, target, targetSize, kernel1D, kstep );
 
-		final int ol = 1;
-		final int til = targetSize[ 0 ] * targetSize[ 1 ] * targetSize[ 2 ];
-		final int sil = sourceSize[ 0 ] * sourceSize[ 1 ] * sourceSize[ 2 ];
-		convolve2( source, target, kernel1D, ol, til, sil, kstep );
-
-//		final int[] sourceSizeExt = sourceSize.clone();
-//		sourceSizeExt[ 1 ] *= sourceSizeExt[ 2 ];
-//		sourceSizeExt[ 2 ] = 1;
-//		final int[] targetSizeExt = targetSize.clone();
-//		targetSizeExt[ 1 ] *= targetSizeExt[ 2 ];
-//		targetSizeExt[ 2 ] = 1;
-//		convolve( source, sourceSizeExt, target, targetSizeExt, kernel1D, kstep );
+//		final int ol = 1;
+//		final int til = targetSize[ 0 ] * targetSize[ 1 ] * targetSize[ 2 ];
+//		final int sil = sourceSize[ 0 ] * sourceSize[ 1 ] * sourceSize[ 2 ];
+//		convolve2( source, target, kernel1D, ol, til, sil, kstep );
 	}
 
 	private static void convolve(
@@ -198,12 +172,6 @@ public class ConvolveExample
 		final double[] sourceCopy = new double[ txl ];
 		final double[] targetCopy = new double[ txl ];
 
-
-//		final int szl = sourceSize[ 2 ];
-//		System.out.println( "szl = " + szl + ", tzl = " + tzl );
-//		System.out.println( "syl = " + syl + ", tyl = " + tyl );
-//		System.out.println( "sxl = " + sxl + ", txl = " + txl );
-
 		for ( int z = 0; z < tzl; ++z )
 			for ( int y = 0; y < tyl; ++y )
 			{
@@ -225,8 +193,8 @@ public class ConvolveExample
 	private static void line( final double[] source, final double[] target, final int txl, final double v )
 	{
 		for ( int x = 0; x < txl; ++x )
-//			target[ x ] = Math.fma( v, source[ x ], target[ x ] );
-			target[ x ] += v * source[ x ];
+			target[ x ] = Math.fma( v, source[ x ], target[ x ] );
+//			target[ x ] += v * source[ x ];
 	}
 
 	private static void convolve2(
@@ -241,11 +209,13 @@ public class ConvolveExample
 		final double[] kernel = kernel1D.fullKernel();
 		final int kl = kernel.length;
 
+//		System.out.println( "ol = " + ol );
 //		System.out.println( "sil = " + sil );
 //		System.out.println( "til = " + til );
 //		System.out.println( "sil - til = " + (sil - til) );
 //		System.out.println( "kstep = " + kstep );
 //		System.out.println( "kernel1D = " + kernel1D.size() );
+//		System.out.println();
 
 		final int bw = 64;
 		final double[] sourceCopy = new double[ bw ];
