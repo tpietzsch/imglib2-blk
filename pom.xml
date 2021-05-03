@@ -91,6 +91,7 @@
 		<bigdataviewer-vistools.version>1.0.0-beta-29-SNAPSHOT</bigdataviewer-vistools.version>
 		<imglib2-ij.version>2.0.0-beta-47-SNAPSHOT</imglib2-ij.version>
 		<imglib2-roi.version>0.11.0</imglib2-roi.version>
+		<imglib2-algorithm.version>0.12.0</imglib2-algorithm.version>
 	</properties>
 
 	<repositories>
