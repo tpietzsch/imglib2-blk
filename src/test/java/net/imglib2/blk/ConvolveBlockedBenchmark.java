@@ -19,7 +19,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 @State( Scope.Benchmark )
 @Warmup( iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS )
-@Measurement( iterations = 50, time = 200, timeUnit = TimeUnit.MILLISECONDS )
+@Measurement( iterations = 20, time = 500, timeUnit = TimeUnit.MILLISECONDS )
 @BenchmarkMode( Mode.AverageTime )
 @OutputTimeUnit( TimeUnit.MILLISECONDS )
 @Fork( 1 )
@@ -43,17 +43,17 @@ public class ConvolveBlockedBenchmark
 	{
 	}
 
-//	@Benchmark
-//	public void benchmarkGauss3()
-//	{
-//		gauss3.compute();
-//	}
+	@Benchmark
+	public void benchmarkGauss3()
+	{
+		gauss3.compute();
+	}
 
-//	@Benchmark
-//	public void benchmarkConvolve()
-//	{
-//		convolve.compute();
-//	}
+	@Benchmark
+	public void benchmarkConvolve()
+	{
+		convolve.compute();
+	}
 
 	@Benchmark
 	public void benchmarkConvolveBlocked()
