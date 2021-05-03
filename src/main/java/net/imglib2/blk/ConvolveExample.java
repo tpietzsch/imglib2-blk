@@ -235,17 +235,26 @@ public class ConvolveExample
 			final Kernel1D kernel1D,
 			final int ol,
 			final int til,
-			final int sil, // == til + kernel.length - 1 (?) // no, not really...
+			final int sil, // == til + ( kernel.length - 1 ) * kstep
 			final int kstep )
 	{
 		final double[] kernel = kernel1D.fullKernel();
 		final int kl = kernel.length;
 
-		final int bw = 32;
+//		System.out.println( "sil = " + sil );
+//		System.out.println( "til = " + til );
+//		System.out.println( "sil - til = " + (sil - til) );
+//		System.out.println( "kstep = " + kstep );
+//		System.out.println( "kernel1D = " + kernel1D.size() );
+
+		final int bw = 64;
 		final double[] sourceCopy = new double[ bw ];
 		final double[] targetCopy = new double[ bw ];
 		final int nBlocks = til / bw;
 		final int trailing = til - nBlocks * bw;
+
+//		System.out.println( "til = " + til );
+//		System.out.println( "trailing = " + trailing );
 
 		for ( int o = 0; o < ol; ++o )
 		{
