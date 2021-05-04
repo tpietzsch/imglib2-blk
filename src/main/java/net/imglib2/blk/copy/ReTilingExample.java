@@ -37,12 +37,12 @@ public class ReTilingExample
 				"input",
 				Bdv.options().is2D().addTo( bdv ) );
 
+		final CellImgBlocks blocks = new CellImgBlocks( cellImg, CONSTANT );
 		final CellLoader< UnsignedByteType > loader = new CellLoader< UnsignedByteType >()
 		{
 			@Override
 			public void load( final SingleCellArrayImg< UnsignedByteType, ? > cell ) throws Exception
 			{
-				final CellImgBlocks blocks = new CellImgBlocks( cellImg, CONSTANT );
 				final int[] srcPos = Intervals.minAsIntArray( cell );
 				final byte[] dest = ( byte[] ) cell.getStorageArray();
 				final int[] size = Intervals.dimensionsAsIntArray( cell );

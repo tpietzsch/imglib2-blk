@@ -23,12 +23,12 @@ public class CellImgBlocks
 	private final int[] srcDims;
 	private final RandomAccessible< ? extends Cell< ? > > cells;
 
-	private FindRanges findRanges;
-
-	// TODO: the following fields would be required per thread to make CellImgBlocks threadsafe
-	private final List< Range >[] rangesPerDimension;
-	private final Range[] ranges;
-	private final RangeCopier copier;
+	private final FindRanges findRanges;
+	//	private final ThreadLocal< RangeCopier > copier = ThreadLocal.withInitial( RangeCopier::new );
+	private final ThreadLocal< RangeCopier > copier = ThreadLocal.withInitial( () -> {
+		System.out.println( "new RangeCopier" );
+		return new RangeCopier();
+	} );
 
 	public enum ExtensionMethod
 	{
@@ -63,6 +63,7 @@ public class CellImgBlocks
 		switch ( extensionMethod )
 		{
 		case CONSTANT:
+		default:
 			findRanges = Ranges::findRanges_constant;
 			break;
 		case BORDER:
@@ -75,10 +76,6 @@ public class CellImgBlocks
 			findRanges = Ranges::findRanges_mirror_double;
 			break;
 		}
-
- 		ranges = new Range[ n ];
-		rangesPerDimension = new List[ n ];
-		copier = new RangeCopier();
 	}
 
 	@FunctionalInterface
@@ -94,33 +91,41 @@ public class CellImgBlocks
 
 	public void copy( final int[] srcPos, final byte[] dest, final int[] size )
 	{
-		// find ranges
-		for ( int d = 0; d < n; ++d )
-			rangesPerDimension[ d ] = findRanges.findRanges( srcPos[ d ], size[ d ], srcDims[ d ], cellGrid.cellDimension( d ) );
-
-		// copy data
-		copier.setupDestSize( size );
-		copy1( dest, n - 1 );
-	}
-
-	private void copy1( final byte[] dest, final int d )
-	{
-		for ( Range range : rangesPerDimension[ d ] )
-		{
-			ranges[ d ] = range;
-			copier.updateRange( d );
-			if ( range.dir == CONSTANT )
-				copier.fill( dest, d );
-			else if ( d > 0 )
-				copy1( dest, d - 1 );
-			else
-				copier.copy( dest );
-		}
+		copier.get().copy( srcPos, dest, size );
 	}
 
 	class RangeCopier
 	{
-		private final RandomAccess< ? extends Cell< ? > > cells = cellImg.getCells().randomAccess();
+		private final List< Range >[] rangesPerDimension = new List[ n ];
+		private final Range[] ranges = new Range[ n ];
+
+		public void copy( final int[] srcPos, final byte[] dest, final int[] size )
+		{
+			// find ranges
+			for ( int d = 0; d < n; ++d )
+				rangesPerDimension[ d ] = findRanges.findRanges( srcPos[ d ], size[ d ], srcDims[ d ], cellGrid.cellDimension( d ) );
+
+			// copy data
+			setupDestSize( size );
+			copyRanges( dest, n - 1 );
+		}
+
+		private void copyRanges( final byte[] dest, final int d )
+		{
+			for ( Range range : rangesPerDimension[ d ] )
+			{
+				ranges[ d ] = range;
+				updateRange( d );
+				if ( range.dir == CONSTANT )
+					fill( dest, d );
+				else if ( d > 0 )
+					copyRanges( dest, d - 1 );
+				else
+					copy( dest );
+			}
+		}
+
+		private final RandomAccess< ? extends Cell< ? > > cellAccess = cells.randomAccess();
 
 		private final int[] dsteps = new int[ n ];
 		private final int[] doffsets = new int[ n + 1 ];
@@ -128,23 +133,23 @@ public class CellImgBlocks
 		private final int[] csteps = new int[ n ];
 		private final int[] lengths = new int[ n ];
 
-		void setupDestSize( final int[] size )
+		private void setupDestSize( final int[] size )
 		{
 			dsteps[ 0 ] = 1;
 			for ( int d = 0; d < n - 1; ++d )
 				dsteps[ d + 1 ] = dsteps[ d ] * size[ d ];
 		}
 
-		void updateRange( final int d )
+		private void updateRange( final int d )
 		{
 			final Range r = ranges[ d ];
-			cells.setPosition( r.gridx, d );
+			cellAccess.setPosition( r.gridx, d );
 			lengths[ d ] = r.w;
 			doffsets[ d ] = doffsets[ d + 1 ] + dsteps[ d ] * r.x; // doffsets[ n ] == 0
 			cdims[ d ] = cellGrid.getCellDimension( d, r.gridx );
 		}
 
-		void copy( final byte[] dest )
+		private void copy( final byte[] dest )
 		{
 			csteps[ 0 ] = 1;
 			for ( int d = 0; d < n - 1; ++d )
@@ -170,21 +175,21 @@ public class CellImgBlocks
 
 			// TODO: generic type:
 			//    Object           ArrayDataAccess< A >
-			final byte[] src = ( ( AbstractByteArray< ? > ) cells.get().getData() ).getCurrentStorageArray();
+			final byte[] src = ( ( AbstractByteArray< ? > ) cellAccess.get().getData() ).getCurrentStorageArray();
 			if ( n > 1 )
-				copy1( src, sOffset, dest, dOffset, n - 1 );
+				copyRanges( src, sOffset, dest, dOffset, n - 1 );
 			else
 				copy0( src, sOffset, dest, dOffset );
 		}
 
-		private void copy1( final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int d )
+		private void copyRanges( final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int d )
 		{
 			final int length = lengths[ d ];
 			final int cstep = csteps[ d ];
 			final int dstep = dsteps[ d ];
 			if ( d > 1 )
 				for ( int i = 0; i < length; ++i )
-					copy1( src, srcPos + i * cstep, dest, destPos + i * dstep, d - 1 );
+					copyRanges( src, srcPos + i * cstep, dest, destPos + i * dstep, d - 1 );
 			else
 				for ( int i = 0; i < length; ++i )
 					copy0( src, srcPos + i * cstep, dest, destPos + i * dstep );
