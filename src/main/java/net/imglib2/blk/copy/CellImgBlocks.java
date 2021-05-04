@@ -207,7 +207,7 @@ public class CellImgBlocks
 			if ( n > 1 )
 				copyRanges( src, sOffset, dest, dOffset, n - 1 );
 			else
-				copy0( src, sOffset, dest, dOffset );
+				copy0( src, sOffset, dest, dOffset, lengths[ 0 ], csteps[ 0 ] );
 		}
 
 		private void copyRanges( final Object src, final int srcPos, final Object dest, final int destPos, final int d )
@@ -220,15 +220,16 @@ public class CellImgBlocks
 					copyRanges( src, srcPos + i * cstep, dest, destPos + i * dstep, d - 1 );
 			else
 				for ( int i = 0; i < length; ++i )
-					copy0( src, srcPos + i * cstep, dest, destPos + i * dstep );
+					copy0( src, srcPos + i * cstep, dest, destPos + i * dstep, lengths[ 0 ], csteps[ 0 ] );
 		}
 
-		private void copy0( final Object gsrc, final int srcPos, final Object gdest, final int destPos )
+		// TODO: pass length, cstep as parameters
+		// TODO: move to interface, below is implementation for T == byte[]
+		// TODO: special case implementation for cstep==0
+		private void copy0( final Object gsrc, final int srcPos, final Object gdest, final int destPos, final int length, final int cstep )
 		{
 			final byte[] src = ( byte[] ) gsrc;
 			final byte[] dest = ( byte[] ) gdest;
-			final int length = lengths[ 0 ];
-			final int cstep = csteps[ 0 ];
 			if ( cstep == 1 )
 			{
 				System.arraycopy( src, srcPos, dest, destPos, length );
@@ -263,6 +264,10 @@ public class CellImgBlocks
 					fill0( dest, destPos + i * dstep, dConst );
 		}
 
+		// TODO: pass length as parameter
+		// TODO: move to interface
+		//       below is implementation for T == byte[]
+		//       oobValue is field of the implementing class
 		private void fill0( final Object gdest, final int destPos, final int dConst )
 		{
 			final byte[] dest = ( byte[] ) gdest;
