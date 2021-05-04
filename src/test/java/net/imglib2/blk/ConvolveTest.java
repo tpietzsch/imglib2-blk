@@ -34,4 +34,19 @@ public class ConvolveTest
 
 		Assert.assertArrayEquals( expected.target, actual.targets[ actual.targets.length - 1 ], 0.000001 );
 	}
+
+	@Test
+	public void testConvolveFloatBlocked()
+	{
+		final double[] sigmas = { 8, 8, 8 };
+		final int[] targetSize = { 128, 128, 128 };
+		final RandomSourceDataFloat sourceData = new RandomSourceDataFloat( targetSize, sigmas );
+
+		final ExpectedResultsFloat expected = new ExpectedResultsFloat( targetSize, sigmas, sourceData.source, sourceData.sourceSize );
+		expected.compute();
+		final ConvolveFloatBlockedExample actual = new ConvolveFloatBlockedExample( targetSize, sigmas, sourceData.source, sourceData.sourceSize );
+		actual.compute( 32 );
+
+		Assert.assertArrayEquals( expected.target, actual.targets[ actual.targets.length - 1 ], 0.000001f );
+	}
 }
