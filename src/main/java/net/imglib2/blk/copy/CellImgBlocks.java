@@ -6,9 +6,11 @@ import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.blk.copy.Ranges.Range;
 import net.imglib2.img.basictypeaccess.array.AbstractByteArray;
+import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
+import net.imglib2.type.NativeType;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
@@ -24,11 +26,7 @@ public class CellImgBlocks
 	private final RandomAccessible< ? extends Cell< ? > > cells;
 
 	private final FindRanges findRanges;
-	//	private final ThreadLocal< RangeCopier > copier = ThreadLocal.withInitial( RangeCopier::new );
-	private final ThreadLocal< RangeCopier > copier = ThreadLocal.withInitial( () -> {
-		System.out.println( "new RangeCopier" );
-		return new RangeCopier();
-	} );
+	private final ThreadLocal< RangeCopier > copier = ThreadLocal.withInitial( RangeCopier::new );
 
 	public enum ExtensionMethod
 	{
@@ -49,6 +47,12 @@ public class CellImgBlocks
 		this.cellImg = cellImg;
 		this.extensionMethod = extensionMethod;
 		this.oobValue = oobValue;
+
+
+		// TODO: store type, verify dest array type in copy(...)
+		final NativeType< ? > type = cellImg.createLinkedType();
+//		System.out.println( "type = " + type.getClass() );
+
 
 		cellGrid = cellImg.getCellGrid();
 		n = cellGrid.numDimensions();
@@ -89,7 +93,16 @@ public class CellImgBlocks
 		);
 	}
 
-	public void copy( final int[] srcPos, final byte[] dest, final int[] size )
+	/**
+	 * @param srcPos
+	 * 		min coordinates of block to copy from src Img.
+	 * @param dest
+	 * 		destination array. Type is {@code byte[]}, {@code float[]},
+	 * 		etc, corresponding to the src Img's native type.
+	 * @param size
+	 * 		dimensions of block to copy from src Img.
+	 */
+	public void copy( final int[] srcPos, final Object dest, final int[] size )
 	{
 		copier.get().copy( srcPos, dest, size );
 	}
@@ -99,7 +112,16 @@ public class CellImgBlocks
 		private final List< Range >[] rangesPerDimension = new List[ n ];
 		private final Range[] ranges = new Range[ n ];
 
-		public void copy( final int[] srcPos, final byte[] dest, final int[] size )
+		/**
+		 * @param srcPos
+		 * 		min coordinates of block to copy from src Img.
+		 * @param dest
+		 * 		destination array. Type is {@code byte[]}, {@code float[]},
+		 * 		etc, corresponding to the src Img's native type.
+		 * @param size
+		 * 		dimensions of block to copy from src Img.
+		 */
+		public void copy( final int[] srcPos, final Object dest, final int[] size )
 		{
 			// find ranges
 			for ( int d = 0; d < n; ++d )
@@ -110,7 +132,15 @@ public class CellImgBlocks
 			copyRanges( dest, n - 1 );
 		}
 
-		private void copyRanges( final byte[] dest, final int d )
+		/**
+		 * @param dest
+		 * 		destination array. Type is {@code byte[]}, {@code float[]},
+		 * 		etc, corresponding to the src Img's native type.
+		 * @param d
+		 * 		current dimension. This method calls itself recursively with
+		 * 		{@code d-1} until {@code d==0} is reached.
+		 */
+		private void copyRanges( final Object dest, final int d )
 		{
 			for ( Range range : rangesPerDimension[ d ] )
 			{
@@ -149,7 +179,7 @@ public class CellImgBlocks
 			cdims[ d ] = cellGrid.getCellDimension( d, r.gridx );
 		}
 
-		private void copy( final byte[] dest )
+		private void copy( final Object dest )
 		{
 			csteps[ 0 ] = 1;
 			for ( int d = 0; d < n - 1; ++d )
@@ -173,16 +203,14 @@ public class CellImgBlocks
 
 			final int dOffset = doffsets[ 0 ];
 
-			// TODO: generic type:
-			//    Object           ArrayDataAccess< A >
-			final byte[] src = ( ( AbstractByteArray< ? > ) cellAccess.get().getData() ).getCurrentStorageArray();
+			final Object src = ( ( ArrayDataAccess< ? > ) cellAccess.get().getData() ).getCurrentStorageArray();
 			if ( n > 1 )
 				copyRanges( src, sOffset, dest, dOffset, n - 1 );
 			else
 				copy0( src, sOffset, dest, dOffset );
 		}
 
-		private void copyRanges( final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int d )
+		private void copyRanges( final Object src, final int srcPos, final Object dest, final int destPos, final int d )
 		{
 			final int length = lengths[ d ];
 			final int cstep = csteps[ d ];
@@ -195,8 +223,10 @@ public class CellImgBlocks
 					copy0( src, srcPos + i * cstep, dest, destPos + i * dstep );
 		}
 
-		private void copy0( final byte[] src, final int srcPos, final byte[] dest, final int destPos )
+		private void copy0( final Object gsrc, final int srcPos, final Object gdest, final int destPos )
 		{
+			final byte[] src = ( byte[] ) gsrc;
+			final byte[] dest = ( byte[] ) gdest;
 			final int length = lengths[ 0 ];
 			final int cstep = csteps[ 0 ];
 			if ( cstep == 1 )
@@ -210,7 +240,7 @@ public class CellImgBlocks
 			}
 		}
 
-		void fill( final byte[] dest, final int dConst )
+		void fill( final Object dest, final int dConst )
 		{
 			final int dOffset = doffsets[ dConst ];
 			lengths[ dConst ] *= dsteps[ dConst ];
@@ -221,7 +251,7 @@ public class CellImgBlocks
 				fill0( dest, dOffset, dConst );
 		}
 
-		private void fill1( final byte[] dest, final int destPos, final int d, final int dConst )
+		private void fill1( final Object dest, final int destPos, final int d, final int dConst )
 		{
 			final int length = lengths[ d ];
 			final int dstep = dsteps[ d ];
@@ -233,8 +263,9 @@ public class CellImgBlocks
 					fill0( dest, destPos + i * dstep, dConst );
 		}
 
-		private void fill0( final byte[] dest, final int destPos, final int dConst )
+		private void fill0( final Object gdest, final int destPos, final int dConst )
 		{
+			final byte[] dest = ( byte[] ) gdest;
 			final int length = lengths[ dConst ];
 			Arrays.fill( dest, destPos, destPos + length, oobValue );
 //			for ( int i = 0; i < length; ++i )
