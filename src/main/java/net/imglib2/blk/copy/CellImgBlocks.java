@@ -5,7 +5,6 @@ import java.util.List;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.blk.copy.Ranges.Range;
-import net.imglib2.img.basictypeaccess.array.AbstractByteArray;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
@@ -108,121 +107,10 @@ public class CellImgBlocks
 		copier.get().copy( srcPos, dest, size );
 	}
 
-	class RangeCopier
+	class RangeCopier< T >
 	{
 		private final List< Range >[] rangesPerDimension = new List[ n ];
 		private final Range[] ranges = new Range[ n ];
-
-		/**
-		 * @param srcPos
-		 * 		min coordinates of block to copy from src Img.
-		 * @param dest
-		 * 		destination array. Type is {@code byte[]}, {@code float[]},
-		 * 		etc, corresponding to the src Img's native type.
-		 * @param size
-		 * 		dimensions of block to copy from src Img.
-		 */
-		public void copy( final int[] srcPos, final Object dest, final int[] size )
-		{
-			// find ranges
-			for ( int d = 0; d < n; ++d )
-				rangesPerDimension[ d ] = findRanges.findRanges( srcPos[ d ], size[ d ], srcDims[ d ], cellGrid.cellDimension( d ) );
-
-			// copy data
-			setupDestSize( size );
-			copyRanges( dest, n - 1 );
-		}
-
-		/**
-		 * @param dest
-		 * 		destination array. Type is {@code byte[]}, {@code float[]},
-		 * 		etc, corresponding to the src Img's native type.
-		 * @param d
-		 * 		current dimension. This method calls itself recursively with
-		 * 		{@code d-1} until {@code d==0} is reached.
-		 */
-		private void copyRanges( final Object dest, final int d )
-		{
-			for ( Range range : rangesPerDimension[ d ] )
-			{
-				ranges[ d ] = range;
-				updateRange( d );
-				if ( range.dir == CONSTANT )
-					fill( dest, d );
-				else if ( d > 0 )
-					copyRanges( dest, d - 1 );
-				else
-					copy( dest );
-			}
-		}
-
-		private final RandomAccess< ? extends Cell< ? > > cellAccess = cells.randomAccess();
-
-		private final int[] dsteps = new int[ n ];
-		private final int[] doffsets = new int[ n + 1 ];
-		private final int[] cdims = new int[ n ];
-		private final int[] csteps = new int[ n ];
-		private final int[] lengths = new int[ n ];
-
-		private void setupDestSize( final int[] size )
-		{
-			dsteps[ 0 ] = 1;
-			for ( int d = 0; d < n - 1; ++d )
-				dsteps[ d + 1 ] = dsteps[ d ] * size[ d ];
-		}
-
-		private void updateRange( final int d )
-		{
-			final Range r = ranges[ d ];
-			cellAccess.setPosition( r.gridx, d );
-			lengths[ d ] = r.w;
-			doffsets[ d ] = doffsets[ d + 1 ] + dsteps[ d ] * r.x; // doffsets[ n ] == 0
-			cdims[ d ] = cellGrid.getCellDimension( d, r.gridx );
-		}
-
-		private void copy( final Object dest )
-		{
-			csteps[ 0 ] = 1;
-			for ( int d = 0; d < n - 1; ++d )
-				csteps[ d + 1 ] = csteps[ d ] * cdims[ d ];
-
-			int sOffset = 0;
-			for ( int d = 0; d < n; ++d )
-			{
-				final Range r = ranges[ d ];
-				sOffset += csteps[ d ] * r.cellx;
-				switch( r.dir )
-				{
-				case BACKWARD:
-					csteps[ d ] = -csteps[ d ];
-					break;
-				case STAY:
-					csteps[ d ] = 0;
-					break;
-				}
-			}
-
-			final int dOffset = doffsets[ 0 ];
-
-			final Object src = ( ( ArrayDataAccess< ? > ) cellAccess.get().getData() ).getCurrentStorageArray();
-			if ( n > 1 )
-				copyRanges( src, sOffset, dest, dOffset, n - 1 );
-			else
-				copy0( src, sOffset, dest, dOffset, lengths[ 0 ], csteps[ 0 ] );
-		}
-
-		private void copyRanges( final Object src, final int srcPos, final Object dest, final int destPos, final int d )
-		{
-			final int length = lengths[ d ];
-			final int cstep = csteps[ d ];
-			final int dstep = dsteps[ d ];
-			if ( d > 1 )
-				for ( int i = 0; i < length; ++i )
-					copyRanges( src, srcPos + i * cstep, dest, destPos + i * dstep, d - 1 );
-			else
-				for ( int i = 0; i < length; ++i )
-					copy0( src, srcPos + i * cstep, dest, destPos + i * dstep, lengths[ 0 ], csteps[ 0 ] );
-		}
 
 		// T is a primitive array type
 		interface MemCopy< T >
@@ -256,70 +144,184 @@ public class CellImgBlocks
 			}
 		}
 
-		private MemCopy< byte[] > memCopy = MemCopy.BYTE;
+		private final MemCopy< T > memCopy = ( MemCopy< T > ) MemCopy.BYTE;
+		private final T oob = ( T ) ( new byte[] { oobValue.getByte() } );
 
-		// TODO: move to interface, below is implementation for T == byte[]
-		// TODO: special case implementation for cstep==0
-		private void copy0( final Object gsrc, final int srcPos, final Object gdest, final int destPos, final int length, final int cstep )
+		/**
+		 * Copy the block starting at {@code srcPos} with the given {@code size}
+		 * into the (appropriately sized) {@code dest} array.
+		 * <p>
+		 * This finds the src range lists for all dimensions and then calls
+		 * {@link #copy(Object, int)} to iterate all range combinations.
+		 *
+		 * @param srcPos
+		 * 		min coordinates of block to copy from src Img.
+		 * @param dest
+		 * 		destination array. Type is {@code byte[]}, {@code float[]},
+		 * 		etc, corresponding to the src Img's native type.
+		 * @param size
+		 * 		dimensions of block to copy from src Img.
+		 */
+		public void copy( final int[] srcPos, final T dest, final int[] size )
 		{
-			final byte[] src = ( byte[] ) gsrc;
-			final byte[] dest = ( byte[] ) gdest;
-			if ( cstep == 1 )
+			// find ranges
+			for ( int d = 0; d < n; ++d )
+				rangesPerDimension[ d ] = findRanges.findRanges( srcPos[ d ], size[ d ], srcDims[ d ], cellGrid.cellDimension( d ) );
+
+			// copy data
+			setupDestSize( size );
+			copy( dest, n - 1 );
+		}
+
+		/**
+		 * Iterate the {@code rangesPerDimension} list for the given dimension {@code d}
+		 * and recursively call itself for iterating dimension {@code d-1}.
+		 *
+		 * @param dest
+		 * 		destination array. Type is {@code byte[]}, {@code float[]},
+		 * 		etc, corresponding to the src Img's native type.
+		 * @param d
+		 * 		current dimension. This method calls itself recursively with
+		 * 		{@code d-1} until {@code d==0} is reached.
+		 */
+		private void copy( final T dest, final int d )
+		{
+			for ( Range range : rangesPerDimension[ d ] )
 			{
-				memCopy.copyForward( src, srcPos, dest, destPos, length );
-			}
-			else if ( cstep == -1 )
-			{
-				memCopy.copyReverse( src, srcPos, dest, destPos, length );
-			}
-			else if ( cstep == 0 )
-			{
-				memCopy.copyValue( src, srcPos, dest, destPos, length );
-			}
-			else
-			{
-				throw new IllegalArgumentException();
+				ranges[ d ] = range;
+				updateRange( d );
+				if ( range.dir == CONSTANT )
+					fillRanges( dest, d );
+				else if ( d > 0 )
+					copy( dest, d - 1 );
+				else
+					copyRanges( dest );
 			}
 		}
 
-		void fill( final Object dest, final int dConst )
+		private final RandomAccess< ? extends Cell< ? > > cellAccess = cells.randomAccess();
+
+		private final int[] dsteps = new int[ n ];
+		private final int[] doffsets = new int[ n + 1 ];
+		private final int[] cdims = new int[ n ];
+		private final int[] csteps = new int[ n ];
+		private final int[] lengths = new int[ n ];
+
+		private void setupDestSize( final int[] size )
+		{
+			dsteps[ 0 ] = 1;
+			for ( int d = 0; d < n - 1; ++d )
+				dsteps[ d + 1 ] = dsteps[ d ] * size[ d ];
+		}
+
+		private void updateRange( final int d )
+		{
+			final Range r = ranges[ d ];
+			cellAccess.setPosition( r.gridx, d );
+			lengths[ d ] = r.w;
+			doffsets[ d ] = doffsets[ d + 1 ] + dsteps[ d ] * r.x; // doffsets[ n ] == 0
+			cdims[ d ] = cellGrid.getCellDimension( d, r.gridx );
+		}
+
+		/**
+		 * Once we get here, {@link #setupDestSize} and {@link #updateRange} for
+		 * all dimensions have been called, so the {@code dsteps}, {@code
+		 * doffsets}, {@code cdims}, and {@code lengths} fields have been
+		 * appropriately set up for the current Range combination. Also {@code
+		 * cellAccess} is positioned on the corresponding cell.
+		 */
+		private void copyRanges( final T dest )
+		{
+			csteps[ 0 ] = 1;
+			for ( int d = 0; d < n - 1; ++d )
+				csteps[ d + 1 ] = csteps[ d ] * cdims[ d ];
+
+			int sOffset = 0;
+			for ( int d = 0; d < n; ++d )
+			{
+				final Range r = ranges[ d ];
+				sOffset += csteps[ d ] * r.cellx;
+				switch( r.dir )
+				{
+				case BACKWARD:
+					csteps[ d ] = -csteps[ d ];
+					break;
+				case STAY:
+					csteps[ d ] = 0;
+					break;
+				}
+			}
+
+			final int dOffset = doffsets[ 0 ];
+
+			final T src = ( T ) ( ( ( ArrayDataAccess< ? > ) cellAccess.get().getData() ).getCurrentStorageArray() );
+			if ( n > 1 )
+				copyRangesRecursively( src, sOffset, dest, dOffset, n - 1 );
+			else
+			{
+				final int l0 = lengths[ 0 ];
+				final int cstep0 = csteps[ 0 ];
+				if ( cstep0 == 1 )
+					memCopy.copyForward( src, sOffset, dest, dOffset, l0 );
+				else if ( cstep0 == -1 )
+					memCopy.copyReverse( src, sOffset, dest, dOffset, l0 );
+				else // cstep0 == 0
+					memCopy.copyValue( src, sOffset, dest, dOffset, l0 );
+			}
+		}
+
+		private void copyRangesRecursively( final T src, final int srcPos, final T dest, final int destPos, final int d )
+		{
+			final int length = lengths[ d ];
+			final int cstep = csteps[ d ];
+			final int dstep = dsteps[ d ];
+			if ( d > 1 )
+				for ( int i = 0; i < length; ++i )
+					copyRangesRecursively( src, srcPos + i * cstep, dest, destPos + i * dstep, d - 1 );
+			else
+			{
+				final int l0 = lengths[ 0 ];
+				final int cstep0 = csteps[ 0 ];
+				if ( cstep0 == 1 )
+					for ( int i = 0; i < length; ++i )
+						memCopy.copyForward( src, srcPos + i * cstep, dest, destPos + i * dstep, l0 );
+				else if ( cstep0 == -1 )
+					for ( int i = 0; i < length; ++i )
+						memCopy.copyReverse( src, srcPos + i * cstep, dest, destPos + i * dstep, l0 );
+				else // cstep0 == 0
+					for ( int i = 0; i < length; ++i )
+						memCopy.copyValue( src, srcPos + i * cstep, dest, destPos + i * dstep, l0 );
+			}
+		}
+
+		/**
+		 * Once we get here, {@link #setupDestSize} and {@link #updateRange} for
+		 * all dimensions have been called, so the {@code dsteps}, {@code
+		 * doffsets}, {@code cdims}, and {@code lengths} fields have been
+		 * appropriately set up for the current Range combination. Also {@code
+		 * cellAccess} is positioned on the corresponding cell.
+		 */
+		void fillRanges( final T dest, final int dConst )
 		{
 			final int dOffset = doffsets[ dConst ];
 			lengths[ dConst ] *= dsteps[ dConst ];
 
 			if ( n - 1 > dConst )
-				fill1( dest, dOffset, n - 1, dConst );
+				fillRangesRecursively( dest, dOffset, n - 1, dConst );
 			else
-				fill0( dest, dOffset, lengths[ dConst ] );
+				memCopy.copyValue( oob, 0, dest, dOffset, lengths[ dConst ] );
 		}
 
-		private void fill1( final Object dest, final int destPos, final int d, final int dConst )
+		private void fillRangesRecursively( final T dest, final int destPos, final int d, final int dConst )
 		{
 			final int length = lengths[ d ];
 			final int dstep = dsteps[ d ];
 			if ( d > dConst + 1 )
 				for ( int i = 0; i < length; ++i )
-					fill1( dest, destPos + i * dstep, d - 1, dConst );
+					fillRangesRecursively( dest, destPos + i * dstep, d - 1, dConst );
 			else
 				for ( int i = 0; i < length; ++i )
-					fill0( dest, destPos + i * dstep, lengths[ dConst ] );
-		}
-
-		final byte[] oob = new byte[] { oobValue.getByte() };
-
-		// TODO: express as copy0(...) with cstep = 0 and oobValue.getStorageArray...?
-		// TODO: move to interface
-		//       below is implementation for T == byte[]
-		//       oobValue is field of the implementing class
-		private void fill0( final Object gdest, final int destPos, final int length )
-		{
-			copy0( oob, 0, gdest, destPos, length, 0 );
-
-//			final byte[] dest = ( byte[] ) gdest;
-//			Arrays.fill( dest, destPos, destPos + length, oobValue.getByte() );
-
-//			for ( int i = 0; i < length; ++i )
-//				dest[ destPos + i ] = oobValue;
+					memCopy.copyValue( oob, 0, dest, destPos + i * dstep, lengths[ dConst ] );
 		}
 	}
 }
