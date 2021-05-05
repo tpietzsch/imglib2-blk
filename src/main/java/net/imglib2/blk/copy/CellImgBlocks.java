@@ -1,6 +1,5 @@
 package net.imglib2.blk.copy;
 
-import java.util.Arrays;
 import java.util.List;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
@@ -111,38 +110,6 @@ public class CellImgBlocks
 	{
 		private final List< Range >[] rangesPerDimension = new List[ n ];
 		private final Range[] ranges = new Range[ n ];
-
-		// T is a primitive array type
-		interface MemCopy< T >
-		{
-			void copyForward( final T src, final int srcPos, final T dest, final int destPos, final int length );
-			void copyReverse( final T src, final int srcPos, final T dest, final int destPos, final int length );
-			void copyValue( final T src, final int srcPos, final T dest, final int destPos, final int length );
-
-			MemCopyByte BYTE = new MemCopyByte();
-		}
-
-		static class MemCopyByte implements MemCopy< byte[] >
-		{
-			@Override
-			public void copyForward( final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length )
-			{
-				System.arraycopy( src, srcPos, dest, destPos, length );
-			}
-
-			@Override
-			public void copyReverse( final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length )
-			{
-				for ( int i = 0; i < length; ++i )
-					dest[ destPos + i ] = src[ srcPos - i ];
-			}
-
-			@Override
-			public void copyValue( final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length )
-			{
-				Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
-			}
-		}
 
 		private final MemCopy< T > memCopy = ( MemCopy< T > ) MemCopy.BYTE;
 		private final T oob = ( T ) ( new byte[] { oobValue.getByte() } );
