@@ -25,7 +25,7 @@ public class CellImgBlocks
 	private final RandomAccessible< ? extends Cell< ? > > cells;
 
 	private final FindRanges findRanges;
-	private final ThreadLocal< RangeCopier > copier = ThreadLocal.withInitial( RangeCopier::new );
+	private final ThreadLocal< RangeCopier > copier;
 
 	public enum ExtensionMethod
 	{
@@ -66,10 +66,10 @@ public class CellImgBlocks
 		switch ( extensionMethod )
 		{
 		case CONSTANT:
-		default:
 			findRanges = Ranges::findRanges_constant;
 			break;
 		case BORDER:
+		default:
 			findRanges = Ranges::findRanges_border;
 			break;
 		case MIRROR_SINGLE:
@@ -79,6 +79,8 @@ public class CellImgBlocks
 			findRanges = Ranges::findRanges_mirror_double;
 			break;
 		}
+
+		copier = ThreadLocal.withInitial( () -> new RangeCopier( cells.randomAccess() ) );
 	}
 
 	@FunctionalInterface
@@ -108,11 +110,35 @@ public class CellImgBlocks
 
 	class RangeCopier< T >
 	{
-		private final List< Range >[] rangesPerDimension = new List[ n ];
-		private final Range[] ranges = new Range[ n ];
-
+		private final RandomAccess< ? extends Cell< ? > > cellAccess;
 		private final MemCopy< T > memCopy = ( MemCopy< T > ) MemCopy.BYTE;
 		private final T oob = ( T ) ( new byte[] { oobValue.getByte() } );
+
+		private final int n;
+
+		private final List< Range >[] rangesPerDimension;
+		private final Range[] ranges;
+
+		private final int[] dsteps;
+		private final int[] doffsets;
+		private final int[] cdims;
+		private final int[] csteps;
+		private final int[] lengths;
+
+		RangeCopier( final RandomAccess< ? extends Cell< ? > > cellAccess )
+		{
+			this.cellAccess = cellAccess;
+			n = cellAccess.numDimensions();
+
+			rangesPerDimension = new List[ n ];
+			ranges = new Range[ n ];
+
+			dsteps = new int[ n ];
+			doffsets = new int[ n + 1 ];
+			cdims = new int[ n ];
+			csteps = new int[ n ];
+			lengths = new int[ n ];
+		}
 
 		/**
 		 * Copy the block starting at {@code srcPos} with the given {@code size}
@@ -165,14 +191,6 @@ public class CellImgBlocks
 					copyRanges( dest );
 			}
 		}
-
-		private final RandomAccess< ? extends Cell< ? > > cellAccess = cells.randomAccess();
-
-		private final int[] dsteps = new int[ n ];
-		private final int[] doffsets = new int[ n + 1 ];
-		private final int[] cdims = new int[ n ];
-		private final int[] csteps = new int[ n ];
-		private final int[] lengths = new int[ n ];
 
 		private void setupDestSize( final int[] size )
 		{
