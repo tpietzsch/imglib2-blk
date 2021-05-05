@@ -17,7 +17,7 @@ import net.imglib2.loops.LoopBuilder;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Intervals;
 
-import static net.imglib2.blk.copy.CellImgBlocks.ExtensionMethod.CONSTANT;
+import static net.imglib2.blk.copy.Extension.CONSTANT;
 
 public class ReTilingExample
 {

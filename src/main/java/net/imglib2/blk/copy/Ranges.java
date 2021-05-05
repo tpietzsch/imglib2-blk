@@ -8,9 +8,45 @@ import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 import static net.imglib2.blk.copy.Ranges.Direction.FORWARD;
 import static net.imglib2.blk.copy.Ranges.Direction.STAY;
 
-public class Ranges
+@FunctionalInterface
+public interface Ranges
 {
-	public enum Direction
+	/**
+	 * Find ranges for one dimension.
+	 *
+	 * @param bx
+	 * 		start of block in source coordinates (in pixels)
+	 * @param bw
+	 * 		width of block to copy (in pixels)
+	 * @param iw
+	 * 		source image width (in pixels)
+	 * @param cw
+	 * 		source cell width (in pixels)
+	 */
+	List< Range > findRanges( int bx, int bw, int iw, int cw );
+
+	Ranges FIND_RANGES_CONSTANT = Ranges::findRanges_constant;
+	Ranges FIND_RANGES_MIRROR_SINGLE = Ranges::findRanges_mirror_single;
+	Ranges FIND_RANGES_MIRROR_DOUBLE = Ranges::findRanges_mirror_double;
+	Ranges FIND_RANGES_BORDER = Ranges::findRanges_border;
+
+	static Ranges forExtension( Extension method )
+	{
+		switch ( method )
+		{
+		case CONSTANT:
+			return FIND_RANGES_CONSTANT;
+		case MIRROR_SINGLE:
+			return FIND_RANGES_MIRROR_SINGLE;
+		case MIRROR_DOUBLE:
+			return FIND_RANGES_MIRROR_DOUBLE;
+		case BORDER:
+		default:
+			return FIND_RANGES_BORDER;
+		}
+	}
+
+	enum Direction
 	{
 		FORWARD,
 		BACKWARD,
@@ -27,7 +63,7 @@ public class Ranges
 	 * It is guaranteed that all {@code w} elements fall within the same cell.
 	 */
 	// TODO: should be flattened out instead of creating objects
-	public static class Range
+	class Range
 	{
 		final int gridx;
 		final int cellx;
@@ -67,7 +103,7 @@ public class Ranges
 	 * <p>
 	 * Out-of-bounds values are set to a constant.
 	 */
-	public static List< Range >  findRanges_constant(
+	static List< Range > findRanges_constant(
 			int bx, // start of block in source coordinates (in pixels)
 			int bw, // width of block to copy (in pixels)
 			int iw, // source image width (in pixels)
@@ -122,7 +158,7 @@ public class Ranges
 	 * Out-of-bounds values are determined by border extension (clamping to
 	 * nearest pixel in the image).
 	 */
-	public static List< Range >  findRanges_border(
+	static List< Range >  findRanges_border(
 			int bx, // start of block in source coordinates (in pixels)
 			int bw, // width of block to copy (in pixels)
 			int iw, // source image width (in pixels)
@@ -181,7 +217,7 @@ public class Ranges
 	 * Out-of-bounds values are determined by mirroring with double boundary,
 	 * i.e., border pixels are repeated.
 	 */
-	static List< Range >  findRanges_mirror_double(
+	static List< Range > findRanges_mirror_double(
 			int bx, // start of block in source coordinates (in pixels)
 			int bw, // width of block to copy (in pixels)
 			int iw, // source image width (in pixels)
@@ -262,7 +298,7 @@ public class Ranges
 	 * Out-of-bounds values are determined by mirroring with single boundary,
 	 * i.e., border pixels are not repeated.
 	 */
-	static List< Range >  findRanges_mirror_single(
+	static List< Range > findRanges_mirror_single(
 			int bx, // start of block in source coordinates (in pixels)
 			int bw, // width of block to copy (in pixels)
 			int iw, // source image width (in pixels)

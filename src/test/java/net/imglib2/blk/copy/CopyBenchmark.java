@@ -24,8 +24,8 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import static net.imglib2.blk.copy.CellImgBlocks.ExtensionMethod.CONSTANT;
-import static net.imglib2.blk.copy.CellImgBlocks.ExtensionMethod.MIRROR_SINGLE;
+import static net.imglib2.blk.copy.Extension.CONSTANT;
+import static net.imglib2.blk.copy.Extension.MIRROR_SINGLE;
 
 @State( Scope.Benchmark )
 @Warmup( iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS )

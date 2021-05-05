@@ -47,7 +47,7 @@ public class CellImgBlocksExample
 		final int bh = 84;
 
 		Bdv bdv = null;
-		for ( CellImgBlocks.ExtensionMethod method : CellImgBlocks.ExtensionMethod.values() )
+		for ( Extension method : Extension.values() )
 		{
 			final byte[] data = new byte[ bw * bh ];
 			final Img< UnsignedByteType > output = ArrayImgs.unsignedBytes( data, bw, bh );
