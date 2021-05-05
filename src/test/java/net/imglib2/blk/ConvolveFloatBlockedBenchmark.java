@@ -76,6 +76,12 @@ public class ConvolveFloatBlockedBenchmark
 		convolveBlocked.compute( blockSize );
 	}
 
+//	ConvolveBlockedBenchmark.benchmarkConvolveBlocked  avgt   20  13,387 ± 1,050  ms/op
+//	ConvolveBlockedBenchmark.benchmarkGauss3           avgt   20  60,080 ± 1,640  ms/op
+
+//	ConvolveFloatBlockedBenchmark.benchmarkConvolveFloatBlocked  avgt   20  10,653 ± 0,540  ms/op
+//	ConvolveFloatBlockedBenchmark.benchmarkGauss3                avgt   20  60,569 ± 1,091  ms/op
+
 	public static void main( String... args ) throws RunnerException
 	{
 //		for ( int i = 256; i <= 4096; i += 256 )

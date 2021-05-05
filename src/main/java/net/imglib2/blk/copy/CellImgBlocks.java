@@ -11,6 +11,7 @@ import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
@@ -18,7 +19,7 @@ public class CellImgBlocks
 {
 	private final AbstractCellImg< ?, ?, ?, ? > cellImg;
 	private final ExtensionMethod extensionMethod;
-	private final byte oobValue;
+	private final UnsignedByteType oobValue;
 
 	private final CellGrid cellGrid;
 	private final int n;
@@ -46,7 +47,7 @@ public class CellImgBlocks
 	{
 		this.cellImg = cellImg;
 		this.extensionMethod = extensionMethod;
-		this.oobValue = oobValue;
+		this.oobValue = new UnsignedByteType( oobValue );
 
 
 		// TODO: store type, verify dest array type in copy(...)
@@ -223,7 +224,40 @@ public class CellImgBlocks
 					copy0( src, srcPos + i * cstep, dest, destPos + i * dstep, lengths[ 0 ], csteps[ 0 ] );
 		}
 
-		// TODO: pass length, cstep as parameters
+		// T is a primitive array type
+		interface MemCopy< T >
+		{
+			void copyForward( final T src, final int srcPos, final T dest, final int destPos, final int length );
+			void copyReverse( final T src, final int srcPos, final T dest, final int destPos, final int length );
+			void copyValue( final T src, final int srcPos, final T dest, final int destPos, final int length );
+
+			MemCopyByte BYTE = new MemCopyByte();
+		}
+
+		static class MemCopyByte implements MemCopy< byte[] >
+		{
+			@Override
+			public void copyForward( final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length )
+			{
+				System.arraycopy( src, srcPos, dest, destPos, length );
+			}
+
+			@Override
+			public void copyReverse( final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length )
+			{
+				for ( int i = 0; i < length; ++i )
+					dest[ destPos + i ] = src[ srcPos - i ];
+			}
+
+			@Override
+			public void copyValue( final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length )
+			{
+				Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
+			}
+		}
+
+		private MemCopy< byte[] > memCopy = MemCopy.BYTE;
+
 		// TODO: move to interface, below is implementation for T == byte[]
 		// TODO: special case implementation for cstep==0
 		private void copy0( final Object gsrc, final int srcPos, final Object gdest, final int destPos, final int length, final int cstep )
@@ -232,12 +266,19 @@ public class CellImgBlocks
 			final byte[] dest = ( byte[] ) gdest;
 			if ( cstep == 1 )
 			{
-				System.arraycopy( src, srcPos, dest, destPos, length );
+				memCopy.copyForward( src, srcPos, dest, destPos, length );
+			}
+			else if ( cstep == -1 )
+			{
+				memCopy.copyReverse( src, srcPos, dest, destPos, length );
+			}
+			else if ( cstep == 0 )
+			{
+				memCopy.copyValue( src, srcPos, dest, destPos, length );
 			}
 			else
 			{
-				for ( int i = 0; i < length; ++i )
-					dest[ destPos + i ] = src[ srcPos + i * cstep ];
+				throw new IllegalArgumentException();
 			}
 		}
 
@@ -249,7 +290,7 @@ public class CellImgBlocks
 			if ( n - 1 > dConst )
 				fill1( dest, dOffset, n - 1, dConst );
 			else
-				fill0( dest, dOffset, dConst );
+				fill0( dest, dOffset, lengths[ dConst ] );
 		}
 
 		private void fill1( final Object dest, final int destPos, final int d, final int dConst )
@@ -261,18 +302,22 @@ public class CellImgBlocks
 					fill1( dest, destPos + i * dstep, d - 1, dConst );
 			else
 				for ( int i = 0; i < length; ++i )
-					fill0( dest, destPos + i * dstep, dConst );
+					fill0( dest, destPos + i * dstep, lengths[ dConst ] );
 		}
 
-		// TODO: pass length as parameter
+		final byte[] oob = new byte[] { oobValue.getByte() };
+
+		// TODO: express as copy0(...) with cstep = 0 and oobValue.getStorageArray...?
 		// TODO: move to interface
 		//       below is implementation for T == byte[]
 		//       oobValue is field of the implementing class
-		private void fill0( final Object gdest, final int destPos, final int dConst )
+		private void fill0( final Object gdest, final int destPos, final int length )
 		{
-			final byte[] dest = ( byte[] ) gdest;
-			final int length = lengths[ dConst ];
-			Arrays.fill( dest, destPos, destPos + length, oobValue );
+			copy0( oob, 0, gdest, destPos, length, 0 );
+
+//			final byte[] dest = ( byte[] ) gdest;
+//			Arrays.fill( dest, destPos, destPos + length, oobValue.getByte() );
+
 //			for ( int i = 0; i < length; ++i )
 //				dest[ destPos + i ] = oobValue;
 		}
