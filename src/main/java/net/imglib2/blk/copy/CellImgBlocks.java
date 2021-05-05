@@ -2,28 +2,17 @@ package net.imglib2.blk.copy;
 
 import java.util.List;
 import net.imglib2.RandomAccess;
-import net.imglib2.RandomAccessible;
 import net.imglib2.blk.copy.Ranges.Range;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
 public class CellImgBlocks
 {
-	private final AbstractCellImg< ?, ?, ?, ? > cellImg;
-	private final ExtensionMethod extensionMethod;
-	private final UnsignedByteType oobValue;
-
-	private final CellGrid cellGrid;
-	private final int n;
-	private final int[] srcDims;
-	private final RandomAccessible< ? extends Cell< ? > > cells;
-
 	private final FindRanges findRanges;
 	private final ThreadLocal< RangeCopier > copier;
 
@@ -43,25 +32,9 @@ public class CellImgBlocks
 	// TODO: CONSTANT extension method should have value parameter. Would be good use-case for sealed classes instead of enum.
 	public CellImgBlocks( final AbstractCellImg< ?, ?, ? extends Cell< ? >, ? > cellImg, ExtensionMethod extensionMethod, final byte oobValue )
 	{
-		this.cellImg = cellImg;
-		this.extensionMethod = extensionMethod;
-		this.oobValue = new UnsignedByteType( oobValue );
-
-
 		// TODO: store type, verify dest array type in copy(...)
 		final NativeType< ? > type = cellImg.createLinkedType();
 //		System.out.println( "type = " + type.getClass() );
-
-
-		cellGrid = cellImg.getCellGrid();
-		n = cellGrid.numDimensions();
-		srcDims = new int[ n ];
-		for ( int d = 0; d < n; d++ )
-		{
-			// TODO check whether it fits into Integer
-			srcDims[ d ] = ( int ) cellGrid.imgDimension( d );
-		}
-		cells = cellImg.getCells();
 
 		switch ( extensionMethod )
 		{
@@ -80,7 +53,9 @@ public class CellImgBlocks
 			break;
 		}
 
-		copier = ThreadLocal.withInitial( () -> new RangeCopier( cells.randomAccess() ) );
+		final MemCopy memCopy = MemCopy.BYTE;
+		final byte[] oob = new byte[] { oobValue };
+		copier = ThreadLocal.withInitial( () -> new RangeCopier( cellImg, findRanges, memCopy, oob ) );
 	}
 
 	@FunctionalInterface
@@ -108,13 +83,15 @@ public class CellImgBlocks
 		copier.get().copy( srcPos, dest, size );
 	}
 
-	class RangeCopier< T >
+	static class RangeCopier< T >
 	{
-		private final RandomAccess< ? extends Cell< ? > > cellAccess;
-		private final MemCopy< T > memCopy = ( MemCopy< T > ) MemCopy.BYTE;
-		private final T oob = ( T ) ( new byte[] { oobValue.getByte() } );
-
 		private final int n;
+		private final CellGrid cellGrid;
+		private final RandomAccess< ? extends Cell< ? > > cellAccess;
+		private final int[] srcDims;
+		private final FindRanges findRanges;
+		private final MemCopy< T > memCopy;
+		private final T oob;
 
 		private final List< Range >[] rangesPerDimension;
 		private final Range[] ranges;
@@ -125,10 +102,26 @@ public class CellImgBlocks
 		private final int[] csteps;
 		private final int[] lengths;
 
-		RangeCopier( final RandomAccess< ? extends Cell< ? > > cellAccess )
+		RangeCopier(
+				final AbstractCellImg< ?, ?, ? extends Cell< ? >, ? > cellImg,
+				final FindRanges findRanges,
+				final MemCopy< T > memCopy,
+				final T oob	)
 		{
-			this.cellAccess = cellAccess;
-			n = cellAccess.numDimensions();
+			n = cellImg.numDimensions();
+			cellGrid = cellImg.getCellGrid();
+			cellAccess = cellImg.getCells().randomAccess();
+
+			srcDims = new int[ n ];
+			for ( int d = 0; d < n; d++ )
+			{
+				// TODO check whether it fits into Integer
+				srcDims[ d ] = ( int ) cellGrid.imgDimension( d );
+			}
+
+			this.findRanges = findRanges;
+			this.memCopy = memCopy;
+			this.oob = oob;
 
 			rangesPerDimension = new List[ n ];
 			ranges = new Range[ n ];
