@@ -52,7 +52,7 @@ public class CellImgBlocksExample
 			final byte[] data = new byte[ bw * bh ];
 			final Img< UnsignedByteType > output = ArrayImgs.unsignedBytes( data, bw, bh );
 
-			final CellImgBlocks blocks = new CellImgBlocks( cellImg, method, ( byte ) 128 );
+			final CellImgBlocks< ? > blocks = new CellImgBlocks<>( cellImg, method, new UnsignedByteType( 128 ) );
 			blocks.copy( new int[] { ox, oy }, data, new int[] { bw, bh } );
 
 			bdv = BdvFunctions.show(

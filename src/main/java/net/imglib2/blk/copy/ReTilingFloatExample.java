@@ -9,17 +9,18 @@ import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions;
 import net.imglib2.cache.img.SingleCellArrayImg;
+import net.imglib2.ij.img.display.imagej.ImageJFunctions;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.cell.CellImgFactory;
-import net.imglib2.ij.img.display.imagej.ImageJFunctions;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 
 import static net.imglib2.blk.copy.Extension.CONSTANT;
 
-public class ReTilingExample
+public class ReTilingFloatExample
 {
 	public static void main( String[] args )
 	{
@@ -28,8 +29,8 @@ public class ReTilingExample
 		final ImagePlus imp = IJ.openImage( fn );
 		final Img< UnsignedByteType > img = ImageJFunctions.wrapByte( imp );
 
-		final CellImg< UnsignedByteType, ? > cellImg = new CellImgFactory<>( new UnsignedByteType(), 64, 64 ).create( img );
-		LoopBuilder.setImages( img, cellImg ).forEachPixel( ( a, b ) -> b.set( a ) );
+		final CellImg< FloatType, ? > cellImg = new CellImgFactory<>( new FloatType(), 64, 64 ).create( img );
+		LoopBuilder.setImages( img, cellImg ).forEachPixel( ( a, b ) -> b.set( a.get() ) );
 
 		Bdv bdv = null;
 		bdv = BdvFunctions.show(
@@ -37,22 +38,22 @@ public class ReTilingExample
 				"input",
 				Bdv.options().is2D().addTo( bdv ) );
 
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, CONSTANT, new UnsignedByteType( 0 ) );
-		final CellLoader< UnsignedByteType > loader = new CellLoader< UnsignedByteType >()
+		final CellImgBlocks blocks = new CellImgBlocks( cellImg, CONSTANT, new FloatType( 0 ) );
+		final CellLoader< FloatType > loader = new CellLoader< FloatType >()
 		{
 			@Override
-			public void load( final SingleCellArrayImg< UnsignedByteType, ? > cell ) throws Exception
+			public void load( final SingleCellArrayImg< FloatType, ? > cell ) throws Exception
 			{
 				final int[] srcPos = Intervals.minAsIntArray( cell );
-				final byte[] dest = ( byte[] ) cell.getStorageArray();
+				final float[] dest = ( float[] ) cell.getStorageArray();
 				final int[] size = Intervals.dimensionsAsIntArray( cell );
 				blocks.copy( srcPos, dest, size );
 			}
 		};
 
-		final CachedCellImg< UnsignedByteType, ? > retiled = new ReadOnlyCachedCellImgFactory().create(
+		final CachedCellImg< FloatType, ? > retiled = new ReadOnlyCachedCellImgFactory().create(
 				Intervals.dimensionsAsLongArray( cellImg ),
-				new UnsignedByteType(),
+				new FloatType(),
 				loader,
 				ReadOnlyCachedCellImgOptions.options().cellDimensions( 100, 100 ) );
 
