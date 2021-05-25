@@ -111,77 +111,6 @@ public class GaussFloatBlocked
 		return floats;
 	}
 
-	private static void convolve(
-			final float[] source,
-			final float[] target,
-			final Kernel1D kernel1D,
-			final int ol,
-			final int til,
-			final int kstep,
-			final int bw )
-	{
-		final float[] kernel = toFloats( kernel1D.fullKernel() );
-		final int kl = kernel.length;
-		final int sil= til + ( kl - 1 ) * kstep;
-
-//		System.out.println( "til = " + til );
-//		System.out.println( "kstep = " + kstep );
-//		System.out.println( "kernel1D = " + kernel1D.size() );
-
-//		final int bw = 1 << 7;
-		final float[] sourceCopy = new float[ bw ];
-		final float[] targetCopy = new float[ bw ];
-		final int nBlocks = til / bw;
-		final int trailing = til - nBlocks * bw;
-
-//		System.out.println( "til = " + til );
-//		System.out.println( "trailing = " + trailing );
-
-		for ( int o = 0; o < ol; ++o )
-		{
-			final int to = o * til;
-			final int so = o * sil;
-
-			for ( int b = 0; b < nBlocks; ++b )
-			{
-				final int tob = to + b * bw;
-				final int sob = so + b * bw;
-
-				Arrays.fill( targetCopy, 0 );
-				for ( int k = 0; k < kl; ++k )
-				{
-					// NB: Copy data to make auto-vectorization happen.
-					// See https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow
-					System.arraycopy( source, sob + k * kstep, sourceCopy, 0, bw );
-					line( sourceCopy, targetCopy, bw, kernel[ k ] );
-				}
-				System.arraycopy( targetCopy, 0, target, tob, bw );
-			}
-			if ( trailing > 0 )
-			{
-				final int tob = to + nBlocks * bw;
-				final int sob = so + nBlocks * bw;
-
-				Arrays.fill( targetCopy, 0 );
-				for ( int k = 0; k < kl; ++k )
-				{
-					// NB: Copy data to make auto-vectorization happen.
-					// See https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow
-					System.arraycopy( source, sob + k * kstep, sourceCopy, 0, trailing );
-					line( sourceCopy, targetCopy, trailing, kernel[ k ] );
-				}
-				System.arraycopy( targetCopy, 0, target, tob, trailing );
-			}
-		}
-	}
-
-	private static void line( final float[] source, final float[] target, final int txl, final float v )
-	{
-		for ( int x = 0; x < txl; ++x )
-			target[ x ] = Math.fma( v, source[ x ], target[ x ] );
-//			target[ x ] += v * source[ x ];
-	}
-
 	private static void convolve2(
 			final float[] source,
 			final float[] target,
@@ -239,7 +168,70 @@ public class GaussFloatBlocked
 
 		for ( ; x < l; ++x )
 			target[ to + x ] = Math.fma( v, source[ so + x ], target[ to + x ] );
-//			target[ x ] += v * source[ x ];
 	}
 
+	// =========================================================================
+
+	private static void convolve_java11(
+			final float[] source,
+			final float[] target,
+			final Kernel1D kernel1D,
+			final int ol,
+			final int til,
+			final int kstep,
+			final int bw )
+	{
+		final float[] kernel = toFloats( kernel1D.fullKernel() );
+		final int kl = kernel.length;
+		final int sil= til + ( kl - 1 ) * kstep;
+
+		final float[] sourceCopy = new float[ bw ];
+		final float[] targetCopy = new float[ bw ];
+		final int nBlocks = til / bw;
+		final int trailing = til - nBlocks * bw;
+
+		for ( int o = 0; o < ol; ++o )
+		{
+			final int to = o * til;
+			final int so = o * sil;
+
+			for ( int b = 0; b < nBlocks; ++b )
+			{
+				final int tob = to + b * bw;
+				final int sob = so + b * bw;
+
+				Arrays.fill( targetCopy, 0 );
+				for ( int k = 0; k < kl; ++k )
+				{
+					// NB: Copy data to make auto-vectorization happen.
+					// See https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow
+					System.arraycopy( source, sob + k * kstep, sourceCopy, 0, bw );
+					line_java11( sourceCopy, targetCopy, bw, kernel[ k ] );
+				}
+				System.arraycopy( targetCopy, 0, target, tob, bw );
+			}
+			if ( trailing > 0 )
+			{
+				final int tob = to + nBlocks * bw;
+				final int sob = so + nBlocks * bw;
+
+				Arrays.fill( targetCopy, 0 );
+				for ( int k = 0; k < kl; ++k )
+				{
+					// NB: Copy data to make auto-vectorization happen.
+					// See https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow
+					System.arraycopy( source, sob + k * kstep, sourceCopy, 0, trailing );
+					line_java11( sourceCopy, targetCopy, trailing, kernel[ k ] );
+				}
+				System.arraycopy( targetCopy, 0, target, tob, trailing );
+			}
+		}
+	}
+
+	private static void line_java11( final float[] source, final float[] target, final int txl, final float v )
+	{
+		for ( int x = 0; x < txl; ++x )
+			target[ x ] = Math.fma( v, source[ x ], target[ x ] );
+//			target[ x ] += v * source[ x ];
+	}
 }
