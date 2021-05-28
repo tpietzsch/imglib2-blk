@@ -1,5 +1,6 @@
 package net.imglib2.blk.copy;
 
+import java.util.function.Supplier;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.type.NativeType;
@@ -9,7 +10,8 @@ import net.imglib2.type.numeric.real.FloatType;
 
 public class CellImgBlocks< T extends NativeType< T > >
 {
-	private final ThreadLocal< RangeCopier > copier;
+//	private final ThreadLocal< AsyncRangeCopier > copier;
+	private final Supplier< AsyncRangeCopier > copier;
 
 	// TODO: This was added out of laziness. Probably remove...
 	private final AbstractCellImg< T, ?, ? extends Cell< ? >, ? > source;
@@ -48,7 +50,9 @@ public class CellImgBlocks< T extends NativeType< T > >
 			throw new IllegalArgumentException( type.getClass() + " is not supported" );
 
 		final Ranges findRanges = Ranges.forExtension( extension );
-		copier = ThreadLocal.withInitial( () -> new RangeCopier( cellImg, findRanges, memCopy, oob ) );
+//		copier = ThreadLocal.withInitial( () -> new AsyncRangeCopier<>( cellImg, findRanges, memCopy, oob ) );
+		copier = () -> new AsyncRangeCopier<>( cellImg, findRanges, memCopy, oob );
+
 
 		source = cellImg;
 	}
