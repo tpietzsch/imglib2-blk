@@ -111,7 +111,7 @@ public class GaussFloatBlocked
 		return floats;
 	}
 
-	private static void convolve2(
+	static void convolve2(
 			final float[] source,
 			final float[] target,
 			final Kernel1D kernel1D,
