@@ -11,6 +11,9 @@ public class CellImgBlocks< T extends NativeType< T > >
 {
 	private final ThreadLocal< RangeCopier > copier;
 
+	// TODO: This was added out of laziness. Probably remove...
+	private final AbstractCellImg< T, ?, ? extends Cell< ? >, ? > source;
+
 	public CellImgBlocks( final AbstractCellImg< T, ?, ? extends Cell< ? >, ? > cellImg, Extension extension )
 	{
 		this( cellImg, extension, null );
@@ -46,6 +49,8 @@ public class CellImgBlocks< T extends NativeType< T > >
 
 		final Ranges findRanges = Ranges.forExtension( extension );
 		copier = ThreadLocal.withInitial( () -> new RangeCopier( cellImg, findRanges, memCopy, oob ) );
+
+		source = cellImg;
 	}
 
 	/**
@@ -62,4 +67,9 @@ public class CellImgBlocks< T extends NativeType< T > >
 		copier.get().copy( srcPos, dest, size );
 	}
 
+	// TODO: This was added out of laziness. It probably should not be in the final API.
+	public AbstractCellImg< T, ?, ? extends Cell< ? >, ? > source()
+	{
+		return source;
+	}
 }

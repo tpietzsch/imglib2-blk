@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.imglib2.Cursor;
+import net.imglib2.IterableInterval;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.blk.copy.CellImgBlocks;
 import net.imglib2.cache.img.CachedCellImg;
@@ -13,9 +14,9 @@ import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions;
 import net.imglib2.cache.img.SingleCellArrayImg;
-import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.loops.LoopBuilder;
@@ -30,6 +31,7 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
@@ -48,8 +50,14 @@ import static net.imglib2.blk.copy.Extension.CONSTANT;
 @Fork( 1 )
 public class GaussFloatBlockedBenchmark
 {
-	final double[] sigmas = { 8, 8, 8 };
-	final int[] targetSize = { 434, 388, 357 };
+	static final int CELL_SIZE = 64;
+
+	@Param( { "true", "false" } )
+	public boolean multiThreaded;
+
+
+	final double[] sigmas = { 4, 4, 4 };
+	final int[] targetSize = { 334, 388, 357 };
 
 	private final CellImg< FloatType, ? > source;
 
@@ -59,7 +67,7 @@ public class GaussFloatBlockedBenchmark
 		final long[] tsl = new long[ targetSize.length ];
 		Arrays.setAll( tsl, i -> targetSize[ i ] );
 		final ArrayImg< FloatType, ? > img = ArrayImgs.floats( sourceData.source, tsl );
-		source = new CellImgFactory<>( new FloatType(), 64, 64, 64 ).create( targetSize );
+		source = new CellImgFactory<>( new FloatType(), CELL_SIZE ).create( targetSize );
 		LoopBuilder.setImages( img, source ).forEachPixel( ( a, b ) -> b.set( a.get() ) );
 
 	}
@@ -71,9 +79,12 @@ public class GaussFloatBlockedBenchmark
 				Intervals.dimensionsAsLongArray( source ),
 				new FloatType(),
 				cell -> Gauss3.gauss( sigmas, Views.extendZero( source ), cell, 1 ),
-				ReadOnlyCachedCellImgOptions.options().cellDimensions( 64, 64, 64 ) );
+				ReadOnlyCachedCellImgOptions.options().cellDimensions( CELL_SIZE ) );
 
-		Parallelization.runMultiThreaded( () -> touchAllCells( gauss3 ) );
+		if ( multiThreaded )
+			Parallelization.runMultiThreaded( () -> touchAllCells( gauss3 ) );
+		else
+			Parallelization.runSingleThreaded( () -> touchAllCells( gauss3 ) );
 	}
 
 	@Benchmark
@@ -105,14 +116,65 @@ public class GaussFloatBlockedBenchmark
 				Intervals.dimensionsAsLongArray( source ),
 				new FloatType(),
 				loader,
-				ReadOnlyCachedCellImgOptions.options().cellDimensions( 64, 64, 64 ) );
+				ReadOnlyCachedCellImgOptions.options().cellDimensions( CELL_SIZE ) );
 
-		Parallelization.runMultiThreaded( () -> touchAllCells( gaussFloatBlocked ) );
+		if ( multiThreaded )
+			Parallelization.runMultiThreaded( () -> touchAllCells( gaussFloatBlocked ) );
+		else
+			Parallelization.runSingleThreaded( () -> touchAllCells( gaussFloatBlocked ) );
 	}
 
-	private static void touchAllCells( final CachedCellImg< ?, ? > img )
+	static CachedCellImg< FloatType, ? > smoothed(
+			final CellImgBlocks blocks,
+			final int dim,
+			final double sigma )
 	{
-		final Img< ? > cells = img.getCells();
+		final ThreadLocal< GaussFloatBlocked1D > tlgauss = ThreadLocal.withInitial( () -> new GaussFloatBlocked1D( blocks.source().numDimensions(), dim, sigma ) );
+		final CellLoader< FloatType > loader = new CellLoader< FloatType >()
+		{
+			@Override
+			public void load( final SingleCellArrayImg< FloatType, ? > cell ) throws Exception
+			{
+				final int[] srcPos = Intervals.minAsIntArray( cell );
+				final float[] dest = ( float[] ) cell.getStorageArray();
+
+				final GaussFloatBlocked1D gauss = tlgauss.get();
+				gauss.setTargetSize( Intervals.dimensionsAsIntArray( cell ) );
+
+				final int[] sourceOffset = gauss.getSourceOffset();
+				for ( int d = 0; d < srcPos.length; d++ )
+					srcPos[ d ] += sourceOffset[ d ];
+				final int[] size = gauss.getSourceSize();
+				final float[] src = gauss.getSourceBuffer();;
+				blocks.copy( srcPos, src, size );
+				gauss.compute( src, dest );
+			}
+		};
+
+		return new ReadOnlyCachedCellImgFactory().create(
+				Intervals.dimensionsAsLongArray( blocks.source() ),
+				new FloatType(),
+				loader,
+				ReadOnlyCachedCellImgOptions.options().cellDimensions( CELL_SIZE ) );
+	}
+
+	@Benchmark
+	public void benchmarkGaussFloatBlocked1D()
+	{
+		AbstractCellImg< FloatType, ?, ?, ? > smoothed = source;
+		for ( int d = 0; d < source.numDimensions(); d++ )
+			smoothed = smoothed( new CellImgBlocks( smoothed, CONSTANT, new FloatType( 0 ) ), d, sigmas[ d ] );
+		final AbstractCellImg< FloatType, ?, ?, ? > gaussFloatBlocked1D = smoothed;
+
+		if ( multiThreaded )
+			Parallelization.runMultiThreaded( () -> touchAllCells( gaussFloatBlocked1D ) );
+		else
+			Parallelization.runSingleThreaded( () -> touchAllCells( gaussFloatBlocked1D ) );
+	}
+
+	private static void touchAllCells( final AbstractCellImg< ?, ?, ?, ? > img )
+	{
+		final IterableInterval< ? > cells = img.getCells();
 
 		final TaskExecutor te = Parallelization.getTaskExecutor();
 		final int numThreads = te.getParallelism();
