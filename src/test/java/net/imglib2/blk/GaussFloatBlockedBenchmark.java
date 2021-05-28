@@ -52,12 +52,14 @@ public class GaussFloatBlockedBenchmark
 {
 	static final int CELL_SIZE = 64;
 
-	@Param( { "true", "false" } )
+//	@Param( { "true", "false" } )
+	@Param( { "true" } )
 	public boolean multiThreaded;
 
 
-	final double[] sigmas = { 4, 4, 4 };
+	final double[] sigmas = { 8, 8, 8 };
 	final int[] targetSize = { 334, 388, 357 };
+//	final int[] targetSize = { 200, 200, 200 };
 
 	private final CellImg< FloatType, ? > source;
 
@@ -158,18 +160,28 @@ public class GaussFloatBlockedBenchmark
 				ReadOnlyCachedCellImgOptions.options().cellDimensions( CELL_SIZE ) );
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void benchmarkGaussFloatBlocked1D()
 	{
-		AbstractCellImg< FloatType, ?, ?, ? > smoothed = source;
+		final int n = source.numDimensions();
+		AbstractCellImg< FloatType, ?, ?, ? > smoothed[] = new AbstractCellImg[ n ];
+		AbstractCellImg< FloatType, ?, ?, ? > s = source;
 		for ( int d = 0; d < source.numDimensions(); d++ )
-			smoothed = smoothed( new CellImgBlocks( smoothed, CONSTANT, new FloatType( 0 ) ), d, sigmas[ d ] );
-		final AbstractCellImg< FloatType, ?, ?, ? > gaussFloatBlocked1D = smoothed;
+		{
+			smoothed[ d ] = smoothed( new CellImgBlocks( s, CONSTANT, new FloatType( 0 ) ), d, sigmas[ d ] );
+			s = smoothed[ d ];
+		}
 
 		if ( multiThreaded )
-			Parallelization.runMultiThreaded( () -> touchAllCells( gaussFloatBlocked1D ) );
+			Parallelization.runMultiThreaded( () -> {
+				for ( int d = 0; d < n; d++ )
+					touchAllCells( smoothed[ d ] );
+			} );
 		else
-			Parallelization.runSingleThreaded( () -> touchAllCells( gaussFloatBlocked1D ) );
+			Parallelization.runSingleThreaded( () -> {
+				for ( int d = 0; d < n; d++ )
+					touchAllCells( smoothed[ d ] );
+			} );
 	}
 
 	private static void touchAllCells( final AbstractCellImg< ?, ?, ?, ? > img )
