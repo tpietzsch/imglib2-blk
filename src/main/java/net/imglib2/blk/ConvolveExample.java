@@ -193,8 +193,8 @@ public class ConvolveExample
 	private static void line( final double[] source, final double[] target, final int txl, final double v )
 	{
 		for ( int x = 0; x < txl; ++x )
-			target[ x ] = Math.fma( v, source[ x ], target[ x ] );
-//			target[ x ] += v * source[ x ];
+//			target[ x ] = Math.fma( v, source[ x ], target[ x ] );
+			target[ x ] += v * source[ x ];
 	}
 
 	private static void convolve2(

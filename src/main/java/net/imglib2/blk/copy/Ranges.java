@@ -370,7 +370,7 @@ public interface Ranges
 		return ranges;
 	}
 
-	private static int cellWidth( final int gx, final int cw, final int iw )
+	static int cellWidth( final int gx, final int cw, final int iw )
 	{
 		final int gw = iw / cw;
 		if ( gx < gw )

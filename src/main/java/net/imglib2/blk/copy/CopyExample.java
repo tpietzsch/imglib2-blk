@@ -1,7 +1,7 @@
 package net.imglib2.blk.copy;
 
-import bdv.vistools.Bdv;
-import bdv.vistools.BdvFunctions;
+import bdv.util.Bdv;
+import bdv.util.BdvFunctions;
 import ij.IJ;
 import ij.ImagePlus;
 import java.util.List;
@@ -14,7 +14,7 @@ import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.cell.CellImgFactory;
-import net.imglib2.ij.img.display.imagej.ImageJFunctions;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Intervals;

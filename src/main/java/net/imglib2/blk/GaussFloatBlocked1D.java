@@ -87,6 +87,6 @@ public class GaussFloatBlocked1D
 
 	public void compute( final float[] source, final float[] target )
 	{
-		GaussFloatBlocked.convolve2( source, target, kernel, ol, il, kstep, blockSize );
+		GaussFloatBlocked.convolve( source, target, kernel, ol, il, kstep, blockSize );
 	}
 }

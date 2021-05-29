@@ -1,10 +1,10 @@
 package net.imglib2.blk;
 
-import bdv.vistools.Bdv;
-import bdv.vistools.BdvFunctions;
-import bdv.vistools.BdvSource;
-import bdv.vistools.volatiles.SharedQueue;
-import bdv.vistools.volatiles.VolatileViews;
+import bdv.util.Bdv;
+import bdv.util.BdvFunctions;
+import bdv.util.BdvSource;
+import bdv.util.volatiles.SharedQueue;
+import bdv.util.volatiles.VolatileViews;
 import ij.IJ;
 import ij.ImagePlus;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions;
 import net.imglib2.cache.img.SingleCellArrayImg;
-import net.imglib2.ij.img.display.imagej.ImageJFunctions;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;

@@ -1,7 +1,7 @@
 package net.imglib2.blk.copy;
 
-import bdv.vistools.Bdv;
-import bdv.vistools.BdvFunctions;
+import bdv.util.Bdv;
+import bdv.util.BdvFunctions;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.cache.img.CachedCellImg;
@@ -9,7 +9,7 @@ import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions;
 import net.imglib2.cache.img.SingleCellArrayImg;
-import net.imglib2.ij.img.display.imagej.ImageJFunctions;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.cell.CellImgFactory;

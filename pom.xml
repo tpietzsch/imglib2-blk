@@ -81,15 +81,15 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
-		<scijava.jvm.version>16</scijava.jvm.version>
+		<!--<scijava.jvm.version>16</scijava.jvm.version>-->
 		<enforcer.skip>true</enforcer.skip> <!-- because enforcer doesn't want java version 16 -->
 		<skipTests>true</skipTests> <!-- because maven-surefire-plugin is too old? -->
 
 		<imglib2.version>5.11.1</imglib2.version>
 		<ui-behaviour.version>2.0.5</ui-behaviour.version>
-		<bigdataviewer-core.version>10.2.1-SNAPSHOT</bigdataviewer-core.version>
-		<bigdataviewer-vistools.version>1.0.0-beta-29-SNAPSHOT</bigdataviewer-vistools.version>
-		<imglib2-ij.version>2.0.0-beta-47-SNAPSHOT</imglib2-ij.version>
+		<bigdataviewer-core.version>10.2.0</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-28</bigdataviewer-vistools.version>
+		<imglib2-ij.version>2.0.0-beta-46</imglib2-ij.version>
 		<imglib2-roi.version>0.11.0</imglib2-roi.version>
 		<imglib2-algorithm.version>0.12.0</imglib2-algorithm.version>
 	</properties>
