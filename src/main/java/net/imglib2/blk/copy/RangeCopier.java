@@ -9,7 +9,7 @@ import net.imglib2.img.cell.CellGrid;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
-class RangeCopier< T >
+public class RangeCopier< T >
 {
 	private final int n;
 	private final CellGrid cellGrid;
@@ -28,7 +28,7 @@ class RangeCopier< T >
 	private final int[] csteps;
 	private final int[] lengths;
 
-	RangeCopier(
+	public RangeCopier(
 			final AbstractCellImg< ?, ?, ? extends Cell< ? >, ? > cellImg,
 			final Ranges findRanges,
 			final MemCopy< T > memCopy,

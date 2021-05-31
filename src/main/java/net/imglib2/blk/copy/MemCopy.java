@@ -3,7 +3,7 @@ package net.imglib2.blk.copy;
 import java.util.Arrays;
 
 // T is a primitive array type
-interface MemCopy< T >
+public interface MemCopy< T >
 {
 	void copyForward( final T src, final int srcPos, final T dest, final int destPos, final int length );
 
@@ -11,10 +11,10 @@ interface MemCopy< T >
 
 	void copyValue( final T src, final int srcPos, final T dest, final int destPos, final int length );
 
-	MemCopyByte BYTE = new MemCopyByte();
-	MemCopyShort SHORT = new MemCopyShort();
-	MemCopyFloat FLOAT = new MemCopyFloat();
-	MemCopyDouble DOUBLE = new MemCopyDouble();
+	public MemCopyByte BYTE = new MemCopyByte();
+	public MemCopyShort SHORT = new MemCopyShort();
+	public MemCopyFloat FLOAT = new MemCopyFloat();
+	public MemCopyDouble DOUBLE = new MemCopyDouble();
 
 	class MemCopyByte implements MemCopy< byte[] >
 	{
