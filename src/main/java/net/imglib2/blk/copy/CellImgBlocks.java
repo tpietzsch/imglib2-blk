@@ -4,6 +4,7 @@ import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 
@@ -31,6 +32,12 @@ public class CellImgBlocks< T extends NativeType< T > >
 			memCopy = MemCopy.BYTE;
 			final byte v = oobValue == null ? 0 : ( ( UnsignedByteType ) oobValue ).getByte();
 			oob = new byte[] { v };
+		}
+		else if ( type instanceof UnsignedShortType )
+		{
+			memCopy = MemCopy.SHORT;
+			final short v = oobValue == null ? 0 : ( ( UnsignedShortType ) oobValue ).getShort();
+			oob = new short[] { v };
 		}
 		else if ( type instanceof FloatType )
 		{
