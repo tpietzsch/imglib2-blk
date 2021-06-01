@@ -1,27 +1,13 @@
 package net.imglib2.blk.view;
 
-import java.util.Arrays;
 import net.imagej.ImgPlus;
 import net.imglib2.RandomAccessible;
-import net.imglib2.blk.copy.CellImgBlocks;
-import net.imglib2.blk.copy.MemCopy;
-import net.imglib2.blk.copy.RangeCopier;
-import net.imglib2.blk.copy.Ranges;
-import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
-import net.imglib2.img.basictypeaccess.array.FloatArray;
-import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.cell.CellImgFactory;
-import net.imglib2.transform.integer.Mixed;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Intervals;
 import net.imglib2.view.MixedTransformView;
-import net.imglib2.view.TransformBuilder;
 import net.imglib2.view.Views;
 
 public class LabkitPlayground
