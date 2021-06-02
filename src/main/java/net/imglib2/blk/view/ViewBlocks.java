@@ -5,6 +5,8 @@ import net.imglib2.blk.copy.MemCopy;
 import net.imglib2.blk.copy.RangeCopier;
 import net.imglib2.blk.copy.Ranges;
 import net.imglib2.converter.Converter;
+import net.imglib2.img.basictypeaccess.array.ByteArray;
+import net.imglib2.img.basictypeaccess.array.DoubleArray;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.transform.integer.Mixed;
@@ -113,13 +115,21 @@ public class ViewBlocks< T extends NativeType< T > >
 
 			static < T extends NativeType< T > > ConvertBlock.Wrapper< T > forType( T type )
 			{
-				if ( type instanceof UnsignedShortType )
+				if ( type instanceof UnsignedByteType )
+				{
+					return array -> ( T ) new UnsignedByteType( new ByteArray( ( byte[] ) array ) );
+				}
+				else if ( type instanceof UnsignedShortType )
 				{
 					return array -> ( T ) new UnsignedShortType( new ShortArray( ( short[] ) array ) );
 				}
 				else if ( type instanceof FloatType )
 				{
 					return array -> ( T ) new FloatType( new FloatArray( ( float[] ) array ) );
+				}
+				else if ( type instanceof DoubleType )
+				{
+					return array -> ( T ) new DoubleType( new DoubleArray( ( double[] ) array ) );
 				}
 				else
 					throw new UnsupportedOperationException( "not implemented yet" );
