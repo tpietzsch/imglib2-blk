@@ -7,6 +7,7 @@ import net.imglib2.blk.copy.Extension;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.read.ConvertedRandomAccessible;
 import net.imglib2.converter.read.ConvertedRandomAccessibleInterval;
+import net.imglib2.img.ImgView;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
 import net.imglib2.outofbounds.OutOfBoundsConstantValueFactory;
@@ -15,6 +16,7 @@ import net.imglib2.outofbounds.OutOfBoundsMirrorFactory;
 import net.imglib2.transform.integer.Mixed;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.MixedTransformView;
 
 import static net.imglib2.blk.copy.Extension.BORDER;
@@ -94,6 +96,14 @@ public class ViewProps
 		else if ( view instanceof ImgPlus )
 		{
 			analyze( ( ( ImgPlus< ? > ) view ).getImg() );
+		}
+		else if ( view instanceof ImgView )
+		{
+			analyze( ( ( ImgView< ? > ) view ).getSource() );
+		}
+		else if ( view instanceof IntervalView )
+		{
+			analyze( ( ( IntervalView< ? > ) view ).getSource() );
 		}
 		else if ( view instanceof AbstractCellImg )
 		{
