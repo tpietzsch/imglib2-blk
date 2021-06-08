@@ -1,32 +1,33 @@
-package net.imglib2.blk;
+package net.imglib2.blk.derivative;
 
 import java.util.Arrays;
 import net.imglib2.algorithm.convolution.kernel.Kernel1D;
-import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.util.Intervals;
 
-public class GaussDoubleBlocked
+public class ConvolveFloatBlocked
 {
 	private final int n;
 	private final int[] targetSize;
 	private final int[] sourceSize;
 	private final int[] sourceOffset;
 
-	private static final int blockSize = 1024;
+	private static final int blockSize = 2048;
 
 	private final Kernel1D[] kernels;
-	private final double[][] targets;
+	private final float[][] targets;
 
 	private final int ols[];
 	private final int ils[];
 	private final int ksteps[];
 
-	public GaussDoubleBlocked( final double[] sigmas )
+	private final int lastNonNullKernel;
+
+	public ConvolveFloatBlocked( final Kernel1D[] kernels )
 	{
-		kernels = Kernel1D.symmetric( Gauss3.halfkernels( sigmas ) );
+		this.kernels = kernels;
 
 		n = kernels.length;
-		targets = new double[ n ][];
+		targets = new float[ n ][];
 		ols = new int[ n ];
 		ils = new int[ n ];
 		ksteps = new int[ n ];
@@ -34,6 +35,18 @@ public class GaussDoubleBlocked
 		targetSize = new int[ n ];
 		sourceSize = new int[ n ];
 		sourceOffset = new int[ n ];
+
+		int lastNonNullKernel = -1;
+		for ( int d = 0; d < n; ++d )
+		{
+			final Kernel1D kernel = kernels[ d ];
+			if ( kernel != null )
+			{
+				sourceOffset[ d ] = -( kernel.size() - 1 ) / 2;
+				lastNonNullKernel = d;
+			}
+		}
+		this.lastNonNullKernel = lastNonNullKernel;
 	}
 
 	public void setTargetSize( final int[] targetSize )
@@ -61,15 +74,18 @@ public class GaussDoubleBlocked
 			for ( int dd = 0; dd < d; ++dd )
 				ksteps[ d ] *= sourceSize[ dd ];
 
-			if ( d < n - 1 )
+			final Kernel1D kernel = kernels[ d ];
+			if ( kernel != null )
 			{
-				final int l = ( int ) Intervals.numElements( sourceSize );
-				if ( targets[ d ] == null || targets[ d ].length < l )
-					targets[ d ] = new double[ l ];
+				if ( d < n - 1 )
+				{
+					final int l = ( int ) Intervals.numElements( sourceSize );
+					if ( targets[ d ] == null || targets[ d ].length < l )
+						targets[ d ] = new float[ l ];
+				}
+				sourceSize[ d ] += kernel.size() - 1;
+				sourceOffset[ d ] = -( kernel.size() - 1 ) / 2;
 			}
-
-			sourceSize[ d ] += kernels[ d ].size() - 1;
-			sourceOffset[ d ] = - ( kernels[ d ].size() - 1 ) / 2;
 		}
 	}
 
@@ -84,38 +100,55 @@ public class GaussDoubleBlocked
 	}
 
 	// optional. also other arrays can be passed to compute()
-	public double[] getSourceBuffer()
+	public float[] getSourceBuffer()
 	{
 		final int l = ( int ) Intervals.numElements( sourceSize );
 		if ( targets[ n - 1 ] == null || targets[ n - 1 ].length < l )
-			targets[ n - 1 ] = new double[ l ];
-		return targets[ n -  1 ];
+			targets[ n - 1 ] = new float[ l ];
+		return targets[ n - 1 ];
 	}
 
-	public void compute( final double[] source, final double[] target )
+	public void compute( final float[] source, final float[] target )
 	{
+		float[] previousTarget = source;
 		for ( int d = 0; d < n; ++d )
-			convolve(
-					d == 0 ? source : targets[ d - 1 ],
-					d == n - 1 ? target : targets[ d ],
-					kernels[ d ], ols[ d ], ils[ d ], ksteps[ d ], blockSize );
+		{
+			final Kernel1D kernel = kernels[ d ];
+			if ( kernel != null )
+			{
+				float[] currentTarget = ( d == lastNonNullKernel ) ? target : targets[ d ];
+				convolve(
+						previousTarget,
+						currentTarget,
+						kernel, ols[ d ], ils[ d ], ksteps[ d ], blockSize );
+				previousTarget = currentTarget;
+			}
+		}
+	}
+
+	public static float[] toFloats( final double[] doubles )
+	{
+		float[] floats = new float[ doubles.length ];
+		for ( int i = 0; i < doubles.length; i++ )
+			floats[ i ] = ( float ) doubles[ i ];
+		return floats;
 	}
 
 	public static void convolve(
-			final double[] source,
-			final double[] target,
+			final float[] source,
+			final float[] target,
 			final Kernel1D kernel1D,
 			final int ol,
 			final int til,
 			final int kstep,
 			final int bw )
 	{
-		final double[] kernel = kernel1D.fullKernel();
+		final float[] kernel = toFloats( kernel1D.fullKernel() );
 		final int kl = kernel.length;
 		final int sil= til + ( kl - 1 ) * kstep;
 
-		final double[] sourceCopy = new double[ bw ];
-		final double[] targetCopy = new double[ bw ];
+		final float[] sourceCopy = new float[ bw ];
+		final float[] targetCopy = new float[ bw ];
 		final int nBlocks = til / bw;
 		final int trailing = til - nBlocks * bw;
 
@@ -157,7 +190,7 @@ public class GaussDoubleBlocked
 		}
 	}
 
-	private static void line( final double[] source, final double[] target, final int txl, final double v )
+	private static void line( final float[] source, final float[] target, final int txl, final float v )
 	{
 		for ( int x = 0; x < txl; ++x )
 //			target[ x ] = Math.fma( v, source[ x ], target[ x ] );

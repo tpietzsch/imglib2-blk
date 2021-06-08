@@ -3,6 +3,7 @@ package net.imglib2.blk;
 import java.util.Arrays;
 import net.imglib2.algorithm.convolution.kernel.Kernel1D;
 import net.imglib2.algorithm.gauss3.Gauss3;
+import net.imglib2.blk.derivative.ConvolveFloatBlocked;
 import net.imglib2.util.Intervals;
 
 public class GaussFloatBlocked1D
@@ -87,6 +88,6 @@ public class GaussFloatBlocked1D
 
 	public void compute( final float[] source, final float[] target )
 	{
-		GaussFloatBlocked.convolve( source, target, kernel, ol, il, kstep, blockSize );
+		ConvolveFloatBlocked.convolve( source, target, kernel, ol, il, kstep, blockSize );
 	}
 }
