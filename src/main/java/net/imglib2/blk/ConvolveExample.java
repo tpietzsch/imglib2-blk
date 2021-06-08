@@ -29,6 +29,9 @@ public class ConvolveExample
 		final ExpectedResults expected = new ExpectedResults( targetSize, sigmas, sourceData.source, sourceData.sourceSize );
 		final ConvolveExample actual = new ConvolveExample( targetSize, sigmas, sourceData.source, sourceData.sourceSize );
 
+		expected.compute();
+		actual.compute();
+
 		double diff = 0;
 		for ( int i = 0; i < actual.targetZ.length; i++ )
 			diff += Math.abs( actual.targetZ[ i ] - expected.target[ i ] );
