@@ -1,12 +1,8 @@
 package net.imglib2.blk.copy;
 
 import java.util.List;
-import net.imglib2.RandomAccess;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
-import net.imglib2.img.cell.AbstractCellImg;
-import net.imglib2.img.cell.Cell;
-import net.imglib2.img.cell.CellGrid;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
@@ -23,7 +19,6 @@ public class ArrayImgRangeCopier< T >
 
 	private final int[] dsteps;
 	private final int[] doffsets;
-	private final int[] cdims;
 	private final int[] csteps;
 	private final int[] lengths;
 
@@ -50,7 +45,6 @@ public class ArrayImgRangeCopier< T >
 
 		dsteps = new int[ n ];
 		doffsets = new int[ n + 1 ];
-		cdims = new int[ n ];
 		csteps = new int[ n ];
 		lengths = new int[ n ];
 
@@ -121,7 +115,6 @@ public class ArrayImgRangeCopier< T >
 		final Ranges.Range r = ranges[ d ];
 		lengths[ d ] = r.w;
 		doffsets[ d ] = doffsets[ d + 1 ] + dsteps[ d ] * r.x; // doffsets[ n ] == 0
-		cdims[ d ] = srcDims[ d ];
 	}
 
 	/**
@@ -134,7 +127,7 @@ public class ArrayImgRangeCopier< T >
 	{
 		csteps[ 0 ] = 1;
 		for ( int d = 0; d < n - 1; ++d )
-			csteps[ d + 1 ] = csteps[ d ] * cdims[ d ];
+			csteps[ d + 1 ] = csteps[ d ] * srcDims[ d ];
 
 		int sOffset = 0;
 		for ( int d = 0; d < n; ++d )
