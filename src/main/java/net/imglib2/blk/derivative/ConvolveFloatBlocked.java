@@ -134,6 +134,15 @@ public class ConvolveFloatBlocked
 		return floats;
 	}
 
+	public static float[] reverseToFloats( final double[] doubles )
+	{
+		final int length = doubles.length;
+		float[] result = new float[ length ];
+		for ( int i = 0; i < length; i++ )
+			result[ i ] = ( float ) doubles[ length - 1 - i ];
+		return result;
+	}
+
 	public static void convolve(
 			final float[] source,
 			final float[] target,
@@ -143,7 +152,7 @@ public class ConvolveFloatBlocked
 			final int kstep,
 			final int bw )
 	{
-		final float[] kernel = toFloats( kernel1D.fullKernel() );
+		final float[] kernel = reverseToFloats( kernel1D.fullKernel() );
 		final int kl = kernel.length;
 		final int sil= til + ( kl - 1 ) * kstep;
 

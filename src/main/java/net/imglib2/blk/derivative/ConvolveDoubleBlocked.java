@@ -126,6 +126,15 @@ public class ConvolveDoubleBlocked
 		}
 	}
 
+	public static double[] reverse( final double[] doubles )
+	{
+		final int length = doubles.length;
+		double[] result = new double[ length ];
+		for ( int i = 0; i < length; i++ )
+			result[ i ] = ( float ) doubles[ length - 1 - i ];
+		return result;
+	}
+
 	public static void convolve(
 			final double[] source,
 			final double[] target,
@@ -135,7 +144,7 @@ public class ConvolveDoubleBlocked
 			final int kstep,
 			final int bw )
 	{
-		final double[] kernel = kernel1D.fullKernel();
+		final double[] kernel = reverse( kernel1D.fullKernel() );
 		final int kl = kernel.length;
 		final int sil= til + ( kl - 1 ) * kstep;
 

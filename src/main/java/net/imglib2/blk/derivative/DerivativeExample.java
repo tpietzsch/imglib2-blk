@@ -20,10 +20,14 @@ public class DerivativeExample
 
 	public static void main( String[] args )
 	{
-		final double[] sigmas = { 8, 8, 8 };
+		final double[] sigmas = { 1, 8, 1 };
 		final int[] targetSize = { 32, 32, 32 };
 
-		final Kernel1D[] kernels = Kernel1D.symmetric( Gauss3.halfkernels( sigmas ) );
+		final int[] order = { 1, 0, 0 };
+		final double[] pixelSize = { 1, 1, 1 };
+
+//		final Kernel1D[] kernels = Kernel1D.symmetric( Gauss3.halfkernels( sigmas ) );
+		final Kernel1D[] kernels = derivativeKernels( pixelSize, order );
 		final RandomSourceData sourceData = new RandomSourceData( targetSize, kernels );
 
 		final ExpectedResults expected = new ExpectedResults( targetSize, kernels, sourceData.source, sourceData.sourceSize );
@@ -36,9 +40,8 @@ public class DerivativeExample
 		for ( int i = 0; i < actual.target.length; i++ )
 			diff += Math.abs( actual.target[ i ] - expected.target[ i ] );
 
-
-//		Bdv bdv = BdvFunctions.show( ArrayImgs.doubles( expected.target, 32, 32, 32 ), "expected" );
-//		BdvFunctions.show( ArrayImgs.doubles( actual.target, 32, 32, 32 ), "actual", Bdv.options().addTo( bdv ) );
+		Bdv bdv = BdvFunctions.show( ArrayImgs.doubles( expected.target, 32, 32, 32 ), "expected" );
+		BdvFunctions.show( ArrayImgs.doubles( actual.target, 32, 32, 32 ), "actual", Bdv.options().addTo( bdv ) );
 
 		System.out.println( "diff = " + diff );
 	}
@@ -60,44 +63,36 @@ public class DerivativeExample
 		convolver.compute( source, target );
 	}
 
-//	private void derivativeConvolver( final int[] orders )
-//	{
-//		final double pixelSizei = 0;
-//		final List< Convolution< NumericType< ? > > > convolutions = new ArrayList<>();
-//		for ( int i = 0; i < orders.length; i++ )
-//		{
-//			final int order = orders[ i ];
-//			if ( order != 0 )
-//			{
-//				Kernel1D multiply = multiply( SIMPLE_KERNELS.get( order ), Math.pow( pixelSizei, -order ) );
-//				convolutions.add( SeparableKernelConvolution.convolution1d( multiply, i ) );
-//			}
-//		}
-//		if (convolutions.isEmpty())
-//			throw new IllegalArgumentException(); // TODO: just return input???
-//
-//		final Convolution< NumericType< ? > > convolution = Convolution.concat( convolutions );
-//
-//		final int numThreads = 1;
-//		final ExecutorService service = Executors.newFixedThreadPool( numThreads );
-//		convolution.setExecutor( service );
-//		convolution.process( Views.translate( sourceImg, shift ), targetImg );
-//		service.shutdown();
-//	}
+	public static Kernel1D[] derivativeKernels( final double[] pixelSize, final int[] orders )
+	{
+		final int n = orders.length;
+		final Kernel1D[] kernels = new Kernel1D[ n ];
+		for ( int d = 0; d < n; d++ )
+		{
+			final int order = orders[ d ];
+			if ( order == 0 )
+				continue;
+			else if ( order > 2 || order < 0 )
+				throw new IllegalArgumentException();
+			else
+				kernels[ d ] = multiply( SIMPLE_KERNELS.get( order ), Math.pow( pixelSize[ d ], -order ) );
+		}
+		return kernels;
+	}
 
-	public static final List< Kernel1D > SIMPLE_KERNELS = Arrays.asList(
+	private static final List< Kernel1D > SIMPLE_KERNELS = Arrays.asList(
 			Kernel1D.centralAsymmetric( 1 ),
 			Kernel1D.centralAsymmetric( 0.5, 0, -0.5 ),
 			Kernel1D.centralAsymmetric( 1, -2, 1 ) );
 
-	private Kernel1D multiply( final Kernel1D kernel1D, final double scaleFactor )
+	private static Kernel1D multiply( final Kernel1D kernel1D, final double scaleFactor )
 	{
 		double[] fullKernel = multiply( kernel1D.fullKernel(), scaleFactor );
 		int originIndex = ( int ) -kernel1D.min();
 		return Kernel1D.asymmetric( fullKernel, originIndex );
 	}
 
-	private double[] multiply( final double[] array, final double scaleFactor )
+	private static double[] multiply( final double[] array, final double scaleFactor )
 	{
 		double[] result = new double[ array.length ];
 		for ( int i = 0; i < array.length; i++ )
