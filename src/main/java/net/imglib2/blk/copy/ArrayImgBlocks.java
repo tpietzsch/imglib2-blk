@@ -14,13 +14,13 @@ public class ArrayImgBlocks< T extends NativeType< T > >
 	// TODO: This was added out of laziness. Probably remove...
 	private final ArrayImg< T, ? > source;
 
-	public ArrayImgBlocks( final ArrayImg< T, ? > arrayImg, Extension extension )
+	public ArrayImgBlocks( final ArrayImg< T, ? > arrayImg, final Extension extension )
 	{
 		this( arrayImg, extension, null );
 	}
 
 	// TODO: CONSTANT extension method should have value parameter. Would be good use-case for sealed classes instead of enum.
-	public ArrayImgBlocks( ArrayImg< T, ? > arrayImg, Extension extension, final T oobValue )
+	public ArrayImgBlocks( ArrayImg< T, ? > arrayImg, final Extension extension, final T oobValue )
 	{
 		// TODO: store type, verify dest array type in copy(...)
 		final T type = arrayImg.createLinkedType();

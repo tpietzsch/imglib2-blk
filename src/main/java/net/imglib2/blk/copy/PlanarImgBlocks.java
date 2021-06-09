@@ -2,29 +2,30 @@ package net.imglib2.blk.copy;
 
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
+import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 
-public class CellImgBlocks< T extends NativeType< T > >
+public class PlanarImgBlocks< T extends NativeType< T > >
 {
-	private final ThreadLocal< RangeCopier > copier;
+	private final ThreadLocal< PlanarImgRangeCopier > copier;
 
 	// TODO: This was added out of laziness. Probably remove...
-	private final AbstractCellImg< T, ?, ? extends Cell< ? >, ? > source;
+	private final PlanarImg< T, ? > source;
 
-	public CellImgBlocks( final AbstractCellImg< T, ?, ? extends Cell< ? >, ? > cellImg, final Extension extension )
+	public PlanarImgBlocks( final PlanarImg< T, ? > planarImg, final Extension extension )
 	{
-		this( cellImg, extension, null );
+		this( planarImg, extension, null );
 	}
 
 	// TODO: CONSTANT extension method should have value parameter. Would be good use-case for sealed classes instead of enum.
-	public CellImgBlocks( final AbstractCellImg< T, ?, ? extends Cell< ? >, ? > cellImg, final Extension extension, final T oobValue )
+	public PlanarImgBlocks( final PlanarImg< T, ? > planarImg, final Extension extension, final T oobValue )
 	{
 		// TODO: store type, verify dest array type in copy(...)
-		final T type = cellImg.createLinkedType();
+		final T type = planarImg.createLinkedType();
 		final MemCopy memCopy;
 		final Object oob;
 		if ( type instanceof UnsignedByteType )
@@ -55,9 +56,9 @@ public class CellImgBlocks< T extends NativeType< T > >
 			throw new IllegalArgumentException( type.getClass() + " is not supported" );
 
 		final Ranges findRanges = Ranges.forExtension( extension );
-		copier = ThreadLocal.withInitial( () -> new RangeCopier( cellImg, findRanges, memCopy, oob ) );
+		copier = ThreadLocal.withInitial( () -> new PlanarImgRangeCopier( planarImg, findRanges, memCopy, oob ) );
 
-		source = cellImg;
+		source = planarImg;
 	}
 
 	/**
@@ -75,7 +76,7 @@ public class CellImgBlocks< T extends NativeType< T > >
 	}
 
 	// TODO: This was added out of laziness. It probably should not be in the final API.
-	public AbstractCellImg< T, ?, ? extends Cell< ? >, ? > source()
+	public PlanarImg< T, ? > source()
 	{
 		return source;
 	}
