@@ -8,7 +8,10 @@ import net.imglib2.converter.Converter;
 import net.imglib2.converter.read.ConvertedRandomAccessible;
 import net.imglib2.converter.read.ConvertedRandomAccessibleInterval;
 import net.imglib2.img.ImgView;
+import net.imglib2.img.NativeImg;
+import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.cell.AbstractCellImg;
+import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
 import net.imglib2.outofbounds.OutOfBoundsConstantValueFactory;
 import net.imglib2.outofbounds.OutOfBoundsFactory;
@@ -26,7 +29,7 @@ import static net.imglib2.blk.copy.Extension.MIRROR_SINGLE;
 
 public class ViewProps
 {
-	AbstractCellImg< ?, ?, ?, ? > img;
+	NativeImg< ?, ? > img;
 	Extension extension;
 	Object oobValue;
 	Converter< ?, ? > converter;
@@ -105,9 +108,9 @@ public class ViewProps
 		{
 			analyze( ( ( IntervalView< ? > ) view ).getSource() );
 		}
-		else if ( view instanceof AbstractCellImg )
+		else if ( view instanceof AbstractCellImg || view instanceof ArrayImg || view instanceof PlanarImg )
 		{
-			img = ( AbstractCellImg< ?, ?, ?, ? > ) view;
+			img = ( NativeImg< ?, ? > ) view;
 		}
 		else
 			throw new IllegalArgumentException( "Cannot handle " + view );

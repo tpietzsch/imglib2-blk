@@ -10,7 +10,7 @@ import net.imglib2.type.numeric.real.FloatType;
 
 public class CellImgBlocks< T extends NativeType< T > >
 {
-	private final ThreadLocal< RangeCopier > copier;
+	private final ThreadLocal< CellImgRangeCopier > copier;
 
 	// TODO: This was added out of laziness. Probably remove...
 	private final AbstractCellImg< T, ?, ? extends Cell< ? >, ? > source;
@@ -55,7 +55,7 @@ public class CellImgBlocks< T extends NativeType< T > >
 			throw new IllegalArgumentException( type.getClass() + " is not supported" );
 
 		final Ranges findRanges = Ranges.forExtension( extension );
-		copier = ThreadLocal.withInitial( () -> new RangeCopier( cellImg, findRanges, memCopy, oob ) );
+		copier = ThreadLocal.withInitial( () -> new CellImgRangeCopier( cellImg, findRanges, memCopy, oob ) );
 
 		source = cellImg;
 	}

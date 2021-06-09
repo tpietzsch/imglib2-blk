@@ -1,14 +1,19 @@
 package net.imglib2.blk.copy;
 
 import java.util.List;
-import net.imglib2.img.array.ArrayImg;
+import net.imglib2.RandomAccess;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
+import net.imglib2.img.cell.AbstractCellImg;
+import net.imglib2.img.cell.Cell;
+import net.imglib2.img.cell.CellGrid;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
-public class ArrayImgRangeCopier< T > implements RangeCopier< T >
+public class CellImgRangeCopier< T > implements RangeCopier< T >
 {
 	private final int n;
+	private final CellGrid cellGrid;
+	private final RandomAccess< ? extends Cell< ? > > cellAccess;
 	private final int[] srcDims;
 	private final Ranges findRanges;
 	private final MemCopy< T > memCopy;
@@ -19,22 +24,26 @@ public class ArrayImgRangeCopier< T > implements RangeCopier< T >
 
 	private final int[] dsteps;
 	private final int[] doffsets;
+	private final int[] cdims;
 	private final int[] csteps;
 	private final int[] lengths;
 
-	private final T src;
-
-	public ArrayImgRangeCopier(
-			final ArrayImg< ?, ? > arrayImg,
+	public CellImgRangeCopier(
+			final AbstractCellImg< ?, ?, ? extends Cell< ? >, ? > cellImg,
 			final Ranges findRanges,
 			final MemCopy< T > memCopy,
 			final T oob )
 	{
-		n = arrayImg.numDimensions();
+		n = cellImg.numDimensions();
+		cellGrid = cellImg.getCellGrid();
+		cellAccess = cellImg.getCells().randomAccess();
 
 		srcDims = new int[ n ];
 		for ( int d = 0; d < n; d++ )
-			srcDims[ d ] = ( int ) arrayImg.dimension( d );
+		{
+			// TODO check whether it fits into Integer
+			srcDims[ d ] = ( int ) cellGrid.imgDimension( d );
+		}
 
 		this.findRanges = findRanges;
 		this.memCopy = memCopy;
@@ -45,10 +54,9 @@ public class ArrayImgRangeCopier< T > implements RangeCopier< T >
 
 		dsteps = new int[ n ];
 		doffsets = new int[ n + 1 ];
+		cdims = new int[ n ];
 		csteps = new int[ n ];
 		lengths = new int[ n ];
-
-		src = ( T ) ( ( ( ArrayDataAccess< ? > ) arrayImg.update( null ) ).getCurrentStorageArray() );
 	}
 
 	/**
@@ -71,7 +79,7 @@ public class ArrayImgRangeCopier< T > implements RangeCopier< T >
 	{
 		// find ranges
 		for ( int d = 0; d < n; ++d )
-			rangesPerDimension[ d ] = findRanges.findRanges( srcPos[ d ], size[ d ], srcDims[ d ], srcDims[ d ] );
+			rangesPerDimension[ d ] = findRanges.findRanges( srcPos[ d ], size[ d ], srcDims[ d ], cellGrid.cellDimension( d ) );
 
 		// copy data
 		setupDestSize( size );
@@ -114,21 +122,24 @@ public class ArrayImgRangeCopier< T > implements RangeCopier< T >
 	private void updateRange( final int d )
 	{
 		final Ranges.Range r = ranges[ d ];
+		cellAccess.setPosition( r.gridx, d );
 		lengths[ d ] = r.w;
 		doffsets[ d ] = doffsets[ d + 1 ] + dsteps[ d ] * r.x; // doffsets[ n ] == 0
+		cdims[ d ] = cellGrid.getCellDimension( d, r.gridx );
 	}
 
 	/**
      * Once we get here, {@link #setupDestSize} and {@link #updateRange} for
      * all dimensions have been called, so the {@code dsteps}, {@code
      * doffsets}, {@code cdims}, and {@code lengths} fields have been
-     * appropriately set up for the current Range combination.
+     * appropriately set up for the current Range combination. Also {@code
+     * cellAccess} is positioned on the corresponding cell.
      */
 	private void copyRanges( final T dest )
 	{
 		csteps[ 0 ] = 1;
 		for ( int d = 0; d < n - 1; ++d )
-			csteps[ d + 1 ] = csteps[ d ] * srcDims[ d ];
+			csteps[ d + 1 ] = csteps[ d ] * cdims[ d ];
 
 		int sOffset = 0;
 		for ( int d = 0; d < n; ++d )
@@ -148,6 +159,7 @@ public class ArrayImgRangeCopier< T > implements RangeCopier< T >
 
 		final int dOffset = doffsets[ 0 ];
 
+		final T src = ( T ) ( ( ( ArrayDataAccess< ? > ) cellAccess.get().getData() ).getCurrentStorageArray() );
 		if ( n > 1 )
 			copyRangesRecursively( src, sOffset, dest, dOffset, n - 1 );
 		else

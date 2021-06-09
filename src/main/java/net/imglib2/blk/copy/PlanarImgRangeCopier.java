@@ -6,7 +6,7 @@ import net.imglib2.img.planar.PlanarImg;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
-public class PlanarImgRangeCopier< T >
+public class PlanarImgRangeCopier< T > implements RangeCopier< T >
 {
 	private final int n;
 	private final SliceAccess< T > sliceAccess;
@@ -70,6 +70,7 @@ public class PlanarImgRangeCopier< T >
 	 * @param size
 	 * 		dimensions of block to copy from src Img.
 	 */
+	@Override
 	public void copy( final int[] srcPos, final T dest, final int[] size )
 	{
 		// find ranges

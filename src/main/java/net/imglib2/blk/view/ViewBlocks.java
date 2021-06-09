@@ -62,7 +62,7 @@ public class ViewBlocks< T extends NativeType< T > >
 			throw new IllegalArgumentException( type.getClass() + " is not supported" );
 
 		final Ranges findRanges = Ranges.forExtension( props.extension );
-		copier = new RangeCopier( props.img, findRanges, memCopy, oob );
+		copier = RangeCopier.create( props.img, findRanges, memCopy, oob );
 		tCoords = new TransformBlockCoords( props.transform );
 		convertBlock = ( props.converter == null )
 				? null
