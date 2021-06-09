@@ -30,7 +30,7 @@ import static net.imglib2.blk.copy.Extension.MIRROR_SINGLE;
 public class ViewProps
 {
 	NativeImg< ?, ? > img;
-	Extension extension;
+	Extension extension = BORDER;
 	Object oobValue;
 	Converter< ?, ? > converter;
 	MixedTransform transform;
