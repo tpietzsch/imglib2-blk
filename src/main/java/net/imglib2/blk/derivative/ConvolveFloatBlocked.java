@@ -84,7 +84,6 @@ public class ConvolveFloatBlocked
 						targets[ d ] = new float[ l ];
 				}
 				sourceSize[ d ] += kernel.size() - 1;
-				sourceOffset[ d ] = -( kernel.size() - 1 ) / 2;
 			}
 		}
 	}

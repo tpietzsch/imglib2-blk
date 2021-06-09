@@ -5,8 +5,6 @@ import bdv.util.BdvFunctions;
 import java.util.Arrays;
 import java.util.List;
 import net.imglib2.algorithm.convolution.kernel.Kernel1D;
-import net.imglib2.algorithm.gauss3.Gauss3;
-import net.imglib2.blk.GaussDoubleBlocked;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.util.Intervals;
 
@@ -26,7 +24,6 @@ public class DerivativeExample
 		final int[] order = { 1, 0, 0 };
 		final double[] pixelSize = { 1, 1, 1 };
 
-//		final Kernel1D[] kernels = Kernel1D.symmetric( Gauss3.halfkernels( sigmas ) );
 		final Kernel1D[] kernels = derivativeKernels( pixelSize, order );
 		final RandomSourceData sourceData = new RandomSourceData( targetSize, kernels );
 

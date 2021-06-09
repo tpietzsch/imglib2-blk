@@ -84,7 +84,6 @@ public class ConvolveDoubleBlocked
 						targets[ d ] = new double[ l ];
 				}
 				sourceSize[ d ] += kernel.size() - 1;
-				sourceOffset[ d ] = -( kernel.size() - 1 ) / 2;
 			}
 		}
 	}
