@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>30.0.0</version>
+		<version>31.1.0</version>
 	</parent>
 
 	<groupId>net.imglib2</groupId>
@@ -85,14 +85,9 @@
 		<enforcer.skip>true</enforcer.skip> <!-- because enforcer doesn't want java version 16 -->
 		<skipTests>true</skipTests> <!-- because maven-surefire-plugin is too old? -->
 
-		<imglib2.version>5.12.0</imglib2.version>
-		<ui-behaviour.version>2.0.5</ui-behaviour.version>
-		<bigdataviewer-core.version>10.2.0</bigdataviewer-core.version>
-		<bigdataviewer-vistools.version>1.0.0-beta-28</bigdataviewer-vistools.version>
-		<imglib2-ij.version>2.0.0-beta-46</imglib2-ij.version>
-		<imglib2-roi.version>0.11.0</imglib2-roi.version>
-		<imglib2-algorithm.version>0.12.0</imglib2-algorithm.version>
-		<imaris-bridge.version>9.6.0-SNAPSHOT</imaris-bridge.version>
+		<imglib2-imaris-bridge.version>9.7.2.0</imglib2-imaris-bridge.version>
+		<bigdataviewer-core.version>10.2.1</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-29</bigdataviewer-vistools.version>
 	</properties>
 
 	<repositories>
@@ -128,8 +123,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.bitplane</groupId>
-			<artifactId>imaris-bridge</artifactId>
-			<version>${imaris-bridge.version}</version>
+			<artifactId>imglib2-imaris-bridge</artifactId>
+			<version>${imglib2-imaris-bridge.version}</version>
 		</dependency>
 
 		<dependency>

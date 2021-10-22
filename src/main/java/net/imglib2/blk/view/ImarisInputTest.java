@@ -26,7 +26,7 @@ public class ImarisInputTest
 	public static void main( String[] args )
 	{
 		ImarisService imaris = new DefaultImarisService();
-		final ImgPlus< UnsignedShortType > imgPlus = ( ImgPlus< UnsignedShortType > ) imaris.getImarisDataset().getImgPlus();
+		final ImgPlus< UnsignedShortType > imgPlus = ( ImgPlus< UnsignedShortType > ) imaris.getApplication().getDataset().asImgPlus();
 		final RandomAccessible< UnsignedShortType > extended = Views.extendBorder( imgPlus );
 		final RandomAccessible< FloatType > converted = Converters.convert(	extended,
 				( in, out ) -> out.setReal( in.getRealFloat() ),
