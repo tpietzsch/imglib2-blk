@@ -12,7 +12,7 @@
 	<artifactId>imglib2-blk</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
-	<name>labkit performance experiments</name>
+	<name>imglib2-blk</name>
 	<description>labkit performance experiments.</description>
 	<url>https://imagej.net/ImgLib2_Algorithms</url>
 	<inceptionYear>2009</inceptionYear>
@@ -85,7 +85,6 @@
 		<enforcer.skip>true</enforcer.skip> <!-- because enforcer doesn't want java version 16 -->
 		<skipTests>true</skipTests> <!-- because maven-surefire-plugin is too old? -->
 
-		<imglib2-imaris-bridge.version>9.7.2.0</imglib2-imaris-bridge.version>
 		<bigdataviewer-core.version>10.2.1</bigdataviewer-core.version>
 		<bigdataviewer-vistools.version>1.0.0-beta-29</bigdataviewer-vistools.version>
 	</properties>
@@ -120,11 +119,6 @@
 			<groupId>com.formdev</groupId>
 			<artifactId>flatlaf</artifactId>
 			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.bitplane</groupId>
-			<artifactId>imglib2-imaris-bridge</artifactId>
-			<version>${imglib2-imaris-bridge.version}</version>
 		</dependency>
 
 		<dependency>
