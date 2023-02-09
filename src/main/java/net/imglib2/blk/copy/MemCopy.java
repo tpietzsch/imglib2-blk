@@ -11,10 +11,11 @@ public interface MemCopy< T >
 
 	void copyValue( final T src, final int srcPos, final T dest, final int destPos, final int length );
 
-	public MemCopyByte BYTE = new MemCopyByte();
-	public MemCopyShort SHORT = new MemCopyShort();
-	public MemCopyFloat FLOAT = new MemCopyFloat();
-	public MemCopyDouble DOUBLE = new MemCopyDouble();
+	MemCopyByte BYTE = new MemCopyByte();
+	MemCopyInt INT = new MemCopyInt();
+	MemCopyShort SHORT = new MemCopyShort();
+	MemCopyFloat FLOAT = new MemCopyFloat();
+	MemCopyDouble DOUBLE = new MemCopyDouble();
 
 	class MemCopyByte implements MemCopy< byte[] >
 	{
@@ -55,6 +56,28 @@ public interface MemCopy< T >
 
 		@Override
 		public void copyValue( final short[] src, final int srcPos, final short[] dest, final int destPos, final int length )
+		{
+			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
+		}
+	}
+
+	class MemCopyInt implements MemCopy< int[] >
+	{
+		@Override
+		public void copyForward( final int[] src, final int srcPos, final int[] dest, final int destPos, final int length )
+		{
+			System.arraycopy( src, srcPos, dest, destPos, length );
+		}
+
+		@Override
+		public void copyReverse( final int[] src, final int srcPos, final int[] dest, final int destPos, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ destPos + i ] = src[ srcPos - i ];
+		}
+
+		@Override
+		public void copyValue( final int[] src, final int srcPos, final int[] dest, final int destPos, final int length )
 		{
 			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
 		}
