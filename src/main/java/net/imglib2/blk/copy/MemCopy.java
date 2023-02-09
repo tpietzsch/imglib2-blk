@@ -8,10 +8,29 @@ import java.util.Arrays;
 // T is a primitive array type
 public interface MemCopy< T >
 {
+	/**
+	 * Copy {@code length} components from the {@code src} array to the {@code
+	 * dest} array. The components at positions {@code srcPos} through {@code
+	 * srcPos+length-1} in the source array are copied into positions {@code
+	 * destPos} through {@code destPos+length-1}, respectively, of the
+	 * destination array.
+	 */
 	void copyForward( final T src, final int srcPos, final T dest, final int destPos, final int length );
 
+	/**
+	 * Copy {@code length} components from the {@code src} array to the {@code
+	 * dest} array, in reverse order. The components at positions {@code srcPos}
+	 * through {@code srcPos-length-1} in the source array are copied into
+	 * positions {@code destPos} through {@code destPos+length-1}, respectively,
+	 * of the destination array.
+	 */
 	void copyReverse( final T src, final int srcPos, final T dest, final int destPos, final int length );
 
+	/**
+	 * Copy component at position {@code srcPos} in the {@code src} array
+	 * ({@code length} times) into positions {@code destPos} through {@code
+	 * destPos+length-1} of the destination array.
+	 */
 	void copyValue( final T src, final int srcPos, final T dest, final int destPos, final int length );
 
 	MemCopyByte BYTE = new MemCopyByte();

@@ -87,8 +87,8 @@ public class CellImgRangeCopier< T > implements RangeCopier< T >
 	}
 
 	/**
-	 * Iterate the {@code rangesPerDimension} list for the given dimension {@code d}
-	 * and recursively call itself for iterating dimension {@code d-1}.
+	 * Iterates the {@code rangesPerDimension} list for the given dimension {@code d}
+	 * and recursively calls itself for iterating dimension {@code d-1}.
 	 *
 	 * @param dest
 	 * 		destination array. Type is {@code byte[]}, {@code float[]},
