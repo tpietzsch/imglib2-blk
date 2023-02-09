@@ -83,13 +83,7 @@ public interface Ranges
 		@Override
 		public String toString()
 		{
-			return "Range{" +
-					"gridx=" + gridx +
-					", cellx=" + cellx +
-					", w=" + w +
-					", dir=" + dir +
-					", x=" + x +
-					'}';
+			return "Range{gridx=" + gridx + ", cellx=" + cellx + ", w=" + w + ", dir=" + dir + ", x=" + x + '}';
 		}
 	}
 
