@@ -2,6 +2,9 @@ package net.imglib2.blk.copy;
 
 import java.util.Arrays;
 
+// TODO javadoc
+// low-level copying methods
+// implementations for all primitive types
 // T is a primitive array type
 public interface MemCopy< T >
 {

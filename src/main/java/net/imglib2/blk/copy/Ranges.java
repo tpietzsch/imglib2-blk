@@ -8,6 +8,8 @@ import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 import static net.imglib2.blk.copy.Ranges.Direction.FORWARD;
 import static net.imglib2.blk.copy.Ranges.Direction.STAY;
 
+// TODO javadoc
+// This is all 1D. For nD, n Ranges are combined
 @FunctionalInterface
 public interface Ranges
 {
@@ -46,6 +48,11 @@ public interface Ranges
 		}
 	}
 
+	// TODO javadoc
+	//    FORWARD
+	//    BACKWARD
+	//    STAY do not move, always take the same input value (used for border extension)
+	//    CONSTANT don't take value from input (use constant OOB value instead)
 	enum Direction
 	{
 		FORWARD,
@@ -150,7 +157,7 @@ public interface Ranges
 	 * of a (non-truncated) cell in this dimension is given by {@code cw}.
 	 * <p>
 	 * Out-of-bounds values are determined by border extension (clamping to
-	 * nearest pixel in the image).
+	 * the nearest pixel in the image).
 	 */
 	static List< Range >  findRanges_border(
 			int bx, // start of block in source coordinates (in pixels)

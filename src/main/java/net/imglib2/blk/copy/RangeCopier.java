@@ -6,6 +6,9 @@ import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.planar.PlanarImg;
 
+// TODO javadoc
+// this does the actual copying work
+// T is a primitive array type
 public interface RangeCopier< T >
 {
 	/**
