@@ -5,6 +5,7 @@ import bdv.util.BdvFunctions;
 import bdv.util.BdvSource;
 import bdv.util.volatiles.SharedQueue;
 import bdv.util.volatiles.VolatileViews;
+import bdv.viewer.DisplayMode;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.algorithm.gauss3.Gauss3;
@@ -31,6 +32,8 @@ public class GaussFloatExample
 {
 	public static void main( String[] args )
 	{
+		System.setProperty("apple.laf.useScreenMenuBar", "true");
+
 		final String fn = "/Users/pietzsch/workspace/data/e002_stack_fused-8bit.tif";
 //		final String fn = "/Users/pietzsch/workspace/data/DrosophilaWing.tif";
 //		final String fn = "/Users/pietzsch/workspace/data/leafcrop.tif";
@@ -44,8 +47,9 @@ public class GaussFloatExample
 				cellImg,
 				"input",
 				Bdv.options() );
-		bdv.setColor( new ARGBType( 0xff0000 ) );
-		bdv.setDisplayRange( 0, 255 );
+		bdv.setColor( new ARGBType( 0xffffff ) );
+		bdv.setDisplayRange( 0, 512 );
+		bdv.getBdvHandle().getViewerPanel().setDisplayMode( DisplayMode.SINGLE );
 
 //		final double[] sigmas = { 4, 4, 4 };
 		final double[] sigmas = { 8, 8, 8 };
@@ -94,9 +98,9 @@ public class GaussFloatExample
 				"gauss3",
 				Bdv.options().addTo( bdv ) );
 
-		smoothedSrc.setColor( new ARGBType( 0x00ff00 ) );
+		smoothedSrc.setColor( new ARGBType( 0x44ff00 ) );
 		smoothedSrc.setDisplayRange( 0, 255 );
-		gauss3Src.setColor( new ARGBType( 0x0000ff ) );
+		gauss3Src.setColor( new ARGBType( 0xff4400 ) );
 		gauss3Src.setDisplayRange( 0, 255 );
 	}
 }
