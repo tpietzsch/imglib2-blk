@@ -7,12 +7,11 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 
-public class ArrayImgBlocks< T extends NativeType< T > >
+class ArrayImgBlocks< T extends NativeType< T > > implements PrimitiveBlocks< T >
 {
-	private final ThreadLocal< ArrayImgRangeCopier > copier;
+	private final T type;
 
-	// TODO: This was added out of laziness. Probably remove...
-	private final ArrayImg< T, ? > source;
+	private final ThreadLocal< ArrayImgRangeCopier > copier;
 
 	public ArrayImgBlocks( final ArrayImg< T, ? > arrayImg, final Extension extension )
 	{
@@ -22,8 +21,7 @@ public class ArrayImgBlocks< T extends NativeType< T > >
 	// TODO: CONSTANT extension method should have value parameter. Would be good use-case for sealed classes instead of enum.
 	public ArrayImgBlocks( ArrayImg< T, ? > arrayImg, final Extension extension, final T oobValue )
 	{
-		// TODO: store type, verify dest array type in copy(...)
-		final T type = arrayImg.createLinkedType();
+		type = arrayImg.createLinkedType();
 		final MemCopy memCopy;
 		final Object oob;
 		if ( type instanceof UnsignedByteType )
@@ -55,8 +53,12 @@ public class ArrayImgBlocks< T extends NativeType< T > >
 
 		final Ranges findRanges = Ranges.forExtension( extension );
 		copier = ThreadLocal.withInitial( () -> new ArrayImgRangeCopier( arrayImg, findRanges, memCopy, oob ) );
+	}
 
-		source = arrayImg;
+	@Override
+	public T getType()
+	{
+		return type;
 	}
 
 	/**
@@ -73,9 +75,9 @@ public class ArrayImgBlocks< T extends NativeType< T > >
 		copier.get().copy( srcPos, dest, size );
 	}
 
-	// TODO: This was added out of laziness. It probably should not be in the final API.
-	public ArrayImg< T, ? > source()
+	@Override
+	public PrimitiveBlocks< T > threadSafe()
 	{
-		return source;
+		return this;
 	}
 }
