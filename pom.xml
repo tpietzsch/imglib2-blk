@@ -85,6 +85,7 @@
 		<enforcer.skip>true</enforcer.skip> <!-- because enforcer doesn't want java version 16 -->
 		<skipTests>true</skipTests> <!-- because maven-surefire-plugin is too old? -->
 
+		<net.imglib2.imglib2.version>6.1.0-SNAPSHOT</net.imglib2.imglib2.version>
 	</properties>
 
 	<repositories>
