@@ -116,20 +116,16 @@ public class ViewProps
 			throw new IllegalArgumentException( "Cannot handle " + view );
 	}
 
-	// TODO: This is a hack. We should add in ImgLib2 OutOfBoundsMirrorFactor.getBoundary().
 	private static Extension getExtensionMethod( final OutOfBoundsMirrorFactory< ?, ? > oobFactory )
 	{
-		try
+		switch ( oobFactory.getBoundary() )
 		{
-			final Field f = OutOfBoundsMirrorFactory.class.getDeclaredField( "boundary" );
-			f.setAccessible( true );
-			if ( ( ( OutOfBoundsMirrorFactory.Boundary ) f.get( oobFactory ) ) == OutOfBoundsMirrorFactory.Boundary.DOUBLE )
-				return MIRROR_DOUBLE;
+		default:
+		case SINGLE:
+			return MIRROR_SINGLE;
+		case DOUBLE:
+			return MIRROR_DOUBLE;
 		}
-		catch ( NoSuchFieldException | IllegalAccessException e )
-		{
-		}
-		return MIRROR_SINGLE;
 	}
 
 	private static boolean isSupported( final Mixed t )
