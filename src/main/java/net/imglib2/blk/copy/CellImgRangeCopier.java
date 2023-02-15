@@ -187,6 +187,7 @@ public class CellImgRangeCopier< T > implements RangeCopier< T >
 		{
 			final int l0 = lengths[ 0 ];
 			final int cstep0 = csteps[ 0 ];
+			// TODO: extract the following as (default) method in MemCopy
 			if ( cstep0 == 1 )
 				for ( int i = 0; i < length; ++i )
 					memCopy.copyForward( src, srcPos + i * cstep, dest, destPos + i * dstep, l0 );
