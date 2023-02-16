@@ -1,6 +1,7 @@
 package net.imglib2.blk.copy;
 
 import java.util.Arrays;
+import net.imglib2.type.PrimitiveType;
 
 // TODO javadoc
 // low-level copying methods
@@ -33,12 +34,62 @@ public interface MemCopy< T >
 	 */
 	void copyValue( final T src, final int srcPos, final T dest, final int destPos, final int length );
 
+	MemCopyBoolean BOOLEAN = new MemCopyBoolean();
 	MemCopyByte BYTE = new MemCopyByte();
+	MemCopyChar CHAR = new MemCopyChar();
 	MemCopyShort SHORT = new MemCopyShort();
 	MemCopyInt INT = new MemCopyInt();
 	MemCopyLong LONG = new MemCopyLong();
 	MemCopyFloat FLOAT = new MemCopyFloat();
 	MemCopyDouble DOUBLE = new MemCopyDouble();
+
+	static MemCopy< ? > forPrimitiveType( final PrimitiveType primitiveType )
+	{
+		switch ( primitiveType )
+		{
+		case BOOLEAN:
+			return BOOLEAN;
+		case BYTE:
+			return BYTE;
+		case CHAR:
+			return CHAR;
+		case SHORT:
+			return SHORT;
+		case INT:
+			return INT;
+		case LONG:
+			return LONG;
+		case FLOAT:
+			return FLOAT;
+		case DOUBLE:
+			return DOUBLE;
+		default:
+		case UNDEFINED:
+			throw new IllegalArgumentException();
+		}
+	}
+
+	class MemCopyBoolean implements MemCopy< boolean[] >
+	{
+		@Override
+		public void copyForward( final boolean[] src, final int srcPos, final boolean[] dest, final int destPos, final int length )
+		{
+			System.arraycopy( src, srcPos, dest, destPos, length );
+		}
+
+		@Override
+		public void copyReverse( final boolean[] src, final int srcPos, final boolean[] dest, final int destPos, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ destPos + i ] = src[ srcPos - i ];
+		}
+
+		@Override
+		public void copyValue( final boolean[] src, final int srcPos, final boolean[] dest, final int destPos, final int length )
+		{
+			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
+		}
+	}
 
 	class MemCopyByte implements MemCopy< byte[] >
 	{
@@ -79,6 +130,28 @@ public interface MemCopy< T >
 
 		@Override
 		public void copyValue( final short[] src, final int srcPos, final short[] dest, final int destPos, final int length )
+		{
+			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
+		}
+	}
+
+	class MemCopyChar implements MemCopy< char[] >
+	{
+		@Override
+		public void copyForward( final char[] src, final int srcPos, final char[] dest, final int destPos, final int length )
+		{
+			System.arraycopy( src, srcPos, dest, destPos, length );
+		}
+
+		@Override
+		public void copyReverse( final char[] src, final int srcPos, final char[] dest, final int destPos, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ destPos + i ] = src[ srcPos - i ];
+		}
+
+		@Override
+		public void copyValue( final char[] src, final int srcPos, final char[] dest, final int destPos, final int length )
 		{
 			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
 		}
