@@ -6,6 +6,7 @@ import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
+// T is a primitive array type
 public class ArrayImgRangeCopier< T > implements RangeCopier< T >
 {
 	private final int n;
@@ -49,6 +50,29 @@ public class ArrayImgRangeCopier< T > implements RangeCopier< T >
 		lengths = new int[ n ];
 
 		src = ( T ) ( ( ( ArrayDataAccess< ? > ) arrayImg.update( null ) ).getCurrentStorageArray() );
+	}
+
+	// creates an independent copy of {@code other}
+	private ArrayImgRangeCopier( ArrayImgRangeCopier< T > copier )
+	{
+		n = copier.n;
+		srcDims = copier.srcDims.clone();
+		findRanges = copier.findRanges;
+		memCopy = copier.memCopy;
+		oob = copier.oob;
+		src = copier.src;
+
+		rangesPerDimension = new List[ n ];
+		ranges = new Ranges.Range[ n ];
+		dsteps = new int[ n ];
+		doffsets = new int[ n + 1 ];
+		csteps = new int[ n ];
+		lengths = new int[ n ];
+	}
+
+	ArrayImgRangeCopier< T > newInstance()
+	{
+		return new ArrayImgRangeCopier<>( this );
 	}
 
 	/**

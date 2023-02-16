@@ -1,6 +1,9 @@
 package net.imglib2.blk.copy;
 
 import java.util.function.Supplier;
+import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.type.NativeType;
 
 class PrimitiveBlocksUtils
@@ -28,5 +31,18 @@ class PrimitiveBlocksUtils
 				return this;
 			}
 		};
+	}
+
+	static < T extends NativeType< T > > Object extractOobValue( final T type, final Extension extension )
+	{
+		if ( extension.type() == Extension.Type.CONSTANT )
+		{
+			final T oobValue = ( ( ExtensionImpl.ConstantExtension< T > ) extension ).getValue();
+			final ArrayImg< T, ? > img = new ArrayImgFactory<>( type ).create( 1 );
+			img.firstElement().set( oobValue );
+			return ( ( ArrayDataAccess< ? > ) ( img.update( null ) ) ).getCurrentStorageArray();
+		}
+		else
+			return null;
 	}
 }

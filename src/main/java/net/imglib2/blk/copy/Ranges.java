@@ -32,9 +32,9 @@ public interface Ranges
 	Ranges FIND_RANGES_MIRROR_DOUBLE = Ranges::findRanges_mirror_double;
 	Ranges FIND_RANGES_BORDER = Ranges::findRanges_border;
 
-	static Ranges forExtension( Extension method )
+	static Ranges forExtension( Extension extension )
 	{
-		switch ( method )
+		switch ( extension.type() )
 		{
 		case CONSTANT:
 			return FIND_RANGES_CONSTANT;
@@ -43,8 +43,9 @@ public interface Ranges
 		case MIRROR_DOUBLE:
 			return FIND_RANGES_MIRROR_DOUBLE;
 		case BORDER:
-		default:
 			return FIND_RANGES_BORDER;
+		default:
+			throw new IllegalArgumentException( "Extension type not supported: " + extension.type() );
 		}
 	}
 
