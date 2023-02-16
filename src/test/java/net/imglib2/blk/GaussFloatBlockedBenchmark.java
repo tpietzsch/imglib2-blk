@@ -6,9 +6,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.imglib2.Cursor;
+import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.blk.copy.CellImgBlocks;
+import net.imglib2.blk.copy.Extension;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
@@ -39,8 +41,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-
-import static net.imglib2.blk.copy.Extension.CONSTANT;
 
 @State( Scope.Benchmark )
 @Warmup( iterations = 3, time = 100, timeUnit = TimeUnit.MILLISECONDS )
@@ -92,7 +92,7 @@ public class GaussFloatBlockedBenchmark
 	@Benchmark
 	public void benchmarkGaussFloatBlocked()
 	{
-		final CellImgBlocks blocks = new CellImgBlocks( source, CONSTANT, new FloatType( 0 ) );
+		final CellImgBlocks blocks = new CellImgBlocks( source, Extension.constant( new FloatType( 0 ) ) );
 		final ThreadLocal< GaussFloatBlocked > tlgauss = ThreadLocal.withInitial( () -> new GaussFloatBlocked( sigmas ) );
 		final CellLoader< FloatType > loader = new CellLoader< FloatType >()
 		{
@@ -127,11 +127,12 @@ public class GaussFloatBlockedBenchmark
 	}
 
 	static CachedCellImg< FloatType, ? > smoothed(
+			final Interval sourceInterval,
 			final CellImgBlocks blocks,
 			final int dim,
 			final double sigma )
 	{
-		final ThreadLocal< GaussFloatBlocked1D > tlgauss = ThreadLocal.withInitial( () -> new GaussFloatBlocked1D( blocks.source().numDimensions(), dim, sigma ) );
+		final ThreadLocal< GaussFloatBlocked1D > tlgauss = ThreadLocal.withInitial( () -> new GaussFloatBlocked1D( sourceInterval.numDimensions(), dim, sigma ) );
 		final CellLoader< FloatType > loader = new CellLoader< FloatType >()
 		{
 			@Override
@@ -154,7 +155,7 @@ public class GaussFloatBlockedBenchmark
 		};
 
 		return new ReadOnlyCachedCellImgFactory().create(
-				Intervals.dimensionsAsLongArray( blocks.source() ),
+				Intervals.dimensionsAsLongArray( sourceInterval ),
 				new FloatType(),
 				loader,
 				ReadOnlyCachedCellImgOptions.options().cellDimensions( CELL_SIZE ) );
@@ -168,7 +169,7 @@ public class GaussFloatBlockedBenchmark
 		AbstractCellImg< FloatType, ?, ?, ? > s = source;
 		for ( int d = 0; d < source.numDimensions(); d++ )
 		{
-			smoothed[ d ] = smoothed( new CellImgBlocks( s, CONSTANT, new FloatType( 0 ) ), d, sigmas[ d ] );
+			smoothed[ d ] = smoothed( source, new CellImgBlocks( s, Extension.constant( new FloatType( 0 ) ) ), d, sigmas[ d ] );
 			s = smoothed[ d ];
 		}
 

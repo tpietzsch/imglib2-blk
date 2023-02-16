@@ -17,8 +17,6 @@ import net.imglib2.loops.LoopBuilder;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Intervals;
 
-import static net.imglib2.blk.copy.Extension.CONSTANT;
-
 public class ReTilingExample
 {
 	public static void main( String[] args )
@@ -37,7 +35,7 @@ public class ReTilingExample
 				"input",
 				Bdv.options().is2D().addTo( bdv ) );
 
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, CONSTANT, new UnsignedByteType( 0 ) );
+		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
 		final CellLoader< UnsignedByteType > loader = new CellLoader< UnsignedByteType >()
 		{
 			@Override

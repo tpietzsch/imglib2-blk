@@ -10,6 +10,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.blk.copy.CellImgBlocks;
+import net.imglib2.blk.copy.Extension;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
@@ -25,8 +26,6 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
-
-import static net.imglib2.blk.copy.Extension.CONSTANT;
 
 public class GaussFloatExample
 {
@@ -53,7 +52,7 @@ public class GaussFloatExample
 
 //		final double[] sigmas = { 4, 4, 4 };
 		final double[] sigmas = { 8, 8, 8 };
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, CONSTANT, new FloatType( 0 ) );
+		final CellImgBlocks< FloatType > blocks = new CellImgBlocks<>( cellImg, Extension.constant( new FloatType( 0 ) ) );
 		final ThreadLocal< GaussFloatBlocked > tlgauss = ThreadLocal.withInitial( () -> new GaussFloatBlocked( sigmas ) );
 		final CellLoader< FloatType > loader = new CellLoader< FloatType >()
 		{

@@ -18,8 +18,6 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 
-import static net.imglib2.blk.copy.Extension.CONSTANT;
-
 public class ReTilingFloatExample
 {
 	public static void main( String[] args )
@@ -38,7 +36,7 @@ public class ReTilingFloatExample
 				"input",
 				Bdv.options().is2D().addTo( bdv ) );
 
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, CONSTANT, new FloatType( 0 ) );
+		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.constant( new FloatType( 0 ) ) );
 		final CellLoader< FloatType > loader = new CellLoader< FloatType >()
 		{
 			@Override

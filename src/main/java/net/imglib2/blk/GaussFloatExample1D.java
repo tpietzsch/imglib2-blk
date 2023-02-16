@@ -8,6 +8,7 @@ import bdv.util.volatiles.VolatileViews;
 import ij.IJ;
 import ij.ImagePlus;
 import java.util.Arrays;
+import net.imglib2.Interval;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.blk.copy.CellImgBlocks;
 import net.imglib2.blk.copy.Extension;
@@ -19,7 +20,6 @@ import net.imglib2.cache.img.SingleCellArrayImg;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.AbstractCellImg;
-import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.loops.LoopBuilder;
@@ -29,18 +29,17 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
-import static net.imglib2.blk.copy.Extension.CONSTANT;
-
 public class GaussFloatExample1D
 {
 	static final int CELL_SIZE = 64;
 
 	static CachedCellImg< FloatType, ? > smoothed(
-			final CellImgBlocks blocks,
+			final Interval sourceInterval,
+			final CellImgBlocks< FloatType > blocks,
 			final int dim,
 			final double sigma )
 	{
-		final ThreadLocal< GaussFloatBlocked1D > tlgauss = ThreadLocal.withInitial( () -> new GaussFloatBlocked1D( blocks.source().numDimensions(), dim, sigma ) );
+		final ThreadLocal< GaussFloatBlocked1D > tlgauss = ThreadLocal.withInitial( () -> new GaussFloatBlocked1D( sourceInterval.numDimensions(), dim, sigma ) );
 		final CellLoader< FloatType > loader = new CellLoader< FloatType >()
 		{
 			@Override
@@ -63,7 +62,7 @@ public class GaussFloatExample1D
 		};
 
 		return new ReadOnlyCachedCellImgFactory().create(
-				Intervals.dimensionsAsLongArray( blocks.source() ),
+				Intervals.dimensionsAsLongArray( sourceInterval ),
 				new FloatType(),
 				loader,
 				ReadOnlyCachedCellImgOptions.options().cellDimensions( CELL_SIZE ) );
@@ -94,7 +93,11 @@ public class GaussFloatExample1D
 
 		AbstractCellImg< FloatType, ?, ?, ? > smoothed = cellImg;
 		for ( int d = 0; d < cellImg.numDimensions(); ++d )
-			smoothed = smoothed( new CellImgBlocks( smoothed, CONSTANT, new FloatType( 0 ) ), d, sigmas[ d ] );
+			smoothed = smoothed(
+					cellImg,
+					new CellImgBlocks<>( smoothed, Extension.constant( new FloatType( 0 ) ) ),
+					d,
+					sigmas[ d ] );
 
 		final CachedCellImg< FloatType, ? > gauss3 = new ReadOnlyCachedCellImgFactory().create(
 				Intervals.dimensionsAsLongArray( cellImg ),

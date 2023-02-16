@@ -24,9 +24,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import static net.imglib2.blk.copy.Extension.CONSTANT;
-import static net.imglib2.blk.copy.Extension.MIRROR_SINGLE;
-
 @State( Scope.Benchmark )
 @Warmup( iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS )
 @Measurement( iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS )
@@ -36,7 +33,7 @@ import static net.imglib2.blk.copy.Extension.MIRROR_SINGLE;
 public class CopyBenchmark
 {
 	private final int[] cellDimensions = { 64, 64, 64 };
-	private final int[] srcDimensions = { 2000, 2000, 1000 };
+	private final int[] srcDimensions = { 300, 300, 300 };
 	private final int[] destDimensions = { 100, 100, 100 };
 	private final int[] pos = { 64, 100, 100 };
 	private final int[] oobPos = { -64, -64, -64 };
@@ -97,21 +94,21 @@ public class CopyBenchmark
 	@Benchmark
 	public void benchmarkCellImgBlocks()
 	{
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, CONSTANT );
+		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
 		blocks.copy( pos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobMirrorSingle()
 	{
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, MIRROR_SINGLE );
+		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.mirrorSingle() );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobConstant()
 	{
-		final CellImgBlocks< ? > blocks = new CellImgBlocks<>( cellImg, CONSTANT, new UnsignedByteType( 0 ) );
+		final CellImgBlocks< ? > blocks = new CellImgBlocks<>( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 

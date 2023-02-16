@@ -26,7 +26,7 @@ public class ArrayImgBlocksExample
 		LoopBuilder.setImages( img, arrayImg ).forEachPixel( ( a, b ) -> b.set( a ) );
 
 		BdvFunctions.show(
-				Views.extendMirrorSingle( arrayImg ),
+				Views.extendZero( arrayImg ),
 				arrayImg,
 				"input",
 				Bdv.options().is2D() );

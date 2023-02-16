@@ -1,6 +1,5 @@
 package net.imglib2.blk.view;
 
-import java.lang.reflect.Field;
 import net.imagej.ImgPlus;
 import net.imglib2.RandomAccessible;
 import net.imglib2.blk.copy.Extension;
@@ -12,25 +11,19 @@ import net.imglib2.img.NativeImg;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.planar.PlanarImg;
-import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
-import net.imglib2.outofbounds.OutOfBoundsConstantValueFactory;
 import net.imglib2.outofbounds.OutOfBoundsFactory;
-import net.imglib2.outofbounds.OutOfBoundsMirrorFactory;
 import net.imglib2.transform.integer.Mixed;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.MixedTransformView;
 
-import static net.imglib2.blk.copy.Extension.BORDER;
-import static net.imglib2.blk.copy.Extension.CONSTANT;
-import static net.imglib2.blk.copy.Extension.MIRROR_DOUBLE;
-import static net.imglib2.blk.copy.Extension.MIRROR_SINGLE;
+import static net.imglib2.blk.copy.Extension.Type.UNKNOWN;
 
 public class ViewProps
 {
 	NativeImg< ?, ? > img;
-	Extension extension = BORDER;
+	Extension extension = Extension.border();
 	Object oobValue;
 	Converter< ?, ? > converter;
 	MixedTransform transform;
@@ -77,23 +70,9 @@ public class ViewProps
 		{
 			ExtendedRandomAccessibleInterval< ?, ? > extended = ( ExtendedRandomAccessibleInterval< ?, ? > ) view;
 			final OutOfBoundsFactory< ?, ? > oobFactory = extended.getOutOfBoundsFactory();
-			if ( oobFactory instanceof OutOfBoundsBorderFactory )
-			{
-				extension = BORDER;
-			}
-			else if ( oobFactory instanceof OutOfBoundsMirrorFactory )
-			{
-				extension = getExtensionMethod( ( OutOfBoundsMirrorFactory< ?, ? > ) oobFactory );
-			}
-			else if ( oobFactory instanceof OutOfBoundsConstantValueFactory )
-			{
-				extension = CONSTANT;
-				oobValue = ( ( OutOfBoundsConstantValueFactory ) oobFactory ).getValue();
-			}
-			else
-			{
+			extension = Extension.of( oobFactory );
+			if ( extension.type() == UNKNOWN )
 				throw new IllegalArgumentException( "Cannot handle OutOfBoundsFactory " + oobFactory.getClass() );
-			}
 			analyze( extended.getSource() );
 		}
 		else if ( view instanceof ImgPlus )
@@ -114,18 +93,6 @@ public class ViewProps
 		}
 		else
 			throw new IllegalArgumentException( "Cannot handle " + view );
-	}
-
-	private static Extension getExtensionMethod( final OutOfBoundsMirrorFactory< ?, ? > oobFactory )
-	{
-		switch ( oobFactory.getBoundary() )
-		{
-		default:
-		case SINGLE:
-			return MIRROR_SINGLE;
-		case DOUBLE:
-			return MIRROR_DOUBLE;
-		}
 	}
 
 	private static boolean isSupported( final Mixed t )
