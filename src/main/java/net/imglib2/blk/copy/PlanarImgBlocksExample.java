@@ -38,12 +38,19 @@ public class PlanarImgBlocksExample
 		final int bd = 300;
 
 		Bdv bdv = null;
-		for ( Extension method : Extension.values() )
+		Extension[] extensions = {
+				Extension.constant( new UnsignedByteType( 128 ) ),
+				Extension.border(),
+				Extension.mirrorSingle(),
+				Extension.mirrorDouble()
+				// TODO: use non-specialized OutOfBoundsFactory
+		};
+		for ( Extension extension : extensions )
 		{
 			final byte[] data = new byte[ bw * bh * bd ];
 			final Img< UnsignedByteType > output = ArrayImgs.unsignedBytes( data, bw, bh, bd );
 
-			final PlanarImgBlocks< ? > blocks = new PlanarImgBlocks<>( ( PlanarImg ) img, method, new UnsignedByteType( 128 ) );
+			final PlanarImgBlocks< ? > blocks = new PlanarImgBlocks<>( ( PlanarImg ) img, extension );
 			blocks.copy( new int[] { ox, oy, oz }, data, new int[] { bw, bh, bd } );
 
 			bdv = BdvFunctions.show(

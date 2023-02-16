@@ -47,12 +47,19 @@ public class CellImgBlocksExample
 		final int bh = 84;
 
 		Bdv bdv = null;
-		for ( Extension method : Extension.values() )
+		Extension[] extensions = {
+				Extension.constant( new UnsignedByteType( 128 ) ),
+				Extension.border(),
+				Extension.mirrorSingle(),
+				Extension.mirrorDouble()
+				// TODO: use non-specialized OutOfBoundsFactory
+		};
+		for ( Extension extension : extensions )
 		{
 			final byte[] data = new byte[ bw * bh ];
 			final Img< UnsignedByteType > output = ArrayImgs.unsignedBytes( data, bw, bh );
 
-			final CellImgBlocks< ? > blocks = new CellImgBlocks<>( cellImg, method, new UnsignedByteType( 128 ) );
+			final CellImgBlocks< ? > blocks = new CellImgBlocks<>( cellImg, extension );
 			blocks.copy( new int[] { ox, oy }, data, new int[] { bw, bh } );
 
 			bdv = BdvFunctions.show(

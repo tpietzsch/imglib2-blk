@@ -9,6 +9,7 @@ import net.imglib2.img.cell.CellGrid;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
+// T is a primitive array type
 public class CellImgRangeCopier< T > implements RangeCopier< T >
 {
 	private final int n;
@@ -29,7 +30,7 @@ public class CellImgRangeCopier< T > implements RangeCopier< T >
 	private final int[] lengths;
 
 	public CellImgRangeCopier(
-			final AbstractCellImg< ?, ?, ? extends Cell< ? >, ? > cellImg,
+			final AbstractCellImg< ?, ?, ?, ? > cellImg,
 			final Ranges findRanges,
 			final MemCopy< T > memCopy,
 			final T oob )
@@ -57,6 +58,31 @@ public class CellImgRangeCopier< T > implements RangeCopier< T >
 		cdims = new int[ n ];
 		csteps = new int[ n ];
 		lengths = new int[ n ];
+	}
+
+	// creates an independent copy of {@code other}
+	private CellImgRangeCopier( CellImgRangeCopier< T > copier )
+	{
+		n = copier.n;
+		cellGrid = copier.cellGrid;
+		cellAccess = copier.cellAccess.copy();
+		srcDims = copier.srcDims.clone();
+		findRanges = copier.findRanges;
+		memCopy = copier.memCopy;
+		oob = copier.oob;
+
+		rangesPerDimension = new List[ n ];
+		ranges = new Ranges.Range[ n ];
+		dsteps = new int[ n ];
+		doffsets = new int[ n + 1 ];
+		cdims = new int[ n ];
+		csteps = new int[ n ];
+		lengths = new int[ n ];
+	}
+
+	CellImgRangeCopier< T > newInstance()
+	{
+		return new CellImgRangeCopier<>( this );
 	}
 
 	/**

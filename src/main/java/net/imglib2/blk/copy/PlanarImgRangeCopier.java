@@ -6,6 +6,7 @@ import net.imglib2.img.planar.PlanarImg;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
+// T is a primitive array type
 public class PlanarImgRangeCopier< T > implements RangeCopier< T >
 {
 	private final int n;
@@ -53,6 +54,30 @@ public class PlanarImgRangeCopier< T > implements RangeCopier< T >
 			srcDims[ d ] = ( int ) planarImg.dimension( d );
 			cdims[ d ] = d < 2 ? srcDims[ d ] : 1;
 		}
+	}
+
+	// creates an independent copy of {@code other}
+	private PlanarImgRangeCopier( PlanarImgRangeCopier< T > copier )
+	{
+		n = copier.n;
+		sliceAccess = copier.sliceAccess.copy();
+		srcDims = copier.srcDims.clone();
+		findRanges = copier.findRanges;
+		memCopy = copier.memCopy;
+		oob = copier.oob;
+
+		rangesPerDimension = new List[ n ];
+		ranges = new Ranges.Range[ n ];
+		dsteps = new int[ n ];
+		cdims = copier.cdims.clone();
+		doffsets = new int[ n + 1 ];
+		csteps = new int[ n ];
+		lengths = new int[ n ];
+	}
+
+	PlanarImgRangeCopier< T > newInstance()
+	{
+		return new PlanarImgRangeCopier<>( this );
 	}
 
 	/**
@@ -264,6 +289,12 @@ public class PlanarImgRangeCopier< T > implements RangeCopier< T >
 		public int getCurrentSliceIndex()
 		{
 			return i;
+		}
+
+		// creates an independent SliceAccess on the same image
+		SliceAccess< T > copy()
+		{
+			return new SliceAccess<>( planarImg );
 		}
 	}
 }
