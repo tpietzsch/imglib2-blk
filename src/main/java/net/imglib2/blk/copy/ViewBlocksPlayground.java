@@ -242,6 +242,24 @@ public class ViewBlocksPlayground
 		return b;
 	}
 
+	private MixedTransform transform;
+
+	private void concatenateTransforms()
+	{
+		final int n = rai.numDimensions();
+		transform = new MixedTransform( n, n );
+		for ( ViewNode node : nodes )
+		{
+			if ( node.viewType() == ViewNode.ViewType.MIXED_TRANSFORM )
+			{
+				final MixedTransformViewNode tnode = ( MixedTransformViewNode ) node;
+				transform = transform.preConcatenate( tnode.getTransformToSource() );
+			}
+		}
+	}
+
+
+
 
 
 	/**
@@ -354,6 +372,11 @@ public class ViewBlocksPlayground
 
 
 
+
+
+
+
+
 	static RandomAccessible< ? > example1()
 	{
  		RandomAccessibleInterval< UnsignedByteType > img0 = ArrayImgs.unsignedBytes( 640, 480, 3 );
@@ -385,7 +408,8 @@ public class ViewBlocksPlayground
 		System.out.println( "playground.oobExtension.type() = " + playground.oobExtension.type() );
 		System.out.println( "playground.checkExtensions2() = " + playground.checkExtensions2() );
 		System.out.println( "playground.checkExtensions3() = " + playground.checkExtensions3() );
-
+		playground.concatenateTransforms();
+		System.out.println( "playground.transform = " + playground.transform );
 	}
 
 }
