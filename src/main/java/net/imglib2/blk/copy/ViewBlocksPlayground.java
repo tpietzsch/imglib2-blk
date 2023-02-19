@@ -266,7 +266,16 @@ public class ViewBlocksPlayground
 		return transform.hasFullSourceMapping();
 	}
 
+	private MixedTransform permuteInvertTransform;
 
+	private MixedTransform remainderTransform;
+
+	private void splitTransform()
+	{
+		final MixedTransform[] split = PrimitiveBlocksUtils.split( transform );
+		permuteInvertTransform = split[ 0 ];
+		remainderTransform = split[ 1 ];
+	}
 
 
 	/**
@@ -418,6 +427,9 @@ public class ViewBlocksPlayground
 		playground.concatenateTransforms();
 		System.out.println( "playground.transform = " + playground.transform );
 		System.out.println( "playground.checkNoDimensionsAdded() = " + playground.checkNoDimensionsAdded() );
+		playground.splitTransform();
+		System.out.println( "playground.permuteInvertTransform = " + playground.permuteInvertTransform );
+		System.out.println( "playground.remainderTransform = " + playground.remainderTransform );
 	}
 
 }
