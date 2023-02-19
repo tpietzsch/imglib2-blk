@@ -1,6 +1,8 @@
 package net.imglib2.blk.copy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
@@ -178,12 +180,10 @@ public class ViewBlocksPlayground
 		if ( oobIndex < 0 ) // there is no extension
 			return true;
 
-		final Interval rootInterval = nodes.get( nodes.size() - 1 ).interval();
-
-		BoundingBox bb = nodes.get( oobIndex + 1 ).bbox();
+		BoundingBox bbExtension = nodes.get( oobIndex + 1 ).bbox();
+		BoundingBox bb = nodes.get( nodes.size() - 1 ).bbox();
 		System.out.println( "bb.getInterval() = " + bb.getInterval() );
-
-		for ( int i = oobIndex + 1; i < nodes.size(); ++i )
+		for ( int i = nodes.size() - 1; i > oobIndex; --i )
 		{
 			final ViewNode node = nodes.get( i );
 
@@ -191,16 +191,54 @@ public class ViewBlocksPlayground
 			if ( node.viewType() == ViewType.MIXED_TRANSFORM )
 			{
 				final MixedTransform t = ( ( MixedTransformViewNode ) node ).getTransformToSource();
-				bb = t.transform( bb );
-				t.applyInverse( rootInterval );
+				bb = transformInverse( t, bb );
 			}
 		}
 
-		System.out.println( "rootInterval = " + rootInterval );
-		System.out.println( "bb.getInterval() = " + bb.getInterval() );
-		return Intervals.equals( bb.getInterval(), rootInterval );
+		return Intervals.equals( bb.getInterval(), bbExtension.getInterval() );
 	}
 
+	/**
+	 * Apply the inverse transform to a target vector to obtain a source vector.
+	 *
+	 * @param source
+	 *            set this to the source coordinates.
+	 * @param target
+	 *            target coordinates.
+	 */
+	private static void applyInverse( MixedTransform transform, long[] source, long[] target )
+	{
+		assert source.length >= transform.numSourceDimensions();
+		assert target.length >= transform.numSourceDimensions();
+
+		for ( int d = 0; d < transform.numTargetDimensions(); ++d )
+		{
+			if ( !transform.getComponentZero( d ) )
+			{
+				long v = target[ d ] - transform.getTranslation( d );
+				source[ transform.getComponentMapping( d ) ] = transform.getComponentInversion( d ) ? -v : v;
+			}
+		}
+	}
+
+	private static BoundingBox transformInverse( final MixedTransform transform, final BoundingBox boundingBox )
+	{
+		assert boundingBox.numDimensions() == transform.numSourceDimensions();
+
+		if ( transform.numSourceDimensions() == transform.numTargetDimensions() )
+		{ // apply in-place
+			final long[] tmp = new long[ transform.numTargetDimensions() ];
+			boundingBox.corner1( tmp );
+			applyInverse( transform, boundingBox.corner1, tmp );
+			boundingBox.corner2( tmp );
+			applyInverse( transform, boundingBox.corner2, tmp );
+			return boundingBox;
+		}
+		final BoundingBox b = new BoundingBox( transform.numSourceDimensions() );
+		applyInverse( transform, b.corner1, boundingBox.corner1 );
+		applyInverse( transform, b.corner2, boundingBox.corner2 );
+		return b;
+	}
 
 	private void analyze( final RandomAccessible< ? > rai )
 	{
@@ -271,7 +309,113 @@ public class ViewBlocksPlayground
 	}
 
 
+	/**
+	 * Array {@code component}, of length {@code numTargetDimensions}, contains
+	 * for every target dimension {@code i} the source dimensions {@code
+	 * component[i]} from which it originates.
+	 *
+	 * Returns an array {@code invComponent}, of length {@code
+	 * numSourceDimensions}, that contains for every source dimension {@code i}
+	 * the target dimension {@code invComponent[i]} which it maps to.
+	 */
+	private static int[] invComponent( final int[] component, final int numSourceDimensions )
+	{
+		final int[] invComponent = new int[ numSourceDimensions ];
+		Arrays.fill( invComponent, -1 );
+		for ( int i = 0; i < component.length; i++ )
+		{
+			final int s = component[ i ];
+			if ( s >= 0 )
+				invComponent[ s ] = i;
+		}
+		return invComponent;
+	}
 
+	/**
+	 * Computes the inverse of (@code transform}. The {@code MixedTransform
+	 * transform} is a pure axis permutation followed by inversion of some axes,
+	 * that is
+	 * <ul>
+	 * <li>{@code numSourceDimensions == numTargetDimensions},</li>
+	 * <li>the translation vector is zero, and</li>
+	 * <li>no target component is zeroed out.</li>
+	 * </ul>
+	 * The computed inverse {@code MixedTransform} concatenates with {@code transform} to identity.
+	 * @return the inverse {@code MixedTransform}
+	 */
+	private static MixedTransform invPermutationInversion( MixedTransform transform )
+	{
+		final int n = transform.numTargetDimensions();
+		final int[] component = new int[ n ];
+		final boolean[] invert = new boolean[ n ];
+		final boolean[] zero = new boolean[ n ];
+		transform.getComponentMapping( component );
+		transform.getComponentInversion( invert );
+		transform.getComponentZero( zero );
+
+		final int m = transform.numSourceDimensions();
+		final int[] invComponent = new int[ m ];
+		final boolean[] invInvert = new boolean[ m ];
+		final boolean[] invZero = new boolean[ m ];
+		Arrays.fill( invZero, true );
+		for ( int i = 0; i < n; i++ )
+		{
+			if ( transform.getComponentZero( i ) == false )
+			{
+				final int j = component[ i ];
+				invComponent[ j ] = i;
+				invInvert[ j ] = invert[ i ];
+				invZero[ j ] = false;
+			}
+		}
+		MixedTransform invTransform = new MixedTransform( n, m );
+		invTransform.setComponentMapping( invComponent );
+		invTransform.setComponentInversion( invInvert );
+		invTransform.setComponentZero( invZero );
+		return invTransform;
+	}
+
+	/**
+	 * Returns {@code true} iff no element of {@code component} is {@code < 0}.
+	 */
+	private static boolean isFullMapping( final int[] component )
+	{
+		for ( int t : component )
+			if ( t < 0 )
+				return false;
+		return true;
+	}
+
+	private static class IntPair
+	{
+		final int i0;
+		final int i1;
+		private IntPair( final int i0, final int i1 )
+		{
+			this.i0 = i0;
+			this.i1 = i1;
+		}
+	}
+
+	private static List<IntPair> toIndexAndTargetDimensionPairs( final int[] component )
+	{
+		final List< IntPair > pairs = new ArrayList<>( component.length );
+		for ( int i = 0; i < component.length; i++ )
+		{
+			pairs.add( new IntPair( i, component[ i ] ) );
+		}
+		pairs.sort( Comparator.comparingInt( pair -> pair.i1 ) );
+		return pairs;
+	}
+
+	private static int[] getComponents( final int componentIndex, final List< IntPair > pairs )
+	{
+		final int[] components = new int[ pairs.size() ];
+		Arrays.setAll( components, componentIndex == 0
+				? i -> pairs.get( i ).i0
+				: i -> pairs.get( i ).i1 );
+		return components;
+	}
 
 
 
@@ -280,10 +424,10 @@ public class ViewBlocksPlayground
  		RandomAccessibleInterval< UnsignedByteType > img0 = ArrayImgs.unsignedBytes( 640, 480, 3 );
 		RandomAccessibleInterval< UnsignedByteType > img1 = Views.rotate( img0, 1, 0 );
 		RandomAccessibleInterval< UnsignedByteType > img2 = Views.zeroMin( img1 );
-//		RandomAccessible< UnsignedByteType > img3 = Views.extendBorder( img2 );
-//		RandomAccessible< UnsignedByteType > img4 = Views.hyperSlice( img3, 2, 1 );
-		RandomAccessibleInterval< UnsignedByteType > img3 = Views.hyperSlice( img2, 2, 1 );
-		RandomAccessible< UnsignedByteType > img4 = Views.extendBorder( img3 );
+		RandomAccessible< UnsignedByteType > img3 = Views.extendBorder( img2 );
+		RandomAccessible< UnsignedByteType > img4 = Views.hyperSlice( img3, 2, 1 );
+//		RandomAccessibleInterval< UnsignedByteType > img3 = Views.hyperSlice( img2, 2, 1 );
+//		RandomAccessible< UnsignedByteType > img4 = Views.extendBorder( img3 );
 		return img4;
 	}
 
