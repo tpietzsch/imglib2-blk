@@ -29,9 +29,16 @@ import net.imglib2.view.Views;
 
 public class ViewBlocksPlayground
 {
+	private final RandomAccessible< ? > rai;
+
 	private final List< ViewNode > nodes = new ArrayList<>();
 
-	private void analyze( final RandomAccessible< ? > rai )
+	ViewBlocksPlayground( final RandomAccessible< ? > rai )
+	{
+		this.rai = rai;
+	}
+
+	private void analyze()
 	{
 		RandomAccessible< ? > source = rai;
 		while ( source != null )
@@ -363,8 +370,8 @@ public class ViewBlocksPlayground
 	{
 		System.out.println( "hello world!" );
 		final RandomAccessible< ? > rai = example1();
-		final ViewBlocksPlayground playground = new ViewBlocksPlayground();
-		playground.analyze( rai );
+		final ViewBlocksPlayground playground = new ViewBlocksPlayground( rai );
+		playground.analyze();
 		for ( int i = 0; i < playground.nodes.size(); i++ )
 		{
 			ViewNode node = playground.nodes.get( i );
