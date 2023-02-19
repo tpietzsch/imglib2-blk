@@ -110,27 +110,6 @@ public class TransformPlayground
 		return new MixedTransform[] { permuteInvert, remainder };
 	}
 
-	private static String toString( MixedTransform transform )
-	{
-		final int n = transform.numTargetDimensions();
-		final int m = transform.numSourceDimensions();
-		final int[] component = new int[ n ];
-		final boolean[] invert = new boolean[ n ];
-		final boolean[] zero = new boolean[ n ];
-		final long[] translation = new long[ n ];
-		transform.getComponentMapping( component );
-		transform.getComponentInversion( invert );
-		transform.getComponentZero( zero );
-		transform.getTranslation( translation );
-
-		return "MixedTransform{"
-				+ m + " -> " + n + ", "
-				+ "component=" + Arrays.toString( component ) + ", "
-				+ "invert=" + Arrays.toString( invert ) + ", "
-				+ "zero=" + Arrays.toString( zero ) + ", "
-				+ "translation=" + Arrays.toString( translation ) + "}";
-	}
-
 	public static void main( String[] args )
 	{
 		{
@@ -138,13 +117,13 @@ public class TransformPlayground
 			t.setComponentMapping( new int[] { 3, 0, 1, 2 } );
 			t.setComponentInversion( new boolean[] { false, true, true, false } );
 
-			System.out.println( "t    = " + toString( t ) );
+			System.out.println( "t    = " + t );
 
 			final MixedTransform tinv = invPermutationInversion( t );
-			System.out.println( "tinv = " + toString( tinv ) );
+			System.out.println( "tinv = " + tinv );
 
-			System.out.println( "t * tinv = " + toString( t.concatenate( tinv ) ) );
-			System.out.println( "tinv * t = " + toString( tinv.concatenate( t ) ) );
+			System.out.println( "t * tinv = " + t.concatenate( tinv ) );
+			System.out.println( "tinv * t = " + tinv.concatenate( t ) );
 			System.out.println();
 			System.out.println();
 		}
@@ -155,13 +134,13 @@ public class TransformPlayground
 			t.setComponentInversion( new boolean[] { false, false, true } );
 			t.setComponentZero( new boolean[] { false, true, false } );
 
-			System.out.println( "t    = " + toString( t ) );
+			System.out.println( "t    = " + t );
 
 			final MixedTransform tinv = invPermutationInversion( t );
-			System.out.println( "tinv = " + toString( tinv ) );
+			System.out.println( "tinv = " + tinv );
 
-			System.out.println( "t * tinv = " + toString( t.concatenate( tinv ) ) );
-			System.out.println( "tinv * t = " + toString( tinv.concatenate( t ) ) );
+			System.out.println( "t * tinv = " + t.concatenate( tinv ) );
+			System.out.println( "tinv * t = " + tinv.concatenate( t ) );
 			System.out.println();
 			System.out.println();
 
@@ -174,16 +153,16 @@ public class TransformPlayground
 			t.setComponentZero( new boolean[] { false, true, false } );
 			t.setTranslation( new long[] { 10, 20, 30 } );
 
-			System.out.println( "t                         = " + toString( t ) );
+			System.out.println( "t                         = " + t );
 
 			final MixedTransform[] split = split( t );
 			final MixedTransform permuteInvert = split[ 0 ];
 			final MixedTransform remainder = split[ 1 ];
 
-			System.out.println( "remainder * permuteInvert = " + toString( remainder.concatenate( permuteInvert ) ) );
-			System.out.println( "remainder = " + toString( remainder ) );
-			System.out.println( "permuteInvert    = " + toString( permuteInvert ) );
-			System.out.println( "permuteInvert^-1 = " + toString( invPermutationInversion( permuteInvert ) ) );
+			System.out.println( "remainder * permuteInvert = " + remainder.concatenate( permuteInvert ) );
+			System.out.println( "remainder = " + remainder );
+			System.out.println( "permuteInvert    = " + permuteInvert );
+			System.out.println( "permuteInvert^-1 = " + invPermutationInversion( permuteInvert ) );
 			System.out.println();
 			System.out.println();
 
