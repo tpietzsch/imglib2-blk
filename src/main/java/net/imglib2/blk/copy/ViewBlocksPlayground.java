@@ -16,6 +16,7 @@ import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.planar.PlanarImg;
+import net.imglib2.outofbounds.OutOfBoundsFactory;
 import net.imglib2.transform.integer.BoundingBox;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -114,7 +115,26 @@ public class ViewBlocksPlayground
 		@Override
 		public String toString()
 		{
-			return "MixedTransformViewNode{viewType=" + viewType + ", view=" + view + ", interval=" + interval + '}';
+			return "MixedTransformViewNode{viewType=" + viewType + ", view=" + view + ", interval=" + interval + ", transformToSource=" + getTransformToSource() + '}';
+		}
+	}
+
+	static class ExtensionViewNode extends AbstractViewNode< ExtendedRandomAccessibleInterval< ?, ? > >
+	{
+		ExtensionViewNode( final ExtendedRandomAccessibleInterval< ?, ? > view )
+		{
+			super( ViewType.EXTENSION, view );
+		}
+
+		public OutOfBoundsFactory< ?, ? > getOutOfBoundsFactory()
+		{
+			return view.getOutOfBoundsFactory();
+		}
+
+		@Override
+		public String toString()
+		{
+			return "ExtensionViewNode{viewType=" + viewType + ", view=" + view + ", interval=" + interval + ", oobFactory=" + getOutOfBoundsFactory() + '}';
 		}
 	}
 
@@ -145,6 +165,8 @@ public class ViewBlocksPlayground
 
 	private int oobIndex = -1;
 
+	private Extension oobExtension = null;
+
 	private boolean checkExtensions1()
 	{
 		// Rule: There must be at most one extension
@@ -163,10 +185,24 @@ public class ViewBlocksPlayground
 					return false;
 			}
 		}
+
+		if (oobIndex >= 0)
+		{
+			final ExtensionViewNode node = ( ExtensionViewNode ) nodes.get( oobIndex );
+			oobExtension = Extension.of( node.getOutOfBoundsFactory() );
+		}
 		return true;
 	}
 
 	private boolean checkExtensions2()
+	{
+		if ( oobIndex < 0 ) // there is no extension
+			return true;
+
+		return oobExtension.type() != Extension.Type.UNKNOWN;
+	}
+
+	private boolean checkExtensions3()
 	{
 		// Rule: At the EXTENSION node, the interval must be equal to the root
 		//       interval carried through the transforms so far. This means that
@@ -296,7 +332,7 @@ public class ViewBlocksPlayground
 			else if ( source instanceof ExtendedRandomAccessibleInterval )
 			{
 				ExtendedRandomAccessibleInterval< ?, ? > view = ( ExtendedRandomAccessibleInterval< ?, ? > ) source;
-				nodes.add( new DefaultViewNode( ViewType.EXTENSION, view ) );
+				nodes.add( new ExtensionViewNode( view ) );
 				source = view.getSource();
 			}
 			// fallback
@@ -443,11 +479,13 @@ public class ViewBlocksPlayground
 			System.out.println( i + ": " + node );
 		}
 
-		System.out.println( "playground.checkRootSupported() == " + playground.checkRootSupported() );
-		System.out.println( "playground.checkConverters() == " + playground.checkConverters() );
-		System.out.println( "playground.checkExtensions1() == " + playground.checkExtensions1() );
+		System.out.println( "playground.checkRootSupported() = " + playground.checkRootSupported() );
+		System.out.println( "playground.checkConverters() = " + playground.checkConverters() );
+		System.out.println( "playground.checkExtensions1() = " + playground.checkExtensions1() );
 		System.out.println( "playground.oobIndex = " + playground.oobIndex );
-		System.out.println( "playground.checkExtensions2() == " + playground.checkExtensions2() );
+		System.out.println( "playground.oobExtension.type() = " + playground.oobExtension.type() );
+		System.out.println( "playground.checkExtensions2() = " + playground.checkExtensions2() );
+		System.out.println( "playground.checkExtensions3() = " + playground.checkExtensions3() );
 
 	}
 
