@@ -258,6 +258,13 @@ public class ViewBlocksPlayground
 		}
 	}
 
+	private boolean checkNoDimensionsAdded()
+	{
+		// Rule: No source dimension is unused. That is Views.addDimension(...)
+		//       is not allowed for now.
+
+		return transform.hasFullSourceMapping();
+	}
 
 
 
@@ -410,6 +417,7 @@ public class ViewBlocksPlayground
 		System.out.println( "playground.checkExtensions3() = " + playground.checkExtensions3() );
 		playground.concatenateTransforms();
 		System.out.println( "playground.transform = " + playground.transform );
+		System.out.println( "playground.checkNoDimensionsAdded() = " + playground.checkNoDimensionsAdded() );
 	}
 
 }
