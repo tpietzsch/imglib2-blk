@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.blk.copy.ViewNodeImpl.DefaultViewNode;
+import net.imglib2.blk.copy.ViewNodeImpl.ExtensionViewNode;
+import net.imglib2.blk.copy.ViewNodeImpl.MixedTransformViewNode;
 import net.imglib2.converter.read.ConvertedRandomAccessible;
 import net.imglib2.converter.read.ConvertedRandomAccessibleInterval;
 import net.imglib2.img.ImgView;
@@ -16,7 +18,6 @@ import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.planar.PlanarImg;
-import net.imglib2.outofbounds.OutOfBoundsFactory;
 import net.imglib2.transform.integer.BoundingBox;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -28,122 +29,80 @@ import net.imglib2.view.Views;
 
 public class ViewBlocksPlayground
 {
-
-	enum ViewType
-	{
-		NATIVE_IMG,
-		IDENTITY, // for wrappers like ImgPlus, ImgView
-		INTERVAL, //
-		CONVERTER, //
-		MIXED_TRANSFORM, // for Mixed transforms
-		EXTENSION // oob extensions
-	}
-
-	interface ViewNode
-	{
-		ViewType viewType();
-
-		RandomAccessible< ? > view();
-
-		Interval interval();
-
-		default BoundingBox bbox() {
-			return interval() == null ? null : new BoundingBox( interval() );
-		}
-	}
-
-	static abstract class AbstractViewNode< V extends RandomAccessible< ? > > implements ViewNode
-	{
-		final ViewType viewType;
-
-		final V view;
-
-		final Interval interval;
-
-		AbstractViewNode( final ViewType viewType, final V view )
-		{
-			this.viewType = viewType;
-			this.view = view;
-			this.interval = view instanceof Interval ? ( Interval ) view : null;
-		}
-
-		@Override
-		public ViewType viewType()
-		{
-			return viewType;
-		}
-
-		@Override
-		public RandomAccessible< ? > view()
-		{
-			return view;
-		}
-
-		@Override
-		public Interval interval()
-		{
-			return interval;
-		}
-	}
-
-	static class DefaultViewNode extends AbstractViewNode< RandomAccessible< ? > >
-	{
-		DefaultViewNode( final ViewType viewType, final RandomAccessible< ? > view )
-		{
-			super( viewType, view );
-		}
-
-		@Override
-		public String toString()
-		{
-			return "DefaultViewNode{viewType=" + viewType + ", view=" + view + ", interval=" + interval + '}';
-		}
-	}
-
-	static class MixedTransformViewNode extends AbstractViewNode< MixedTransformView< ? > >
-	{
-		MixedTransformViewNode( final MixedTransformView< ? > view )
-		{
-			super( ViewType.MIXED_TRANSFORM, view );
-		}
-
-		public MixedTransform getTransformToSource()
-		{
-			return view.getTransformToSource();
-		}
-
-		@Override
-		public String toString()
-		{
-			return "MixedTransformViewNode{viewType=" + viewType + ", view=" + view + ", interval=" + interval + ", transformToSource=" + getTransformToSource() + '}';
-		}
-	}
-
-	static class ExtensionViewNode extends AbstractViewNode< ExtendedRandomAccessibleInterval< ?, ? > >
-	{
-		ExtensionViewNode( final ExtendedRandomAccessibleInterval< ?, ? > view )
-		{
-			super( ViewType.EXTENSION, view );
-		}
-
-		public OutOfBoundsFactory< ?, ? > getOutOfBoundsFactory()
-		{
-			return view.getOutOfBoundsFactory();
-		}
-
-		@Override
-		public String toString()
-		{
-			return "ExtensionViewNode{viewType=" + viewType + ", view=" + view + ", interval=" + interval + ", oobFactory=" + getOutOfBoundsFactory() + '}';
-		}
-	}
-
 	private final List< ViewNode > nodes = new ArrayList<>();
+
+	private void analyze( final RandomAccessible< ? > rai )
+	{
+		RandomAccessible< ? > source = rai;
+		while ( source != null )
+		{
+			// NATIVE_IMG,
+			if ( source instanceof NativeImg )
+			{
+				final NativeImg< ?, ? > view = ( NativeImg< ?, ? > ) source;
+				nodes.add( new DefaultViewNode( ViewNode.ViewType.NATIVE_IMG, view ) );
+				source = null;
+			}
+			// IDENTITY,
+			else if ( source instanceof WrappedImg )
+			{
+				final WrappedImg< ? > view = ( WrappedImg< ? > ) source;
+				nodes.add( new DefaultViewNode( ViewNode.ViewType.IDENTITY, source ) );
+				source = view.getImg();
+			}
+			else if ( source instanceof ImgView )
+			{
+				final ImgView< ? > view = ( ImgView< ? > ) source;
+				nodes.add( new DefaultViewNode( ViewNode.ViewType.IDENTITY, view ) );
+				source = view.getSource();
+			}
+			// INTERVAL,
+			else if ( source instanceof IntervalView )
+			{
+				final IntervalView< ? > view = ( IntervalView< ? > ) source;
+				nodes.add( new DefaultViewNode( ViewNode.ViewType.INTERVAL, view ) );
+				source = view.getSource();
+			}
+			// CONVERTER,
+			else if ( source instanceof ConvertedRandomAccessible )
+			{
+				final ConvertedRandomAccessible< ?, ? > view = ( ConvertedRandomAccessible< ?, ? > ) source;
+				nodes.add( new DefaultViewNode( ViewNode.ViewType.CONVERTER, view ) );
+				source = view.getSource();
+			}
+			else if ( source instanceof ConvertedRandomAccessibleInterval )
+			{
+				final ConvertedRandomAccessibleInterval< ?, ? > view = ( ConvertedRandomAccessibleInterval< ?, ? > ) source;
+				nodes.add( new DefaultViewNode( ViewNode.ViewType.CONVERTER, view ) );
+				source = view.getSource();
+			}
+			// MIXED_TRANSFORM,
+			else if ( source instanceof MixedTransformView )
+			{
+				final MixedTransformView< ? > view = ( MixedTransformView< ? > ) source;
+				nodes.add( new MixedTransformViewNode( view ) );
+				source = view.getSource();
+			}
+			// EXTENSION
+			else if ( source instanceof ExtendedRandomAccessibleInterval )
+			{
+				ExtendedRandomAccessibleInterval< ?, ? > view = ( ExtendedRandomAccessibleInterval< ?, ? > ) source;
+				nodes.add( new ExtensionViewNode( view ) );
+				source = view.getSource();
+			}
+			// fallback
+			else
+			{
+				// TODO
+				throw new IllegalArgumentException( "Cannot handle " + source );
+			}
+		}
+	}
 
 	private boolean checkRootSupported()
 	{
 		final ViewNode root = nodes.get( nodes.size() - 1 );
-		if ( root.viewType() != ViewType.NATIVE_IMG )
+		if ( root.viewType() != ViewNode.ViewType.NATIVE_IMG )
 			return false;
 		return ( root.view() instanceof PlanarImg )
 				|| ( root.view() instanceof ArrayImg )
@@ -160,7 +119,7 @@ public class ViewBlocksPlayground
 		//       Converters could be chained. This is independent of the
 		//       coordinate transforms.
 
-		return nodes.stream().noneMatch( node -> node.viewType() == ViewType.CONVERTER );
+		return nodes.stream().noneMatch( node -> node.viewType() == ViewNode.ViewType.CONVERTER );
 	}
 
 	private int oobIndex = -1;
@@ -177,7 +136,7 @@ public class ViewBlocksPlayground
 		oobIndex = -1;
 		for ( int i = 0; i < nodes.size(); i++ )
 		{
-			if ( nodes.get( i ).viewType() == ViewType.EXTENSION )
+			if ( nodes.get( i ).viewType() == ViewNode.ViewType.EXTENSION )
 			{
 				if ( oobIndex < 0 )
 					oobIndex = i;
@@ -224,7 +183,7 @@ public class ViewBlocksPlayground
 			final ViewNode node = nodes.get( i );
 
 			// all other view types are ignored.
-			if ( node.viewType() == ViewType.MIXED_TRANSFORM )
+			if ( node.viewType() == ViewNode.ViewType.MIXED_TRANSFORM )
 			{
 				final MixedTransform t = ( ( MixedTransformViewNode ) node ).getTransformToSource();
 				bb = transformInverse( t, bb );
@@ -276,73 +235,6 @@ public class ViewBlocksPlayground
 		return b;
 	}
 
-	private void analyze( final RandomAccessible< ? > rai )
-	{
-		RandomAccessible< ? > source = rai;
-		while ( source != null )
-		{
-			// NATIVE_IMG,
-			if ( source instanceof NativeImg )
-			{
-				final NativeImg< ?, ? > view = ( NativeImg< ?, ? > ) source;
-				nodes.add( new DefaultViewNode( ViewType.NATIVE_IMG, view ) );
-				source = null;
-			}
-			// IDENTITY,
-			else if ( source instanceof WrappedImg )
-			{
-				final WrappedImg< ? > view = ( WrappedImg< ? > ) source;
-				nodes.add( new DefaultViewNode( ViewType.IDENTITY, source ) );
-				source = view.getImg();
-			}
-			else if ( source instanceof ImgView )
-			{
-				final ImgView< ? > view = ( ImgView< ? > ) source;
-				nodes.add( new DefaultViewNode( ViewType.IDENTITY, view ) );
-				source = view.getSource();
-			}
-			// INTERVAL,
-			else if ( source instanceof IntervalView )
-			{
-				final IntervalView< ? > view = ( IntervalView< ? > ) source;
-				nodes.add( new DefaultViewNode( ViewType.INTERVAL, view ) );
-				source = view.getSource();
-			}
-			// CONVERTER,
-			else if ( source instanceof ConvertedRandomAccessible )
-			{
-				final ConvertedRandomAccessible< ?, ? > view = ( ConvertedRandomAccessible< ?, ? > ) source;
-				nodes.add( new DefaultViewNode( ViewType.CONVERTER, view ) );
-				source = view.getSource();
-			}
-			else if ( source instanceof ConvertedRandomAccessibleInterval )
-			{
-				final ConvertedRandomAccessibleInterval< ?, ? > view = ( ConvertedRandomAccessibleInterval< ?, ? > ) source;
-				nodes.add( new DefaultViewNode( ViewType.CONVERTER, view ) );
-				source = view.getSource();
-			}
-			// MIXED_TRANSFORM,
-			else if ( source instanceof MixedTransformView )
-			{
-				final MixedTransformView< ? > view = ( MixedTransformView< ? > ) source;
-				nodes.add( new MixedTransformViewNode( view ) );
-				source = view.getSource();
-			}
-			// EXTENSION
-			else if ( source instanceof ExtendedRandomAccessibleInterval )
-			{
-				ExtendedRandomAccessibleInterval< ?, ? > view = ( ExtendedRandomAccessibleInterval< ?, ? > ) source;
-				nodes.add( new ExtensionViewNode( view ) );
-				source = view.getSource();
-			}
-			// fallback
-			else
-			{
-				// TODO
-				throw new IllegalArgumentException( "Cannot handle " + source );
-			}
-		}
-	}
 
 
 	/**
