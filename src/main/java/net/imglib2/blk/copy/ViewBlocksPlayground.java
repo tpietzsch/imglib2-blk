@@ -350,7 +350,7 @@ public class ViewBlocksPlayground
 					"viewType=" + viewType.getClass().getSimpleName() +
 					", root=" + root +
 					", rootType=" + rootType.getClass().getSimpleName() +
-					", extension=" + extension.type() +
+					", extension=" + extension +
 					", transform=" + transform +
 					'}';
 		}
@@ -398,7 +398,7 @@ public class ViewBlocksPlayground
 		System.out.println( "playground.checkConverters() = " + playground.checkConverters() );
 		System.out.println( "playground.checkExtensions1() = " + playground.checkExtensions1() );
 		System.out.println( "playground.oobIndex = " + playground.oobIndex );
-		System.out.println( "playground.oobExtension.type() = " + playground.oobExtension.type() );
+		System.out.println( "playground.oobExtension.type() = " + playground.oobExtension );
 		System.out.println( "playground.checkExtensions2() = " + playground.checkExtensions2() );
 		System.out.println( "playground.checkExtensions3() = " + playground.checkExtensions3() );
 		playground.concatenateTransforms();
