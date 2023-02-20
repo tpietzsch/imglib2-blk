@@ -25,7 +25,7 @@ public class CellImgBlocks< T extends NativeType< T > > implements PrimitiveBloc
 	@Override
 	public T getType()
 	{
-		return null;
+		return type;
 	}
 
 	/**
