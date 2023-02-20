@@ -1,9 +1,9 @@
 package net.imglib2.blk.copy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
+import net.imglib2.Interval;
+import net.imglib2.Point;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.blk.copy.ViewNodeImpl.DefaultViewNode;
@@ -21,8 +21,10 @@ import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.transform.integer.BoundingBox;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.Type;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Intervals;
+import net.imglib2.util.Util;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.MixedTransformView;
@@ -31,18 +33,18 @@ import net.imglib2.view.Views;
 
 public class ViewBlocksPlayground
 {
-	private final RandomAccessible< ? > rai;
+	private final RandomAccessible< ? > ra;
 
 	private final List< ViewNode > nodes = new ArrayList<>();
 
 	ViewBlocksPlayground( final RandomAccessible< ? > rai )
 	{
-		this.rai = rai;
+		this.ra = rai;
 	}
 
 	private void analyze()
 	{
-		RandomAccessible< ? > source = rai;
+		RandomAccessible< ? > source = ra;
 		while ( source != null )
 		{
 			// NATIVE_IMG,
@@ -255,7 +257,7 @@ public class ViewBlocksPlayground
 
 	private void concatenateTransforms()
 	{
-		final int n = rai.numDimensions();
+		final int n = ra.numDimensions();
 		transform = new MixedTransform( n, n );
 		for ( ViewNode node : nodes )
 		{
@@ -293,116 +295,66 @@ public class ViewBlocksPlayground
 		return TransformBuilder.isIdentity( permuteInvertTransform );
 	}
 
+	private < T extends NativeType< T >, R extends NativeType< R > > ViewProperties< T, R > getViewProperties()
+	{
+		final T viewType = getType( ( RandomAccessible< T > ) ra );
+		final NativeImg< R, ? > root = ( NativeImg< R, ? > ) nodes.get( nodes.size() - 1 ).view();
+		final R rootType = root.createLinkedType();
+		return new ViewProperties<>( viewType, root, rootType, oobExtension, transform );
+	}
+
+	// TODO replace by ra.getType() when that is available in imglib2 core
+	private static < T extends Type< T > > T getType( RandomAccessible< T > ra )
+	{
+		final Point p = new Point( ra.numDimensions() );
+		if ( ra instanceof Interval )
+			( ( Interval ) ra ).min( p );
+		return ra.getAt( p ).createVariable();
+	}
 
 	/**
-	 * Array {@code component}, of length {@code numTargetDimensions}, contains
-	 * for every target dimension {@code i} the source dimensions {@code
-	 * component[i]} from which it originates.
 	 *
-	 * Returns an array {@code invComponent}, of length {@code
-	 * numSourceDimensions}, that contains for every source dimension {@code i}
-	 * the target dimension {@code invComponent[i]} which it maps to.
+	 * @param <T> type of the view {@code RandomAccessible}
+	 * @param <R> type of the root {@code NativeImg}
 	 */
-	private static int[] invComponent( final int[] component, final int numSourceDimensions )
+	static class ViewProperties< T extends NativeType< T >, R extends NativeType< R > >
 	{
-		final int[] invComponent = new int[ numSourceDimensions ];
-		Arrays.fill( invComponent, -1 );
-		for ( int i = 0; i < component.length; i++ )
+		private final T viewType;
+
+		private final NativeImg< R, ? > root;
+
+		private final R rootType;
+
+		private final Extension extension;
+
+		private final MixedTransform transform;
+
+		ViewProperties(
+				final T viewType,
+				final NativeImg< R, ? > root,
+				final R rootType,
+				final Extension extension,
+				final MixedTransform transform )
 		{
-			final int s = component[ i ];
-			if ( s >= 0 )
-				invComponent[ s ] = i;
+			this.viewType = viewType;
+			this.root = root;
+			this.rootType = rootType;
+			this.extension = extension;
+			this.transform = transform;
 		}
-		return invComponent;
-	}
 
-	/**
-	 * Computes the inverse of (@code transform}. The {@code MixedTransform
-	 * transform} is a pure axis permutation followed by inversion of some axes,
-	 * that is
-	 * <ul>
-	 * <li>{@code numSourceDimensions == numTargetDimensions},</li>
-	 * <li>the translation vector is zero, and</li>
-	 * <li>no target component is zeroed out.</li>
-	 * </ul>
-	 * The computed inverse {@code MixedTransform} concatenates with {@code transform} to identity.
-	 * @return the inverse {@code MixedTransform}
-	 */
-	private static MixedTransform invPermutationInversion( MixedTransform transform )
-	{
-		final int n = transform.numTargetDimensions();
-		final int[] component = new int[ n ];
-		final boolean[] invert = new boolean[ n ];
-		final boolean[] zero = new boolean[ n ];
-		transform.getComponentMapping( component );
-		transform.getComponentInversion( invert );
-		transform.getComponentZero( zero );
-
-		final int m = transform.numSourceDimensions();
-		final int[] invComponent = new int[ m ];
-		final boolean[] invInvert = new boolean[ m ];
-		final boolean[] invZero = new boolean[ m ];
-		Arrays.fill( invZero, true );
-		for ( int i = 0; i < n; i++ )
+		@Override
+		public String toString()
 		{
-			if ( transform.getComponentZero( i ) == false )
-			{
-				final int j = component[ i ];
-				invComponent[ j ] = i;
-				invInvert[ j ] = invert[ i ];
-				invZero[ j ] = false;
-			}
-		}
-		MixedTransform invTransform = new MixedTransform( n, m );
-		invTransform.setComponentMapping( invComponent );
-		invTransform.setComponentInversion( invInvert );
-		invTransform.setComponentZero( invZero );
-		return invTransform;
-	}
-
-	/**
-	 * Returns {@code true} iff no element of {@code component} is {@code < 0}.
-	 */
-	private static boolean isFullMapping( final int[] component )
-	{
-		for ( int t : component )
-			if ( t < 0 )
-				return false;
-		return true;
-	}
-
-	private static class IntPair
-	{
-		final int i0;
-		final int i1;
-		private IntPair( final int i0, final int i1 )
-		{
-			this.i0 = i0;
-			this.i1 = i1;
+			return "ViewProperties{" +
+					"viewType=" + viewType.getClass().getSimpleName() +
+					", root=" + root +
+					", rootType=" + rootType.getClass().getSimpleName() +
+					", extension=" + extension.type() +
+					", transform=" + transform +
+					'}';
 		}
 	}
-
-	private static List<IntPair> toIndexAndTargetDimensionPairs( final int[] component )
-	{
-		final List< IntPair > pairs = new ArrayList<>( component.length );
-		for ( int i = 0; i < component.length; i++ )
-		{
-			pairs.add( new IntPair( i, component[ i ] ) );
-		}
-		pairs.sort( Comparator.comparingInt( pair -> pair.i1 ) );
-		return pairs;
-	}
-
-	private static int[] getComponents( final int componentIndex, final List< IntPair > pairs )
-	{
-		final int[] components = new int[ pairs.size() ];
-		Arrays.setAll( components, componentIndex == 0
-				? i -> pairs.get( i ).i0
-				: i -> pairs.get( i ).i1 );
-		return components;
-	}
-
-
 
 
 
@@ -456,6 +408,9 @@ public class ViewBlocksPlayground
 		System.out.println( "playground.permuteInvertTransform = " + playground.permuteInvertTransform );
 		System.out.println( "playground.remainderTransform = " + playground.remainderTransform );
 		System.out.println( "playground.checkNoPermutationInversion() = " + playground.checkNoPermutationInversion() );
+
+		final ViewProperties< ?, ? > viewProperties = playground.getViewProperties();
+		System.out.println( "viewProperties = " + viewProperties );
 	}
 
 }
