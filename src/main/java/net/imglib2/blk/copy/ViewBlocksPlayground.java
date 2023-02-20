@@ -25,6 +25,7 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.MixedTransformView;
+import net.imglib2.view.TransformBuilder;
 import net.imglib2.view.Views;
 
 public class ViewBlocksPlayground
@@ -277,6 +278,13 @@ public class ViewBlocksPlayground
 		remainderTransform = split[ 1 ];
 	}
 
+	private boolean checkNoPermutationInversion()
+	{
+		// Rule: No axis permutation or inversion is
+
+		return TransformBuilder.isIdentity( permuteInvertTransform );
+	}
+
 
 	/**
 	 * Array {@code component}, of length {@code numTargetDimensions}, contains
@@ -395,14 +403,22 @@ public class ViewBlocksPlayground
 
 	static RandomAccessible< ? > example1()
 	{
- 		RandomAccessibleInterval< UnsignedByteType > img0 = ArrayImgs.unsignedBytes( 640, 480, 3 );
-		RandomAccessibleInterval< UnsignedByteType > img1 = Views.rotate( img0, 1, 0 );
-		RandomAccessibleInterval< UnsignedByteType > img2 = Views.zeroMin( img1 );
-		RandomAccessible< UnsignedByteType > img3 = Views.extendBorder( img2 );
-		RandomAccessible< UnsignedByteType > img4 = Views.hyperSlice( img3, 2, 1 );
+//		RandomAccessibleInterval< UnsignedByteType > img0 = ArrayImgs.unsignedBytes( 640, 480, 3 );
+//		RandomAccessibleInterval< UnsignedByteType > img1 = Views.rotate( img0, 1, 0 );
+//		RandomAccessibleInterval< UnsignedByteType > img2 = Views.zeroMin( img1 );
+//		RandomAccessible< UnsignedByteType > img3 = Views.extendBorder( img2 );
+//		RandomAccessible< UnsignedByteType > img4 = Views.hyperSlice( img3, 2, 1 );
+//		return img4;
+
 //		RandomAccessibleInterval< UnsignedByteType > img3 = Views.hyperSlice( img2, 2, 1 );
 //		RandomAccessible< UnsignedByteType > img4 = Views.extendBorder( img3 );
-		return img4;
+//		return img4;
+
+		RandomAccessibleInterval< UnsignedByteType > img0 = ArrayImgs.unsignedBytes( 640, 480, 3 );
+		RandomAccessibleInterval< UnsignedByteType > img1 = Views.hyperSlice( img0, 2, 1 );
+		RandomAccessible< UnsignedByteType > img2 = Views.extendBorder( img1 );
+		RandomAccessible< UnsignedByteType > img3 = Views.translate( img2, 100, 50 );
+		return img3;
 	}
 
 	public static void main( String[] args )
@@ -430,6 +446,7 @@ public class ViewBlocksPlayground
 		playground.splitTransform();
 		System.out.println( "playground.permuteInvertTransform = " + playground.permuteInvertTransform );
 		System.out.println( "playground.remainderTransform = " + playground.remainderTransform );
+		System.out.println( "playground.checkNoPermutationInversion() = " + playground.checkNoPermutationInversion() );
 	}
 
 }
