@@ -20,6 +20,7 @@ import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.transform.integer.BoundingBox;
 import net.imglib2.transform.integer.MixedTransform;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
@@ -115,6 +116,13 @@ public class ViewBlocksPlayground
 		return ( root.view() instanceof PlanarImg )
 				|| ( root.view() instanceof ArrayImg )
 				|| ( root.view() instanceof AbstractCellImg );
+	}
+
+	private boolean checkRootTypeSupported()
+	{
+		final ViewNode root = nodes.get( nodes.size() - 1 );
+		final NativeType< ? > type = ( NativeType< ? > ) ( ( NativeImg< ?, ? > ) root.view() ).createLinkedType();
+		return type.getEntitiesPerPixel().getRatio() == 1;
 	}
 
 	private boolean checkConverters()
@@ -434,6 +442,7 @@ public class ViewBlocksPlayground
 		}
 
 		System.out.println( "playground.checkRootSupported() = " + playground.checkRootSupported() );
+		System.out.println( "playground.checkRootTypeSupported() = " + playground.checkRootTypeSupported() );
 		System.out.println( "playground.checkConverters() = " + playground.checkConverters() );
 		System.out.println( "playground.checkExtensions1() = " + playground.checkExtensions1() );
 		System.out.println( "playground.oobIndex = " + playground.oobIndex );
