@@ -70,7 +70,8 @@ public class ArrayImgRangeCopier< T > implements RangeCopier< T >
 		lengths = new int[ n ];
 	}
 
-	ArrayImgRangeCopier< T > newInstance()
+	@Override
+	public ArrayImgRangeCopier< T > newInstance()
 	{
 		return new ArrayImgRangeCopier<>( this );
 	}

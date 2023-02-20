@@ -354,6 +354,31 @@ public class ViewBlocksPlayground
 					", transform=" + transform +
 					'}';
 		}
+
+		public T getViewType()
+		{
+			return viewType;
+		}
+
+		public NativeImg< R, ? > getRoot()
+		{
+			return root;
+		}
+
+		public R getRootType()
+		{
+			return rootType;
+		}
+
+		public Extension getExtension()
+		{
+			return extension;
+		}
+
+		public MixedTransform getTransform()
+		{
+			return transform;
+		}
 	}
 
 

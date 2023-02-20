@@ -25,6 +25,15 @@ public interface RangeCopier< T >
 	 */
 	void copy( final int[] srcPos, final T dest, final int[] size );
 
+	/**
+	 * Return a new independent instance of this {@code RangeCopier}. This is
+	 * used for multi-threading. The new instance works on the same source
+	 * image, but has independent internal state.
+	 *
+	 * @return new independent instance of this {@code RangeCopier}
+	 */
+	RangeCopier< T > newInstance();
+
 	static < T > RangeCopier< T > create(
 			final NativeImg< ?, ? > img,
 			final Ranges findRanges,

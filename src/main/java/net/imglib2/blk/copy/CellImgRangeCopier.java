@@ -80,7 +80,8 @@ public class CellImgRangeCopier< T > implements RangeCopier< T >
 		lengths = new int[ n ];
 	}
 
-	CellImgRangeCopier< T > newInstance()
+	@Override
+	public CellImgRangeCopier< T > newInstance()
 	{
 		return new CellImgRangeCopier<>( this );
 	}

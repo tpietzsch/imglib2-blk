@@ -75,7 +75,8 @@ public class PlanarImgRangeCopier< T > implements RangeCopier< T >
 		lengths = new int[ n ];
 	}
 
-	PlanarImgRangeCopier< T > newInstance()
+	@Override
+	public PlanarImgRangeCopier< T > newInstance()
 	{
 		return new PlanarImgRangeCopier<>( this );
 	}
