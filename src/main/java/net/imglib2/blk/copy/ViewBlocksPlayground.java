@@ -299,7 +299,7 @@ public class ViewBlocksPlayground
 		final T viewType = getType( ( RandomAccessible< T > ) ra );
 		final NativeImg< R, ? > root = ( NativeImg< R, ? > ) nodes.get( nodes.size() - 1 ).view();
 		final R rootType = root.createLinkedType();
-		return new ViewProperties<>( viewType, root, rootType, oobExtension, transform );
+		return new ViewProperties<>( viewType, root, rootType, oobExtension, transform, permuteInvertTransform );
 	}
 
 	// TODO replace by ra.getType() when that is available in imglib2 core
@@ -328,18 +328,22 @@ public class ViewBlocksPlayground
 
 		private final MixedTransform transform;
 
+		private final MixedTransform permuteInvertTransform;
+
 		ViewProperties(
 				final T viewType,
 				final NativeImg< R, ? > root,
 				final R rootType,
 				final Extension extension,
-				final MixedTransform transform )
+				final MixedTransform transform,
+				final MixedTransform permuteInvertTransform )
 		{
 			this.viewType = viewType;
 			this.root = root;
 			this.rootType = rootType;
 			this.extension = extension;
 			this.transform = transform;
+			this.permuteInvertTransform = permuteInvertTransform;
 		}
 
 		@Override
@@ -351,6 +355,7 @@ public class ViewBlocksPlayground
 					", rootType=" + rootType.getClass().getSimpleName() +
 					", extension=" + extension +
 					", transform=" + transform +
+					", permuteInvertTransform=" + permuteInvertTransform +
 					'}';
 		}
 
@@ -377,6 +382,11 @@ public class ViewBlocksPlayground
 		public MixedTransform getTransform()
 		{
 			return transform;
+		}
+
+		public MixedTransform getPermuteInvertTransform()
+		{
+			return permuteInvertTransform;
 		}
 	}
 
