@@ -1,6 +1,7 @@
 package net.imglib2.blk.copy;
 
 import net.imglib2.blk.copy.ViewBlocksPlayground.ViewProperties;
+import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.PrimitiveType;
 
@@ -39,7 +40,27 @@ class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R
 	 */
 	public void copy( final int[] srcPos, final Object dest, final int[] size )
 	{
-		copier.copy( srcPos, dest, size );
+		final MixedTransform transform = props.getTransform();
+		final int n = transform.numTargetDimensions();
+		final int[] destPos = new int[ n ];
+		final int[] destSize = new int[ n ];
+		for ( int d = 0; d < n; d++ )
+		{
+			final int t = ( int ) transform.getTranslation( d );
+			if ( transform.getComponentZero( d ) )
+			{
+				destPos[ d ] = t;
+				destSize[ d ] = 1;
+			}
+			else {
+				final int c = transform.getComponentMapping( d );
+				final boolean i = transform.getComponentInversion( d );
+				destPos[ d ] = ( i ? size[ c ] - srcPos[ c ] + 1 : srcPos[ c ] ) + t;
+				destSize[ d ] = size[ c ];
+			}
+		}
+
+		copier.copy( destPos, dest, destSize );
 	}
 
 

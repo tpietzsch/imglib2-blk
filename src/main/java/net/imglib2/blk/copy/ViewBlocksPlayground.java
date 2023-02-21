@@ -24,7 +24,6 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Intervals;
-import net.imglib2.util.Util;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.MixedTransformView;
@@ -436,6 +435,24 @@ public class ViewBlocksPlayground
 
 		final ViewProperties< ?, ? > viewProperties = playground.getViewProperties();
 		System.out.println( "viewProperties = " + viewProperties );
+	}
+
+	// TEMPORARY. TODO REMOVE
+	public static ViewProperties< ?, ? > properties( RandomAccessible< ? > view )
+	{
+		final ViewBlocksPlayground v = new ViewBlocksPlayground( view );
+		v.analyze();
+		v.checkRootSupported();
+		v.checkRootTypeSupported();
+		v.checkConverters();
+		v.checkExtensions1();
+		v.checkExtensions2();
+		v.checkExtensions3();
+		v.concatenateTransforms();
+		v.checkNoDimensionsAdded();
+		v.splitTransform();
+		v.checkNoPermutationInversion();
+		return v.getViewProperties();
 	}
 
 }
