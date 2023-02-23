@@ -1,21 +1,23 @@
 package net.imglib2.blk.copy;
 
-import java.util.List;
 import net.imglib2.blk.copy.ViewBlocksPlayground.ViewProperties;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.PrimitiveType;
+import net.imglib2.util.Cast;
+import net.imglib2.util.Intervals;
 
 import static net.imglib2.blk.copy.PrimitiveBlocksUtils.extractOobValue;
-import static net.imglib2.blk.copy.PrimitiveBlocksUtils.invPermutationInversion;
 
 class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R > > implements PrimitiveBlocks< T >
 {
 	private final PermuteInvert permuteInvert;
 
-	private ViewProperties< T, R > props;
+	private final ViewProperties< T, R > props;
 
 	private final RangeCopier copier;
+
+	private final TempArray< R > tempArray;
 
 	public RandomAccessibleBlocks( final ViewProperties< T, R > props )
 	{
@@ -25,8 +27,8 @@ class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R
 		final Object oob = extractOobValue( props.getRootType(), props.getExtension() );
 		final Ranges findRanges = Ranges.forExtension( props.getExtension() );
 		copier = RangeCopier.create( props.getRoot(), findRanges, memCopy, oob );
-		final MixedTransform invPermuteInvertTransform = invPermutationInversion( props.getPermuteInvertTransform() );
-		permuteInvert = new PermuteInvert( memCopy, invPermuteInvertTransform );
+		tempArray = Cast.unchecked( TempArray.forPrimitiveType( primitiveType ) );
+		permuteInvert = new PermuteInvert( memCopy, props.getPermuteInvertTransform() );
 	}
 
 	@Override
@@ -58,60 +60,65 @@ class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R
 				destPos[ d ] = t;
 				destSize[ d ] = 1;
 			}
-			else {
+			else
+			{
 				final int c = transform.getComponentMapping( d );
-				final boolean i = transform.getComponentInversion( d );
-				destPos[ d ] = ( i ? size[ c ] - srcPos[ c ] + 1 : srcPos[ c ] ) + t;
+				destPos[ d ] = transform.getComponentInversion( d )
+						? t - srcPos[ c ] - size[ c ] + 1
+						: t + srcPos[ c ];
 				destSize[ d ] = size[ c ];
 			}
 		}
 
 		copier.copy( destPos, dest, destSize );
 
-		// TODO create temporary memory
-		permuteInvert.permuteAndInvert(  );
-
+		final int length = ( int ) Intervals.numElements( size );
+		final Object temp = tempArray.get( length );
+		permuteInvert.permuteAndInvert( dest, temp, size );
+		System.arraycopy( temp, 0, dest, 0, length );
 	}
 
 	static class PermuteInvert
 	{
 		private final MemCopy memCopy;
 
-		private MixedTransform transform;
-
 		private final int n;
 
-		private int[] ssize;
-		private final int[] ssteps;
-		private final int[] tsize;
-		private final int[] tsteps;
 		private final int[] scomp;
+
 		private final boolean[] sinv;
+
+		private final int[] ssize;
+
+		private final int[] ssteps;
+
+		private final int[] tsteps;
+
 		private final int[] csteps;
+
 		private int cstart;
 
 		public PermuteInvert( final MemCopy memCopy, MixedTransform transform )
 		{
 			this.memCopy = memCopy;
-			this.transform = transform;
 			this.n = transform.numSourceDimensions();
-			ssteps = new int[ n ];
-			tsize = new int[ n ];
-			tsteps = new int[ n ];
 			scomp = new int[ n ];
 			sinv = new boolean[ n ];
 			transform.getComponentMapping( scomp );
 			transform.getComponentInversion( sinv );
+			ssize = new int[ n ];
+			ssteps = new int[ n ];
+			tsteps = new int[ n ];
 			csteps = new int[ n ];
 		}
 
 		// TODO: Object --> T
-		public void permuteAndInvert( Object src, int[] srcSize, Object dest )
+		public void permuteAndInvert( Object src, Object dest, int[] destSize  )
 		{
-			ssize = srcSize;
+			final int[] tsize = destSize;
 
 			for ( int d = 0; d < n; ++d )
-				tsize[ scomp[ d ] ] = ssize[ d ];
+				ssize[ d ] = tsize[ scomp[ d ] ];
 
 			ssteps[ 0 ] = 1;
 			for ( int d = 0; d < n - 1; ++d )
@@ -156,17 +163,17 @@ class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R
 		private PermuteInvert( PermuteInvert copier )
 		{
 			memCopy = copier.memCopy;
-			transform = copier.transform;
 			n = copier.n;
+			scomp = copier.scomp;
+			sinv = copier.sinv;
+			ssize = new int[ n ];
 			ssteps = new int[ n ];
-			tsize = new int[ n ];
 			tsteps = new int[ n ];
-			scomp = copier.scomp.clone();
-			sinv = copier.sinv.clone();
 			csteps = new int[ n ];
 		}
 
-		PermuteInvert newInstance() {
+		PermuteInvert newInstance()
+		{
 			return new PermuteInvert( this );
 		}
 	}
@@ -187,6 +194,7 @@ class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R
 	{
 		props = blocks.props;
 		copier = blocks.copier.newInstance();
-		permuteInvert = blocks.permuteInvert.newInstance()
+		permuteInvert = blocks.permuteInvert.newInstance();
+		tempArray = blocks.tempArray.newInstance();
 	}
 }

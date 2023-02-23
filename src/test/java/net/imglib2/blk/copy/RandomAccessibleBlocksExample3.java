@@ -40,7 +40,7 @@ public class RandomAccessibleBlocksExample3
 
 		Bdv bdv = BdvFunctions.show( img5, "view", Bdv.options().is2D() );
 
-		final ViewProperties< ?, ? > props = ViewBlocksPlayground.properties( img4 );
+		final ViewProperties< ?, ? > props = ViewBlocksPlayground.properties( img5 );
 		final PrimitiveBlocks< ? > blocks = new RandomAccessibleBlocks<>( props ).threadSafe();
 //		blocks.copy( srcPos, dest, size );
 
@@ -55,7 +55,7 @@ public class RandomAccessibleBlocksExample3
 				img5.dimensionsAsLongArray(),
 				new UnsignedByteType(),
 				loader,
-				ReadOnlyCachedCellImgOptions.options().cellDimensions( 64, 64 ) );
+				ReadOnlyCachedCellImgOptions.options().cellDimensions( 64, 128 ) );
 
 		BdvFunctions.show(
 				retiled,

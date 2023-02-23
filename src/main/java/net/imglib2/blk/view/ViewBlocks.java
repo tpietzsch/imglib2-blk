@@ -2,6 +2,7 @@ package net.imglib2.blk.view;
 
 import java.util.Arrays;
 import net.imglib2.blk.copy.MemCopy;
+import net.imglib2.blk.copy.TempArray;
 import net.imglib2.blk.copy.RangeCopier;
 import net.imglib2.blk.copy.Ranges;
 import net.imglib2.converter.Converter;
@@ -11,6 +12,7 @@ import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.transform.integer.Mixed;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.PrimitiveType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -21,7 +23,7 @@ import net.imglib2.view.TransformBuilder;
 public class ViewBlocks< T extends NativeType< T > >
 {
 	private final MemCopy memCopy;
-	private final PrimitiveArray tempMem;
+	private final TempArray tempMem;
 	private final ConvertBlock convertBlock;
 	private final RangeCopier copier;
 	private final TransformBlockCoords tCoords;
@@ -33,28 +35,28 @@ public class ViewBlocks< T extends NativeType< T > >
 		if ( type instanceof UnsignedByteType )
 		{
 			memCopy = MemCopy.BYTE;
-			tempMem = new PrimitiveArray.Bytes();
+			tempMem = TempArray.forPrimitiveType( PrimitiveType.BYTE );
 			final byte v = props.oobValue == null ? 0 : ( ( UnsignedByteType ) props.oobValue ).getByte();
 			oob = new byte[] { v };
 		}
 		else if ( type instanceof UnsignedShortType )
 		{
 			memCopy = MemCopy.SHORT;
-			tempMem = new PrimitiveArray.Shorts();
+			tempMem = TempArray.forPrimitiveType( PrimitiveType.SHORT );
 			final short v = props.oobValue == null ? 0 : ( ( UnsignedShortType ) props.oobValue ).getShort();
 			oob = new short[] { v };
 		}
 		else if ( type instanceof FloatType )
 		{
 			memCopy = MemCopy.FLOAT;
-			tempMem = new PrimitiveArray.Floats();
+			tempMem = TempArray.forPrimitiveType( PrimitiveType.FLOAT );
 			final float v = props.oobValue == null ? 0 : ( ( FloatType ) props.oobValue ).get();
 			oob = new float[] { v };
 		}
 		else if ( type instanceof DoubleType )
 		{
 			memCopy = MemCopy.DOUBLE;
-			tempMem = new PrimitiveArray.Doubles();
+			tempMem = TempArray.forPrimitiveType( PrimitiveType.DOUBLE );
 			final double v = props.oobValue == null ? 0 : ( ( DoubleType ) props.oobValue ).get();
 			oob = new double[] { v };
 		}
@@ -186,61 +188,4 @@ public class ViewBlocks< T extends NativeType< T > >
 		}
 	}
 
-	// T is a primitive array type
-	interface PrimitiveArray< T >
-	{
-		T get( final int minSize );
-
-		class Bytes implements PrimitiveArray< byte[] >
-		{
-			private byte[] array = new byte[ 0 ];
-
-			@Override
-			public byte[] get( final int minSize )
-			{
-				if ( array.length < minSize )
-					array = new byte[ minSize ];
-				return array;
-			}
-		}
-
-		class Shorts implements PrimitiveArray< short[] >
-		{
-			private short[] array = new short[ 0 ];
-
-			@Override
-			public short[] get( final int minSize )
-			{
-				if ( array.length < minSize )
-					array = new short[ minSize ];
-				return array;
-			}
-		}
-
-		class Floats implements PrimitiveArray< float[] >
-		{
-			private float[] array = new float[ 0 ];
-
-			@Override
-			public float[] get( final int minSize )
-			{
-				if ( array.length < minSize )
-					array = new float[ minSize ];
-				return array;
-			}
-		}
-
-		class Doubles implements PrimitiveArray< double[] >
-		{
-			private double[] array = new double[ 0 ];
-
-			@Override
-			public double[] get( final int minSize )
-			{
-				if ( array.length < minSize )
-					array = new double[ minSize ];
-				return array;
-			}
-		}
-	}
 }
