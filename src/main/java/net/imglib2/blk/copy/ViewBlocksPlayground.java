@@ -287,13 +287,6 @@ public class ViewBlocksPlayground
 		remainderTransform = split[ 1 ];
 	}
 
-	private boolean checkNoPermutationInversion()
-	{
-		// Rule: No axis permutation or inversion is
-
-		return TransformBuilder.isIdentity( permuteInvertTransform );
-	}
-
 	private < T extends NativeType< T >, R extends NativeType< R > > ViewProperties< T, R > getViewProperties()
 	{
 		final T viewType = getType( ( RandomAccessible< T > ) ra );
@@ -330,6 +323,8 @@ public class ViewBlocksPlayground
 
 		private final MixedTransform permuteInvertTransform;
 
+		private final boolean hasPermuteInvertTransform;
+
 		ViewProperties(
 				final T viewType,
 				final NativeImg< R, ? > root,
@@ -344,6 +339,7 @@ public class ViewBlocksPlayground
 			this.extension = extension;
 			this.transform = transform;
 			this.permuteInvertTransform = permuteInvertTransform;
+			hasPermuteInvertTransform = !TransformBuilder.isIdentity( permuteInvertTransform );
 		}
 
 		@Override
@@ -382,6 +378,18 @@ public class ViewBlocksPlayground
 		public MixedTransform getTransform()
 		{
 			return transform;
+		}
+
+		/**
+		 * Returns {@code true} if there is a non-identity {@link
+		 * #getPermuteInvertTransform() permute-invert} transform.
+		 *
+		 * @return {@code true} iff the {@link #getPermuteInvertTransform()
+		 * permute-invert} transform is not identity.
+		 */
+		public boolean hasPermuteInvertTransform()
+		{
+			return hasPermuteInvertTransform;
 		}
 
 		public MixedTransform getPermuteInvertTransform()
@@ -441,7 +449,6 @@ public class ViewBlocksPlayground
 		playground.splitTransform();
 		System.out.println( "playground.permuteInvertTransform = " + playground.permuteInvertTransform );
 		System.out.println( "playground.remainderTransform = " + playground.remainderTransform );
-		System.out.println( "playground.checkNoPermutationInversion() = " + playground.checkNoPermutationInversion() );
 
 		final ViewProperties< ?, ? > viewProperties = playground.getViewProperties();
 		System.out.println( "viewProperties = " + viewProperties );
@@ -461,7 +468,6 @@ public class ViewBlocksPlayground
 		v.concatenateTransforms();
 		v.checkNoDimensionsAdded();
 		v.splitTransform();
-		v.checkNoPermutationInversion();
 		return v.getViewProperties();
 	}
 
