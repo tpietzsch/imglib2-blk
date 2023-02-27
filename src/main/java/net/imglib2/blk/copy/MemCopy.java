@@ -16,7 +16,7 @@ public interface MemCopy< T >
 	 * destPos} through {@code destPos+length-1}, respectively, of the
 	 * destination array.
 	 */
-	void copyForward( final T src, final int srcPos, final T dest, final int destPos, final int length );
+	void copyForward( T src, int srcPos, T dest, int destPos, int length );
 
 	/**
 	 * Copy {@code length} components from the {@code src} array to the {@code
@@ -25,14 +25,19 @@ public interface MemCopy< T >
 	 * positions {@code destPos} through {@code destPos+length-1}, respectively,
 	 * of the destination array.
 	 */
-	void copyReverse( final T src, final int srcPos, final T dest, final int destPos, final int length );
+	void copyReverse( T src, int srcPos, T dest, int destPos, int length );
 
 	/**
 	 * Copy component at position {@code srcPos} in the {@code src} array
 	 * ({@code length} times) into positions {@code destPos} through {@code
 	 * destPos+length-1} of the destination array.
 	 */
-	void copyValue( final T src, final int srcPos, final T dest, final int destPos, final int length );
+	void copyValue( T src, int srcPos, T dest, int destPos, int length );
+
+	/**
+	 * TODO javadoc
+	 */
+	void copyStrided( T src, int srcPos, T dest, int destPos, int destStride, int length );
 
 	MemCopyBoolean BOOLEAN = new MemCopyBoolean();
 	MemCopyByte BYTE = new MemCopyByte();
@@ -89,6 +94,16 @@ public interface MemCopy< T >
 		{
 			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
 		}
+
+		@Override
+		public void copyStrided( final boolean[] src, final int srcPos, final boolean[] dest, final int destPos, final int destStride, final int length )
+		{
+			if ( destStride == 1 )
+				copyForward( src, srcPos, dest, destPos, length );
+			else
+				for ( int i = 0; i < length; ++i )
+					dest[ destPos + i * destStride ] = src[ srcPos + i ];
+		}
 	}
 
 	class MemCopyByte implements MemCopy< byte[] >
@@ -110,6 +125,16 @@ public interface MemCopy< T >
 		public void copyValue( final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length )
 		{
 			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
+		}
+
+		@Override
+		public void copyStrided( final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int destStride, final int length )
+		{
+			if ( destStride == 1 )
+				copyForward( src, srcPos, dest, destPos, length );
+			else
+				for ( int i = 0; i < length; ++i )
+					dest[ destPos + i * destStride ] = src[ srcPos + i ];
 		}
 	}
 
@@ -133,6 +158,17 @@ public interface MemCopy< T >
 		{
 			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
 		}
+
+
+		@Override
+		public void copyStrided( final short[] src, final int srcPos, final short[] dest, final int destPos, final int destStride, final int length )
+		{
+			if ( destStride == 1 )
+				copyForward( src, srcPos, dest, destPos, length );
+			else
+				for ( int i = 0; i < length; ++i )
+					dest[ destPos + i * destStride ] = src[ srcPos + i ];
+		}
 	}
 
 	class MemCopyChar implements MemCopy< char[] >
@@ -154,6 +190,16 @@ public interface MemCopy< T >
 		public void copyValue( final char[] src, final int srcPos, final char[] dest, final int destPos, final int length )
 		{
 			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
+		}
+
+		@Override
+		public void copyStrided( final char[] src, final int srcPos, final char[] dest, final int destPos, final int destStride, final int length )
+		{
+			if ( destStride == 1 )
+				copyForward( src, srcPos, dest, destPos, length );
+			else
+				for ( int i = 0; i < length; ++i )
+					dest[ destPos + i * destStride ] = src[ srcPos + i ];
 		}
 	}
 
@@ -177,6 +223,16 @@ public interface MemCopy< T >
 		{
 			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
 		}
+
+		@Override
+		public void copyStrided( final int[] src, final int srcPos, final int[] dest, final int destPos, final int destStride, final int length )
+		{
+			if ( destStride == 1 )
+				copyForward( src, srcPos, dest, destPos, length );
+			else
+				for ( int i = 0; i < length; ++i )
+					dest[ destPos + i * destStride ] = src[ srcPos + i ];
+		}
 	}
 
 	class MemCopyLong implements MemCopy< long[] >
@@ -198,6 +254,16 @@ public interface MemCopy< T >
 		public void copyValue( final long[] src, final int srcPos, final long[] dest, final int destPos, final int length )
 		{
 			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
+		}
+
+		@Override
+		public void copyStrided( final long[] src, final int srcPos, final long[] dest, final int destPos, final int destStride, final int length )
+		{
+			if ( destStride == 1 )
+				copyForward( src, srcPos, dest, destPos, length );
+			else
+				for ( int i = 0; i < length; ++i )
+					dest[ destPos + i * destStride ] = src[ srcPos + i ];
 		}
 	}
 
@@ -221,6 +287,16 @@ public interface MemCopy< T >
 		{
 			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
 		}
+
+		@Override
+		public void copyStrided( final float[] src, final int srcPos, final float[] dest, final int destPos, final int destStride, final int length )
+		{
+			if ( destStride == 1 )
+				copyForward( src, srcPos, dest, destPos, length );
+			else
+				for ( int i = 0; i < length; ++i )
+					dest[ destPos + i * destStride ] = src[ srcPos + i ];
+		}
 	}
 
 	class MemCopyDouble implements MemCopy< double[] >
@@ -242,6 +318,16 @@ public interface MemCopy< T >
 		public void copyValue( final double[] src, final int srcPos, final double[] dest, final int destPos, final int length )
 		{
 			Arrays.fill( dest, destPos, destPos + length, src[ srcPos ] );
+		}
+
+		@Override
+		public void copyStrided( final double[] src, final int srcPos, final double[] dest, final int destPos, final int destStride, final int length )
+		{
+			if ( destStride == 1 )
+				copyForward( src, srcPos, dest, destPos, length );
+			else
+				for ( int i = 0; i < length; ++i )
+					dest[ destPos + i * destStride ] = src[ srcPos + i ];
 		}
 	}
 }

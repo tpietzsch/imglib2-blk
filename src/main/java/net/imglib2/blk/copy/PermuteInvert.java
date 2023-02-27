@@ -1,5 +1,6 @@
 package net.imglib2.blk.copy;
 
+import java.util.Arrays;
 import net.imglib2.transform.integer.MixedTransform;
 
 class PermuteInvert
@@ -67,11 +68,9 @@ class PermuteInvert
 	{
 		if ( d == 0 )
 		{
-			// TODO add strided copy to MemCopy
 			final int length = ssize[ d ];
 			final int stride = csteps[ d ];
-			for ( int i = 0; i < length; ++i )
-				memCopy.copyValue( src, srcPos + i, dest, destPos + i * stride, 1 );
+			memCopy.copyStrided( src, srcPos, dest, destPos, stride, length );
 		}
 		else
 		{
