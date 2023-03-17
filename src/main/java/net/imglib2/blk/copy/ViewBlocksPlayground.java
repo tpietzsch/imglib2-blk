@@ -32,16 +32,33 @@ import net.imglib2.view.Views;
 
 public class ViewBlocksPlayground
 {
+	/**
+	 * The View.
+	 */
 	private final RandomAccessible< ? > ra;
 
+	/**
+	 * View sequence of the target {@code RandomAccessible}. The first element
+	 * is the target {@code RandomAccessible} itself. The last element is the
+	 * source {@code NativeImg} where the View sequence originates.
+	 */
 	private final List< ViewNode > nodes = new ArrayList<>();
 
-	ViewBlocksPlayground( final RandomAccessible< ? > rai )
+	private final StringBuilder errorDescription = new StringBuilder();
+
+	ViewBlocksPlayground( final RandomAccessible< ? > ra )
 	{
-		this.ra = rai;
+		this.ra = ra;
 	}
 
-	private void analyze()
+	/**
+	 * Deconstruct the View sequence of the target {@link #ra RandomAccessible}
+	 * into a list of {@link #nodes ViewNodes}.
+	 *
+	 * @return {@code false}, if during the analysis a View type is encountered that can not be handled.
+	 *         {@code true}, if everything went ok.
+	 */
+	private boolean analyze()
 	{
 		RandomAccessible< ? > source = ra;
 		while ( source != null )
@@ -103,29 +120,72 @@ public class ViewBlocksPlayground
 			// fallback
 			else
 			{
-				// TODO
-				throw new IllegalArgumentException( "Cannot handle " + source );
+				errorDescription.append( "Cannot analyze view " + source + " of class " + source.getClass().getSimpleName() );
+				return false;
 			}
 		}
+		return true;
 	}
 
+	/**
+	 * Check whether the root of the View sequence is supported. Supported roots
+	 * are {@code PlanarImg}, {@code ArrayImg}, and {@code CellImg} variants.
+	 *
+	 * @return {@code true}, if the root is supported.
+	 */
 	private boolean checkRootSupported()
 	{
 		final ViewNode root = nodes.get( nodes.size() - 1 );
 		if ( root.viewType() != ViewNode.ViewType.NATIVE_IMG )
+		{
+			errorDescription.append( "The root of the View sequence must be a NativeImg. (Found "
+					+ root.view() + " of class " + root.view().getClass().getSimpleName() + ")" );
 			return false;
-		return ( root.view() instanceof PlanarImg )
+		}
+		if ( ( root.view() instanceof PlanarImg )
 				|| ( root.view() instanceof ArrayImg )
-				|| ( root.view() instanceof AbstractCellImg );
+				|| ( root.view() instanceof AbstractCellImg ) )
+		{
+			return true;
+		}
+		else
+		{
+			errorDescription.append(
+					"The root of the View sequence must be PlanarImg, ArrayImg, or AbstractCellImg. (Found "
+							+ root.view() + " of class " + root.view().getClass().getSimpleName() + ")" );
+			return false;
+		}
 	}
 
+	/**
+	 * Check whether the pixel {@code Type} of the root of the View sequence is
+	 * supported. All {@code NativeType}s with {@code entitiesPerPixel==1} are
+	 * supported.
+	 *
+	 * @return {@code true}, if the root's pixel type is supported.
+	 */
 	private boolean checkRootTypeSupported()
 	{
 		final ViewNode root = nodes.get( nodes.size() - 1 );
 		final NativeType< ? > type = ( NativeType< ? > ) ( ( NativeImg< ?, ? > ) root.view() ).createLinkedType();
-		return type.getEntitiesPerPixel().getRatio() == 1;
+		if ( type.getEntitiesPerPixel().getRatio() == 1 )
+		{
+			return true;
+		}
+		else
+		{
+			errorDescription.append(
+					"The pixel Type of root of the View sequence must be a NativeType with entitiesPerPixel==1. (Found "
+							+ type.getClass().getSimpleName() + ")" );
+			return false;
+		}
 	}
 
+	/**
+	 * TODO javadoc when finalized.
+	 *
+	 * @return
+	 */
 	private boolean checkConverters()
 	{
 		// Rule: There must be no converters
@@ -139,16 +199,31 @@ public class ViewBlocksPlayground
 		return nodes.stream().noneMatch( node -> node.viewType() == ViewNode.ViewType.CONVERTER );
 	}
 
+	/**
+	 * The index of the out-of-bounds extension in {@link #nodes}.
+	 */
 	private int oobIndex = -1;
 
+	/**
+	 * The description of the out-of-bounds extension.
+	 */
 	private Extension oobExtension = null;
 
+
+	/**
+	 * Check whether there is at most one out-of-bounds extension.
+	 * If an extension is found, store its index into {@link #oobIndex},
+	 * and its description into {@link #oobExtension}.
+	 *
+	 * @return {@code true}, if there is at most one out-of-bounds extension.
+	 *         {@code false}, otherwise
+	 */
 	private boolean checkExtensions1()
 	{
-		// Rule: There must be at most one extension
-
-		// TODO: This could be softened to allow for Extend nodes that are
-		//       "swallowed" by subsequent Extend nodes.
+		// TODO: This could be weakened to allow for extensions that are
+		//       "swallowed" by subsequent extensions on a fully contained
+		//       sub-interval (i.e., the earlier extension doesn't really do
+		//       anything).
 
 		oobIndex = -1;
 		for ( int i = 0; i < nodes.size(); i++ )
@@ -157,8 +232,11 @@ public class ViewBlocksPlayground
 			{
 				if ( oobIndex < 0 )
 					oobIndex = i;
-				else // this is already the second EXTENSION
+				else
+				{
+					errorDescription.append( "There must be at most one out-of-bounds extension." );
 					return false;
+				}
 			}
 		}
 
@@ -170,22 +248,48 @@ public class ViewBlocksPlayground
 		return true;
 	}
 
+	/**
+	 * Check whether the out-of-bounds extension (if any) is of a supported type
+	 * (constant-value, border, mirror-single, mirror-double).
+	 *
+	 * @return {@code true}, if the out-of-bounds extension is of a supported
+	 *         type, or if there is no extension.
+	 */
 	private boolean checkExtensions2()
 	{
+		// TODO: This could be weakened to allow for unknown extensions, by using
+		//       fast copying for in-bounds regions, and fall-back for the rest.
+
 		if ( oobIndex < 0 ) // there is no extension
 			return true;
 
-		return oobExtension.type() != Extension.Type.UNKNOWN;
+		if ( oobExtension.type() != Extension.Type.UNKNOWN )
+		{
+			return true;
+		}
+		else
+		{
+			final ExtensionViewNode node = ( ExtensionViewNode ) nodes.get( oobIndex );
+			errorDescription.append(
+					"Only constant-value, border, mirror-single, mirror-double out-of-bounds extensions are supported. (Found "
+							+ node.getOutOfBoundsFactory().getClass().getSimpleName() + ")" );
+			return false;
+		}
 	}
 
+	/**
+	 * Check whether the interval at the out-of-bounds extension is compatible.
+	 * The interval must be equal to the root interval carried through the
+	 * transforms so far. This means that the extension can be applied to the
+	 * root directly (assuming that extension method is the same for every
+	 * axis.)
+	 *
+	 * @return {@code true}, if the out-of-bounds extension interval is
+	 *         compatible, or if there is no extension.
+	 */
 	private boolean checkExtensions3()
 	{
-		// Rule: At the EXTENSION node, the interval must be equal to the root
-		//       interval carried through the transforms so far. This means that
-		//       the EXTENSION can be applied to the root directly (assuming
-		//       that extension method is the same for every axis.)
-
-		// TODO: This could be softened to allow intervals that are fully
+		// TODO: This could be weakened to allow intervals that are fully
 		//       contained in the bottom interval. This would require revising
 		//       the Ranges.findRanges() implementations.
 
@@ -203,57 +307,87 @@ public class ViewBlocksPlayground
 			if ( node.viewType() == ViewNode.ViewType.MIXED_TRANSFORM )
 			{
 				final MixedTransform t = ( ( MixedTransformViewNode ) node ).getTransformToSource();
-				bb = transformInverse( t, bb );
+				bb = transform( t, bb );
 			}
 		}
 
-		return Intervals.equals( bb.getInterval(), bbExtension.getInterval() );
+		if ( Intervals.equals( bb.getInterval(), bbExtension.getInterval() ) )
+		{
+			return true;
+		}
+		else
+		{
+			errorDescription.append(
+					"The interval at the out-of-bounds extension must be equal to the root interval carried through the transforms so far." );
+			return false;
+		}
 	}
 
 	/**
-	 * Apply the inverse transform to a target vector to obtain a source vector.
+	 * Apply the {@code transformToSource} to a target vector to obtain a
+	 * source vector.
 	 *
+	 * @param transformToSource
+	 * 		the transformToSource from target to source.
 	 * @param source
-	 *            set this to the source coordinates.
+	 * 		set this to the source coordinates.
 	 * @param target
-	 *            target coordinates.
+	 * 		target coordinates.
 	 */
-	private static void applyInverse( MixedTransform transform, long[] source, long[] target )
+	private static void apply( MixedTransform transformToSource, long[] source, long[] target )
 	{
-		assert source.length >= transform.numSourceDimensions();
-		assert target.length >= transform.numSourceDimensions();
+		assert source.length >= transformToSource.numSourceDimensions();
+		assert target.length >= transformToSource.numSourceDimensions();
 
-		for ( int d = 0; d < transform.numTargetDimensions(); ++d )
+		for ( int d = 0; d < transformToSource.numTargetDimensions(); ++d )
 		{
-			if ( !transform.getComponentZero( d ) )
+			if ( !transformToSource.getComponentZero( d ) )
 			{
-				long v = target[ d ] - transform.getTranslation( d );
-				source[ transform.getComponentMapping( d ) ] = transform.getComponentInversion( d ) ? -v : v;
+				long v = target[ d ] - transformToSource.getTranslation( d );
+				source[ transformToSource.getComponentMapping( d ) ] = transformToSource.getComponentInversion( d ) ? -v : v;
 			}
 		}
 	}
 
-	private static BoundingBox transformInverse( final MixedTransform transform, final BoundingBox boundingBox )
+	/**
+	 * Apply the {@code transformToSource} to a target bounding box to obtain a
+	 * source bounding box.
+	 *
+	 * @param transformToSource
+	 * 		the transformToSource from target to source.
+	 * @param boundingBox
+	 * 		the target bounding box.
+	 *
+	 * @return the source bounding box.
+	 */
+	private static BoundingBox transform( final MixedTransform transformToSource, final BoundingBox boundingBox )
 	{
-		assert boundingBox.numDimensions() == transform.numSourceDimensions();
+		assert boundingBox.numDimensions() == transformToSource.numSourceDimensions();
 
-		if ( transform.numSourceDimensions() == transform.numTargetDimensions() )
+		if ( transformToSource.numSourceDimensions() == transformToSource.numTargetDimensions() )
 		{ // apply in-place
-			final long[] tmp = new long[ transform.numTargetDimensions() ];
+			final long[] tmp = new long[ transformToSource.numTargetDimensions() ];
 			boundingBox.corner1( tmp );
-			applyInverse( transform, boundingBox.corner1, tmp );
+			apply( transformToSource, boundingBox.corner1, tmp );
 			boundingBox.corner2( tmp );
-			applyInverse( transform, boundingBox.corner2, tmp );
+			apply( transformToSource, boundingBox.corner2, tmp );
 			return boundingBox;
 		}
-		final BoundingBox b = new BoundingBox( transform.numSourceDimensions() );
-		applyInverse( transform, b.corner1, boundingBox.corner1 );
-		applyInverse( transform, b.corner2, boundingBox.corner2 );
+		final BoundingBox b = new BoundingBox( transformToSource.numSourceDimensions() );
+		apply( transformToSource, b.corner1, boundingBox.corner1 );
+		apply( transformToSource, b.corner2, boundingBox.corner2 );
 		return b;
 	}
 
+	/**
+	 * The concatenated transform from the View {@link #ra RandomAccessible} to the root.
+	 */
 	private MixedTransform transform;
 
+	/**
+	 * Compute the concatenated {@link #transform transform} from the View
+	 * {@link #ra RandomAccessible} to the root.
+	 */
 	private void concatenateTransforms()
 	{
 		final int n = ra.numDimensions();
@@ -268,18 +402,45 @@ public class ViewBlocksPlayground
 		}
 	}
 
+	/**
+	 * Check that all View dimensions are used (mapped to some root dimension).
+	 *
+	 * @return {@code true}, if all View dimensions are used.
+	 */
 	private boolean checkNoDimensionsAdded()
 	{
-		// Rule: No source dimension is unused. That is Views.addDimension(...)
-		//       is not allowed for now.
+		// TODO: Views.addDimension(...) is not allowed for now. This could be
+		//       supported by replicating hyperplanes in the target block.
 
-		return transform.hasFullSourceMapping();
+		if(transform.hasFullSourceMapping())
+		{
+			return true;
+		}
+		else
+		{
+			errorDescription.append(
+					"All View dimensions must map to a dimension of the underlying NativeImg. "
+							+ "That is Views.addDimension(...) is not allowed." );
+			return false;
+		}
 	}
 
 	private MixedTransform permuteInvertTransform;
 
 	private MixedTransform remainderTransform;
 
+	/**
+	 * Split {@link #transform} into
+	 * <ol>
+	 * <li>{@link #permuteInvertTransform}, a pure axis permutation followed by inversion of some axes, and</li>
+	 * <li>{@link #remainderTransform}, a remainder transformation,</li>
+	 * </ol>
+	 * such that {@code remainder * permuteInvert == transform}.
+	 * <p>
+	 * Block copying will then first use {@code remainderTransform} to extract a
+	 * intermediate block from the root {@code NativeImg}. Then compute the
+	 * final block by applying {@code permuteInvertTransform}.
+	 */
 	private void splitTransform()
 	{
 		final MixedTransform[] split = PrimitiveBlocksUtils.split( transform );
@@ -295,13 +456,30 @@ public class ViewBlocksPlayground
 		return new ViewProperties<>( viewType, root, rootType, oobExtension, transform, permuteInvertTransform );
 	}
 
-	// TODO replace by ra.getType() when that is available in imglib2 core
+	// TODO replace with ra.getType() when that is available in imglib2 core
 	private static < T extends Type< T > > T getType( RandomAccessible< T > ra )
 	{
 		final Point p = new Point( ra.numDimensions() );
 		if ( ra instanceof Interval )
 			( ( Interval ) ra ).min( p );
 		return ra.getAt( p ).createVariable();
+	}
+
+	// TEMPORARY. TODO REMOVE
+	public static ViewProperties< ?, ? > properties( RandomAccessible< ? > view )
+	{
+		final ViewBlocksPlayground v = new ViewBlocksPlayground( view );
+		v.analyze();
+		v.checkRootSupported();
+		v.checkRootTypeSupported();
+		v.checkConverters();
+		v.checkExtensions1();
+		v.checkExtensions2();
+		v.checkExtensions3();
+		v.concatenateTransforms();
+		v.checkNoDimensionsAdded();
+		v.splitTransform();
+		return v.getViewProperties();
 	}
 
 	/**
@@ -453,22 +631,4 @@ public class ViewBlocksPlayground
 		final ViewProperties< ?, ? > viewProperties = playground.getViewProperties();
 		System.out.println( "viewProperties = " + viewProperties );
 	}
-
-	// TEMPORARY. TODO REMOVE
-	public static ViewProperties< ?, ? > properties( RandomAccessible< ? > view )
-	{
-		final ViewBlocksPlayground v = new ViewBlocksPlayground( view );
-		v.analyze();
-		v.checkRootSupported();
-		v.checkRootTypeSupported();
-		v.checkConverters();
-		v.checkExtensions1();
-		v.checkExtensions2();
-		v.checkExtensions3();
-		v.concatenateTransforms();
-		v.checkNoDimensionsAdded();
-		v.splitTransform();
-		return v.getViewProperties();
-	}
-
 }
