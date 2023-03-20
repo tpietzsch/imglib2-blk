@@ -182,6 +182,29 @@ public class ViewBlocksPlayground
 	}
 
 	/**
+	 * Check whether the pixel {@code Type} of the View is supported. All {@code
+	 * NativeType}s with {@code entitiesPerPixel==1} are supported.
+	 *
+	 * @return {@code true}, if the view's pixel type is supported.
+	 */
+	private < T extends Type< T > > boolean checkViewTypeSupported()
+	{
+		final T type = getType( ( RandomAccessible< T > ) ra );
+		if ( type instanceof NativeType
+				&& ( ( NativeType ) type ).getEntitiesPerPixel().getRatio() == 1 )
+		{
+			return true;
+		}
+		else
+		{
+			errorDescription.append(
+					"The pixel Type of the View must be a NativeType with entitiesPerPixel==1. (Found "
+							+ type.getClass().getSimpleName() + ")" );
+			return false;
+		}
+	}
+
+	/**
 	 * TODO javadoc when finalized.
 	 *
 	 * @return
