@@ -2,13 +2,16 @@ package net.imglib2.blk.copy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 import net.imglib2.Interval;
 import net.imglib2.Point;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.blk.copy.ViewNodeImpl.ConverterViewNode;
 import net.imglib2.blk.copy.ViewNodeImpl.DefaultViewNode;
 import net.imglib2.blk.copy.ViewNodeImpl.ExtensionViewNode;
 import net.imglib2.blk.copy.ViewNodeImpl.MixedTransformViewNode;
+import net.imglib2.converter.Converter;
 import net.imglib2.converter.read.ConvertedRandomAccessible;
 import net.imglib2.converter.read.ConvertedRandomAccessibleInterval;
 import net.imglib2.img.ImgView;
@@ -94,13 +97,13 @@ public class ViewBlocksPlayground
 			else if ( source instanceof ConvertedRandomAccessible )
 			{
 				final ConvertedRandomAccessible< ?, ? > view = ( ConvertedRandomAccessible< ?, ? > ) source;
-				nodes.add( new DefaultViewNode( ViewNode.ViewType.CONVERTER, view ) );
+				nodes.add( new ConverterViewNode<>( view ) );
 				source = view.getSource();
 			}
 			else if ( source instanceof ConvertedRandomAccessibleInterval )
 			{
 				final ConvertedRandomAccessibleInterval< ?, ? > view = ( ConvertedRandomAccessibleInterval< ?, ? > ) source;
-				nodes.add( new DefaultViewNode( ViewNode.ViewType.CONVERTER, view ) );
+				nodes.add( new ConverterViewNode<>( view ) );
 				source = view.getSource();
 			}
 			// MIXED_TRANSFORM,
@@ -505,6 +508,39 @@ public class ViewBlocksPlayground
 		return v.getViewProperties();
 	}
 
+	static class ViewPropertiesOrError< T extends NativeType< T >, R extends NativeType< R > >
+	{
+		boolean supportsRandomAccessibleBlocks()
+		{
+			// TODO
+//			true, if all checks go through
+			return false;
+		}
+
+		boolean supportsPrimitiveBlocksFallBack()
+		{
+			// TODO
+//			true, if the target type is a NativeType with entitiesPerPixel==1
+//			[ ] there is no check for this yet. Add checkViewTypeSupported()
+			return false;
+		}
+
+		public String error()
+		{
+			// TODO
+//		description of why this cannot be handled by either
+//		RandomAccessibleBlocks or FallbackPrimitiveBlocks, or both.
+			return null;
+		}
+
+		ViewProperties<T, R> properties()
+		{
+			// TODO
+//			null, if supportsRandomAccessibleBlocks() == false
+			return null;
+		}
+	}
+
 	/**
 	 *
 	 * @param <T> type of the view {@code RandomAccessible}
@@ -653,5 +689,60 @@ public class ViewBlocksPlayground
 
 		final ViewProperties< ?, ? > viewProperties = playground.getViewProperties();
 		System.out.println( "viewProperties = " + viewProperties );
+	}
+
+
+
+
+
+
+
+
+
+	static class AccumulateConverters
+	{
+		private Supplier< ? extends Converter< ?, ? > > converterSupplier = null;
+
+		private Supplier< ? > destinationSupplier = null;
+
+		AccumulateConverters( final List< ViewNode > nodes )
+		{
+			for ( int i = nodes.size() - 1; i > 0; --i )
+			{
+				final ViewNode node = nodes.get( i );
+				if ( node.viewType() == ViewNode.ViewType.CONVERTER )
+					append( ( ConverterViewNode< ?, ? > ) node );
+			}
+		}
+
+		private < A, B, C > void append( ConverterViewNode< B, C > node )
+		{
+			if ( converterSupplier == null )
+			{
+				converterSupplier = node.getConverterSupplier();
+				destinationSupplier = node.getDestinationSupplier();
+			}
+			else
+			{
+				Supplier< Converter< A, B > > pcs = ( Supplier< Converter< A, B > > ) converterSupplier;
+				Supplier< ? extends B > pds = ( Supplier< ? extends B > ) destinationSupplier;
+				converterSupplier = () -> new Converter< A, C >()
+				{
+					final Converter< A, B > cAB = pcs.get();
+
+					final B b = pds.get();
+
+					final Converter< ? super B, ? super C > cBC = node.getConverterSupplier().get();
+
+					@Override
+					public void convert( final A a, final C c )
+					{
+						cAB.convert( a, b );
+						cBC.convert( b, c );
+					}
+				};
+				destinationSupplier = node.getDestinationSupplier();
+			}
+		}
 	}
 }

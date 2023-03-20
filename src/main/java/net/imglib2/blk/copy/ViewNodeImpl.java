@@ -1,7 +1,11 @@
 package net.imglib2.blk.copy;
 
+import java.util.function.Supplier;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
+import net.imglib2.converter.Converter;
+import net.imglib2.converter.read.ConvertedRandomAccessible;
+import net.imglib2.converter.read.ConvertedRandomAccessibleInterval;
 import net.imglib2.outofbounds.OutOfBoundsFactory;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
@@ -92,6 +96,37 @@ class ViewNodeImpl
 		public String toString()
 		{
 			return "ExtensionViewNode{viewType=" + viewType + ", view=" + view + ", interval=" + interval + ", oobFactory=" + getOutOfBoundsFactory() + '}';
+		}
+	}
+
+	static class ConverterViewNode< A, B > extends ViewNodeImpl.AbstractViewNode< RandomAccessible< B > >
+	{
+		private final Supplier< ? extends B > destinationSupplier;
+
+		private final Supplier< Converter< ? super A, ? super B > > converterSupplier;
+
+		ConverterViewNode( final ConvertedRandomAccessibleInterval< A, B > view )
+		{
+			super( ViewType.CONVERTER, view );
+			converterSupplier = view.getConverterSupplier();
+			destinationSupplier = view.getDestinationSupplier();
+		}
+
+		ConverterViewNode( final ConvertedRandomAccessible< A, B > view )
+		{
+			super( ViewType.CONVERTER, view );
+			converterSupplier = view.getConverterSupplier();
+			destinationSupplier = view.getDestinationSupplier();
+		}
+
+		public Supplier< ? extends B > getDestinationSupplier()
+		{
+			return destinationSupplier;
+		}
+
+		public Supplier< Converter< ? super A, ? super B > > getConverterSupplier()
+		{
+			return converterSupplier;
 		}
 	}
 }
