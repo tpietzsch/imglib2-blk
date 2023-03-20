@@ -1,6 +1,5 @@
 package net.imglib2.blk.copy;
 
-import java.util.Arrays;
 import net.imglib2.transform.integer.MixedTransform;
 
 class PermuteInvert
