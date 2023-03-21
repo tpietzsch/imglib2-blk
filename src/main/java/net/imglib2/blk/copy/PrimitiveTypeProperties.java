@@ -24,6 +24,10 @@ import static net.imglib2.type.PrimitiveType.INT;
 import static net.imglib2.type.PrimitiveType.LONG;
 import static net.imglib2.type.PrimitiveType.SHORT;
 
+/**
+ * @param <P> a primitive array type, e.g., {@code byte[]}.
+ * @param <A> the corresponding {@code ArrayDataAccess} type.
+ */
 public class PrimitiveTypeProperties< P, A extends ArrayDataAccess< A > >
 {
 	final Class< P > primitiveArrayClass;

@@ -11,11 +11,30 @@ public interface Extension
 {
 	enum Type
 	{
-		CONSTANT,
-		BORDER,
-		MIRROR_SINGLE,
-		MIRROR_DOUBLE,
-		UNKNOWN
+		CONSTANT(true),
+		BORDER(false),
+		MIRROR_SINGLE(false),
+		MIRROR_DOUBLE(false),
+		UNKNOWN( true );
+
+		private final boolean isValueDependent;
+
+		Type( final boolean isValueDependent )
+		{
+			this.isValueDependent = isValueDependent;
+		}
+
+		/**
+		 * Whether this extension depends on the pixel value. E.g., {@code
+		 * BORDER}, {@code MIRROR_SINGLE}, {@code MIRROR_DOUBLE} are only
+		 * dependent on position ({@code isValueDependent()==false}), while
+		 * {@code CONSTANT} is dependent on the out-of-bounds value ({@code
+		 * isValueDependent()==true}).
+		 */
+		public boolean isValueDependent()
+		{
+			return isValueDependent;
+		}
 	}
 
 	Type type();

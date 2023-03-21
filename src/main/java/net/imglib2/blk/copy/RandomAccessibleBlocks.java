@@ -11,13 +11,20 @@ import static net.imglib2.blk.copy.PrimitiveBlocksUtils.extractOobValue;
 
 class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R > > implements PrimitiveBlocks< T >
 {
-	private final PermuteInvert permuteInvert;
-
 	private final ViewProperties< T, R > props;
 
+	// copies from view root. root type primitive equivalent
 	private final RangeCopier copier;
 
+	// root primitive type
 	private final TempArray< R > tempArrayPermute;
+
+	// root primitive type
+	private final TempArray< R > tempArrayConvert;
+
+	private final PermuteInvert permuteInvert;
+
+	private final Convert convert;
 
 	public RandomAccessibleBlocks( final ViewProperties< T, R > props )
 	{
@@ -27,8 +34,12 @@ class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R
 		final Object oob = extractOobValue( props.getRootType(), props.getExtension() );
 		final Ranges findRanges = Ranges.forExtension( props.getExtension() );
 		copier = RangeCopier.create( props.getRoot(), findRanges, memCopy, oob );
+		tempArrayConvert = Cast.unchecked( TempArray.forPrimitiveType( primitiveType ) );
 		tempArrayPermute = Cast.unchecked( TempArray.forPrimitiveType( primitiveType ) );
 		permuteInvert = new PermuteInvert( memCopy, props.getPermuteInvertTransform() );
+		convert = props.hasConverterSupplier()
+				? new Convert( props.getRootType(), props.getViewType(), props.getConverterSupplier() )
+				: null;
 	}
 
 	@Override
@@ -70,21 +81,32 @@ class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R
 			}
 		}
 
-		final boolean permute = props.hasPermuteInvertTransform();
-		final Object copyDest;
-		if ( permute )
+		final boolean doPermute = props.hasPermuteInvertTransform();
+		final boolean doConvert = props.hasConverterSupplier();
+		final int length = ( int ) Intervals.numElements( size );
+		if ( doPermute && doConvert )
 		{
-			final int length = ( int ) Intervals.numElements( size );
-			copyDest = tempArrayPermute.get( length );
+			final Object copyDest = tempArrayPermute.get( length );
+			final Object permuteDest = tempArrayConvert.get( length );
+			copier.copy( destPos, copyDest, destSize );
+			permuteInvert.permuteAndInvert( copyDest, permuteDest, size );
+			convert.convert( permuteDest, dest, length );
+		}
+		else if ( doPermute )
+		{
+			final Object copyDest = tempArrayConvert.get( length );
+			copier.copy( destPos, copyDest, destSize );
+			permuteInvert.permuteAndInvert( copyDest, dest, size );
+		}
+		else if ( doConvert )
+		{
+			final Object copyDest = tempArrayPermute.get( length );
+			copier.copy( destPos, copyDest, destSize );
+			convert.convert( copyDest, dest, length );
 		}
 		else
-			copyDest = dest;
-
-		copier.copy( destPos, copyDest, destSize );
-
-		if ( permute )
 		{
-			permuteInvert.permuteAndInvert( copyDest, dest, size );
+			copier.copy( destPos, dest, destSize );
 		}
 	}
 
@@ -104,6 +126,8 @@ class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R
 		props = blocks.props;
 		copier = blocks.copier.newInstance();
 		permuteInvert = blocks.permuteInvert.newInstance();
+		convert = blocks.convert == null ? null : blocks.convert.newInstance();
+		tempArrayConvert = blocks.tempArrayConvert.newInstance();
 		tempArrayPermute = blocks.tempArrayPermute.newInstance();
 	}
 }

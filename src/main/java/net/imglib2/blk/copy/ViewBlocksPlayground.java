@@ -208,24 +208,6 @@ public class ViewBlocksPlayground
 	}
 
 	/**
-	 * TODO javadoc when finalized.
-	 *
-	 * @return
-	 */
-	private boolean checkConverters()
-	{
-		// Rule: There must be no converters
-
-		// TODO: Add the ability to use Converters.
-		//       OutOfBounds extension needs to happen before Converter is
-		//       applied. (Or Converter needs to be invertible). Multiple
-		//       Converters could be chained. This is independent of the
-		//       coordinate transforms.
-
-		return nodes.stream().noneMatch( node -> node.viewType() == ViewNode.ViewType.CONVERTER );
-	}
-
-	/**
 	 * The index of the out-of-bounds extension in {@link #nodes}.
 	 */
 	private int oobIndex = -1;
@@ -406,6 +388,52 @@ public class ViewBlocksPlayground
 	}
 
 	/**
+	 * Supplies Converter from root type to view type.
+	 * Maybe {@code null}, if there is no conversion required.
+	 */
+	private Supplier< ? extends Converter< ?, ? > > converterSupplier;
+
+	/**
+	 * Connect all converters in the view sequence into a combined converter. If
+	 * the out-of-bounds extension requires values of a specific type (like
+	 * constant-value extension), then all converters have to happen after the
+	 * out-of-bounds extension (because for example the constant-value
+	 * extension's oob value type does not match the pixel type after
+	 * conversion). If everything works, the combined converter is provided in
+	 * {@link #converterSupplier}.
+	 *
+	 * @return {@code true}, if all converters could be combined and work with the out-of-bounds extension.
+	 */
+	private boolean checkConverters()
+	{
+		final boolean requiresConvertBeforeExtend = oobExtension != null && oobExtension.type().isValueDependent();
+
+		final List< ConverterViewNode< ?, ? > > converterViewNodes = new ArrayList<>();
+		for ( int i = 0; i < nodes.size(); i++ )
+		{
+			final ViewNode node = nodes.get( i );
+			if ( node.viewType() == ViewNode.ViewType.CONVERTER )
+			{
+				if ( i < oobIndex && requiresConvertBeforeExtend )
+				{
+					errorDescription.append(
+							"The out-of-bounds extension in the view sequence requires that all converters happen before." );
+					return false;
+				}
+				else
+				{
+					converterViewNodes.add( ( ConverterViewNode< ?, ? > ) node );
+				}
+			}
+		}
+
+		if ( !converterViewNodes.isEmpty() )
+			converterSupplier = AccumulateConverters.getConverterSupplier( converterViewNodes );
+
+		return true;
+	}
+
+	/**
 	 * The concatenated transform from the View {@link #ra RandomAccessible} to the root.
 	 */
 	private MixedTransform transform;
@@ -479,7 +507,7 @@ public class ViewBlocksPlayground
 		final T viewType = getType( ( RandomAccessible< T > ) ra );
 		final NativeImg< R, ? > root = ( NativeImg< R, ? > ) nodes.get( nodes.size() - 1 ).view();
 		final R rootType = root.createLinkedType();
-		return new ViewProperties<>( viewType, root, rootType, oobExtension, transform, permuteInvertTransform );
+		return new ViewProperties<>( viewType, root, rootType, oobExtension, transform, permuteInvertTransform, converterSupplier );
 	}
 
 	// TODO replace with ra.getType() when that is available in imglib2 core
@@ -498,10 +526,10 @@ public class ViewBlocksPlayground
 		v.analyze();
 		v.checkRootSupported();
 		v.checkRootTypeSupported();
-		v.checkConverters();
 		v.checkExtensions1();
 		v.checkExtensions2();
 		v.checkExtensions3();
+		v.checkConverters();
 		v.concatenateTransforms();
 		v.checkNoDimensionsAdded();
 		v.splitTransform();
@@ -562,13 +590,16 @@ public class ViewBlocksPlayground
 
 		private final boolean hasPermuteInvertTransform;
 
+		private final Supplier< Converter< R, T > > converterSupplier;
+
 		ViewProperties(
 				final T viewType,
 				final NativeImg< R, ? > root,
 				final R rootType,
 				final Extension extension,
 				final MixedTransform transform,
-				final MixedTransform permuteInvertTransform )
+				final MixedTransform permuteInvertTransform,
+				final Supplier< ? extends Converter< ?, ? > > converterSupplier )
 		{
 			this.viewType = viewType;
 			this.root = root;
@@ -577,6 +608,7 @@ public class ViewBlocksPlayground
 			this.transform = transform;
 			this.permuteInvertTransform = permuteInvertTransform;
 			hasPermuteInvertTransform = !TransformBuilder.isIdentity( permuteInvertTransform );
+			this.converterSupplier = converterSupplier == null ? null : () -> ( Converter< R, T > ) converterSupplier.get();
 		}
 
 		@Override
@@ -589,6 +621,7 @@ public class ViewBlocksPlayground
 					", extension=" + extension +
 					", transform=" + transform +
 					", permuteInvertTransform=" + permuteInvertTransform +
+					", converterSupplier=" + converterSupplier +
 					'}';
 		}
 
@@ -633,6 +666,16 @@ public class ViewBlocksPlayground
 		{
 			return permuteInvertTransform;
 		}
+
+		public boolean hasConverterSupplier()
+		{
+			return converterSupplier != null;
+		}
+
+		public Supplier< Converter< R, T > > getConverterSupplier()
+		{
+			return converterSupplier;
+		}
 	}
 
 
@@ -674,12 +717,12 @@ public class ViewBlocksPlayground
 
 		System.out.println( "playground.checkRootSupported() = " + playground.checkRootSupported() );
 		System.out.println( "playground.checkRootTypeSupported() = " + playground.checkRootTypeSupported() );
-		System.out.println( "playground.checkConverters() = " + playground.checkConverters() );
 		System.out.println( "playground.checkExtensions1() = " + playground.checkExtensions1() );
 		System.out.println( "playground.oobIndex = " + playground.oobIndex );
 		System.out.println( "playground.oobExtension.type() = " + playground.oobExtension );
 		System.out.println( "playground.checkExtensions2() = " + playground.checkExtensions2() );
 		System.out.println( "playground.checkExtensions3() = " + playground.checkExtensions3() );
+		System.out.println( "playground.checkConverters() = " + playground.checkConverters() );
 		playground.concatenateTransforms();
 		System.out.println( "playground.transform = " + playground.transform );
 		System.out.println( "playground.checkNoDimensionsAdded() = " + playground.checkNoDimensionsAdded() );
@@ -701,19 +744,17 @@ public class ViewBlocksPlayground
 
 	static class AccumulateConverters
 	{
+		static Supplier< ? extends Converter< ?, ? > > getConverterSupplier(final List< ConverterViewNode< ?, ? > > nodes )
+		{
+			final AccumulateConverters acc = new AccumulateConverters();
+			for ( int i = nodes.size() - 1; i >= 0; --i )
+				acc.append( nodes.get( i ) );
+			return acc.converterSupplier;
+		}
+
 		private Supplier< ? extends Converter< ?, ? > > converterSupplier = null;
 
 		private Supplier< ? > destinationSupplier = null;
-
-		AccumulateConverters( final List< ViewNode > nodes )
-		{
-			for ( int i = nodes.size() - 1; i > 0; --i )
-			{
-				final ViewNode node = nodes.get( i );
-				if ( node.viewType() == ViewNode.ViewType.CONVERTER )
-					append( ( ConverterViewNode< ?, ? > ) node );
-			}
-		}
 
 		private < A, B, C > void append( ConverterViewNode< B, C > node )
 		{
