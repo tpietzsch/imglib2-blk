@@ -54,6 +54,29 @@ public class ViewBlocksPlayground
 	}
 
 	/**
+	 * Check whether the pixel {@code Type} of the View is supported. All {@code
+	 * NativeType}s with {@code entitiesPerPixel==1} are supported.
+	 *
+	 * @return {@code true}, if the view's pixel type is supported.
+	 */
+	private < T extends Type< T > > boolean checkViewTypeSupported()
+	{
+		final T type = getType( ( RandomAccessible< T > ) ra );
+		if ( type instanceof NativeType
+				&& ( ( NativeType ) type ).getEntitiesPerPixel().getRatio() == 1 )
+		{
+			return true;
+		}
+		else
+		{
+			errorDescription.append(
+					"The pixel Type of the View must be a NativeType with entitiesPerPixel==1. (Found "
+							+ type.getClass().getSimpleName() + ")" );
+			return false;
+		}
+	}
+
+	/**
 	 * Deconstruct the View sequence of the target {@link #ra RandomAccessible}
 	 * into a list of {@link #nodes ViewNodes}.
 	 *
@@ -178,29 +201,6 @@ public class ViewBlocksPlayground
 		{
 			errorDescription.append(
 					"The pixel Type of root of the View sequence must be a NativeType with entitiesPerPixel==1. (Found "
-							+ type.getClass().getSimpleName() + ")" );
-			return false;
-		}
-	}
-
-	/**
-	 * Check whether the pixel {@code Type} of the View is supported. All {@code
-	 * NativeType}s with {@code entitiesPerPixel==1} are supported.
-	 *
-	 * @return {@code true}, if the view's pixel type is supported.
-	 */
-	private < T extends Type< T > > boolean checkViewTypeSupported()
-	{
-		final T type = getType( ( RandomAccessible< T > ) ra );
-		if ( type instanceof NativeType
-				&& ( ( NativeType ) type ).getEntitiesPerPixel().getRatio() == 1 )
-		{
-			return true;
-		}
-		else
-		{
-			errorDescription.append(
-					"The pixel Type of the View must be a NativeType with entitiesPerPixel==1. (Found "
 							+ type.getClass().getSimpleName() + ")" );
 			return false;
 		}
@@ -440,8 +440,10 @@ public class ViewBlocksPlayground
 	/**
 	 * Compute the concatenated {@link #transform transform} from the View
 	 * {@link #ra RandomAccessible} to the root.
+	 *
+	 * @return {@code true}
 	 */
-	private void concatenateTransforms()
+	private boolean concatenateTransforms()
 	{
 		final int n = ra.numDimensions();
 		transform = new MixedTransform( n, n );
@@ -453,6 +455,7 @@ public class ViewBlocksPlayground
 				transform = transform.preConcatenate( tnode.getTransformToSource() );
 			}
 		}
+		return true;
 	}
 
 	/**
@@ -493,12 +496,15 @@ public class ViewBlocksPlayground
 	 * Block copying will then first use {@code remainderTransform} to extract a
 	 * intermediate block from the root {@code NativeImg}. Then compute the
 	 * final block by applying {@code permuteInvertTransform}.
+	 *
+	 * @return {@code true}
 	 */
-	private void splitTransform()
+	private boolean splitTransform()
 	{
 		final MixedTransform[] split = PrimitiveBlocksUtils.split( transform );
 		permuteInvertTransform = split[ 0 ];
 		remainderTransform = split[ 1 ];
+		return true;
 	}
 
 	private < T extends NativeType< T >, R extends NativeType< R > > ViewProperties< T, R > getViewProperties()
@@ -533,6 +539,52 @@ public class ViewBlocksPlayground
 		v.checkNoDimensionsAdded();
 		v.splitTransform();
 		return v.getViewProperties();
+	}
+
+	public static ViewPropertiesOrError< ?, ? > tryGetProperties( RandomAccessible< ? > view )
+	{
+		final ViewBlocksPlayground v = new ViewBlocksPlayground( view );
+
+		// Check whether the pixel type of ciew is supported (NativeType with entitiesPerPixel==1)
+		final boolean supportsFallback = v.checkViewTypeSupported();
+		if ( !supportsFallback )
+		{
+			// TODO
+			return null;
+		}
+
+		final boolean fullySupported =
+				// Deconstruct the target view into a list of ViewNodes
+				v.analyze()
+				// check whether the root of the view is supported (PlanarImg, ArrayImg, CellImg)
+				&& v.checkRootSupported()
+				// Check whether the pixel type of the root is supported (NativeType with entitiesPerPixel==1)
+				&& v.checkRootTypeSupported()
+				// Check whether there is at most one out-of-bounds extension
+				&& v.checkExtensions1()
+				// Check whether the out-of-bounds extension (if any) is of a supported type (constant-value, border, mirror-single, mirror-double)
+				&& v.checkExtensions2()
+				// Check whether the interval at the out-of-bounds extension is compatible.
+				&& v.checkExtensions3()
+				// Connect all converters in the view sequence into a combined converter
+				&& v.checkConverters()
+				// Compute the concatenated MixedTransform
+				&& v.concatenateTransforms()
+				// Check that all View dimensions are used (mapped to some root dimension)
+				&& v.checkNoDimensionsAdded()
+				// Split concatenated transform into remainder * permuteInvert
+				&& v.splitTransform();
+		if (!fullySupported)
+		{
+			final StringBuilder errorDescription = new StringBuilder();
+			errorDescription.append( "The RandomAccessible " + view + " can only be supported by fall-back copier. \n" );
+			errorDescription.append( v.errorDescription );
+			// TODO
+			return null;
+		}
+
+		// TODO
+		return null;
 	}
 
 	static class ViewPropertiesOrError< T extends NativeType< T >, R extends NativeType< R > >
