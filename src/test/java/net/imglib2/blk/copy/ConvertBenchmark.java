@@ -1,7 +1,9 @@
 package net.imglib2.blk.copy;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import net.imglib2.converter.Converter;
+import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
@@ -28,8 +30,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @Fork( 1 )
 public class ConvertBenchmark
 {
-	private static final int SIZE = 6553600;
-	private static final int LENGTH = 100 * 100 * 100;
+	private static final int LENGTH = 64 * 64 * 64;
 
 	private final short[] uint16src;
 	private final float[] src;
@@ -37,21 +38,9 @@ public class ConvertBenchmark
 
 	public ConvertBenchmark()
 	{
-		src = new float[ SIZE ];
-		dest = new float[ SIZE ];
-		uint16src = new short[ SIZE ];
-	}
-
-	@Benchmark
-	public void benchmark1()
-	{
-		copy1( src, dest, 0, 0, LENGTH );
-	}
-
-	@Benchmark
-	public void benchmark2()
-	{
-		copy2( src, dest, LENGTH );
+		src = new float[ LENGTH ];
+		dest = new float[ LENGTH ];
+		uint16src = new short[ LENGTH ];
 	}
 
 	@Benchmark
@@ -65,6 +54,14 @@ public class ConvertBenchmark
 	{
 		final Converter< UnsignedShortType, FloatType > converter = ( in, out ) -> out.setReal( in.getRealFloat() );
 		convert2( uint16src, dest, LENGTH, converter );
+	}
+
+	@Benchmark
+	public void benchmarkConvert3()
+	{
+		final Supplier< Converter< UnsignedShortType, FloatType > > converterSupplier = () -> ( in, out ) -> out.setReal( in.getRealFloat() );
+		final Convert< UnsignedShortType, FloatType > convert = new Convert<>( new UnsignedShortType(), new FloatType(), converterSupplier );
+		convert3( uint16src, dest, LENGTH, convert );
 	}
 
 	static void copy1( float[] src, float[] dest, int src_offset, int dest_offset, int length )
@@ -97,9 +94,15 @@ public class ConvertBenchmark
 		}
 	}
 
+	static void convert3( short[] src, float[] dest, int length, Convert< UnsignedShortType, FloatType > convert )
+	{
+		convert.convert( src, dest, length );
+	}
+
 	public static void main( String... args ) throws RunnerException
 	{
 		Options options = new OptionsBuilder().include( ConvertBenchmark.class.getSimpleName() ).build();
 		new Runner( options ).run();
+//		new ConvertBenchmark().benchmarkConvert3();
 	}
 }
