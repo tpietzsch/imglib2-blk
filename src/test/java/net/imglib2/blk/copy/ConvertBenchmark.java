@@ -60,7 +60,7 @@ public class ConvertBenchmark
 	public void benchmarkConvert3()
 	{
 		final Supplier< Converter< UnsignedShortType, FloatType > > converterSupplier = () -> ( in, out ) -> out.setReal( in.getRealFloat() );
-		final Convert< UnsignedShortType, FloatType > convert = new Convert<>( new UnsignedShortType(), new FloatType(), converterSupplier );
+		final Convert convert = Convert.create( new UnsignedShortType(), new FloatType(), converterSupplier );
 		convert3( uint16src, dest, LENGTH, convert );
 	}
 
@@ -94,7 +94,7 @@ public class ConvertBenchmark
 		}
 	}
 
-	static void convert3( short[] src, float[] dest, int length, Convert< UnsignedShortType, FloatType > convert )
+	static void convert3( short[] src, float[] dest, int length, Convert convert )
 	{
 		convert.convert( src, dest, length );
 	}

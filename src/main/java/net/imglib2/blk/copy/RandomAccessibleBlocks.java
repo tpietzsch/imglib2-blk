@@ -38,7 +38,7 @@ class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R
 		tempArrayPermute = Cast.unchecked( TempArray.forPrimitiveType( primitiveType ) );
 		permuteInvert = new PermuteInvert( memCopy, props.getPermuteInvertTransform() );
 		convert = props.hasConverterSupplier()
-				? new Convert( props.getRootType(), props.getViewType(), props.getConverterSupplier() )
+				? Convert.create( props.getRootType(), props.getViewType(), props.getConverterSupplier() )
 				: null;
 	}
 
