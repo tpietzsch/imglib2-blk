@@ -1,6 +1,5 @@
 package net.imglib2.blk.copy;
 
-import net.imglib2.blk.copy.ViewBlocksPlayground.ViewProperties;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.PrimitiveType;
