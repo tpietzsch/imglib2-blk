@@ -28,9 +28,8 @@ import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.MixedTransformView;
 
-// TODO rename to ViewAnalyzer
 // TODO make package-private
-public class ViewBlocksPlayground
+public class ViewAnalyzer
 {
 	/**
 	 * The View.
@@ -46,7 +45,7 @@ public class ViewBlocksPlayground
 
 	private final StringBuilder errorDescription = new StringBuilder();
 
-	ViewBlocksPlayground( final RandomAccessible< ? > ra )
+	ViewAnalyzer( final RandomAccessible< ? > ra )
 	{
 		this.ra = ra;
 	}
@@ -575,7 +574,7 @@ public class ViewBlocksPlayground
 
 	public static ViewPropertiesOrError< ?, ? > getViewProperties( RandomAccessible< ? > view )
 	{
-		final ViewBlocksPlayground v = new ViewBlocksPlayground( view );
+		final ViewAnalyzer v = new ViewAnalyzer( view );
 
 		// Check whether the pixel type of ciew is supported (NativeType with entitiesPerPixel==1)
 		final boolean supportsFallback = v.checkViewTypeSupported();
@@ -630,43 +629,4 @@ public class ViewBlocksPlayground
 		final FallbackProperties fallbackProperties = v.getFallbackProperties();
 		return new ViewPropertiesOrError<>( viewProperties, fallbackProperties, "" );
 	}
-
-	public static class FallbackProperties< T extends NativeType< T > >
-	{
-		private final T viewType;
-
-		private final RandomAccessible< T > view;
-
-		/**
-		 * TODO: javadoc
-		 *
-		 * @param viewType pixel type of the View to copy from
-		 * @param view
-		 */
-		FallbackProperties( final T viewType, final RandomAccessible< T > view )
-		{
-			this.viewType = viewType;
-			this.view = view;
-		}
-
-		@Override
-		public String toString()
-		{
-			return "FallbackProperties{" +
-					"viewType=" + viewType.getClass().getSimpleName() +
-					", view=" + view +
-					'}';
-		}
-
-		public T getViewType()
-		{
-			return viewType;
-		}
-
-		public RandomAccessible< T > getView()
-		{
-			return view;
-		}
-	}
-
 }

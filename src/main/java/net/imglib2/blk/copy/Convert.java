@@ -45,6 +45,6 @@ interface Convert
 			}
 		}
 
-		return new ConvertGeneric<>( srcType, destType, converterSupplier );
+		return new ConvertImpl.ConvertGeneric<>( srcType, destType, converterSupplier );
 	}
 }

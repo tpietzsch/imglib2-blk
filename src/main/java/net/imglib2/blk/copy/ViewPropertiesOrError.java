@@ -6,13 +6,13 @@ class ViewPropertiesOrError< T extends NativeType< T >, R extends NativeType< R 
 {
 	private final ViewProperties< T, R > viewProperties;
 
-	private final ViewBlocksPlayground.FallbackProperties< T > fallbackProperties;
+	private final FallbackProperties< T > fallbackProperties;
 
 	private final String errorMessage;
 
 	ViewPropertiesOrError(
 			final ViewProperties< T, R > viewProperties,
-			final ViewBlocksPlayground.FallbackProperties< T > fallbackProperties,
+			final FallbackProperties< T > fallbackProperties,
 			final String errorMessage )
 	{
 		this.viewProperties = viewProperties;
@@ -47,7 +47,7 @@ class ViewPropertiesOrError< T extends NativeType< T >, R extends NativeType< R 
 		return viewProperties;
 	}
 
-	public ViewBlocksPlayground.FallbackProperties< T > getFallbackProperties()
+	public FallbackProperties< T > getFallbackProperties()
 	{
 		// TODO: null-check, throw Exception (which type?) with errorMessage
 		return fallbackProperties;

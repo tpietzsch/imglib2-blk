@@ -8,8 +8,7 @@ import net.imglib2.util.Intervals;
 
 import static net.imglib2.blk.copy.PrimitiveBlocksUtils.extractOobValue;
 
-// TODO: rename to ViewPrimitiveBlocks
-class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R > > implements PrimitiveBlocks< T >
+class ViewPrimitiveBlocks< T extends NativeType< T >, R extends NativeType< R > > implements PrimitiveBlocks< T >
 {
 	private final ViewProperties< T, R > props;
 
@@ -26,7 +25,7 @@ class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R
 
 	private final Convert convert;
 
-	public RandomAccessibleBlocks( final ViewProperties< T, R > props )
+	public ViewPrimitiveBlocks( final ViewProperties< T, R > props )
 	{
 		this.props = props;
 		final PrimitiveType primitiveType = props.getRootType().getNativeTypeFactory().getPrimitiveType();
@@ -116,12 +115,12 @@ class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R
 		return PrimitiveBlocksUtils.threadSafe( this::newInstance );
 	}
 
-	RandomAccessibleBlocks< T, R > newInstance()
+	ViewPrimitiveBlocks< T, R > newInstance()
 	{
-		return new RandomAccessibleBlocks<>( this );
+		return new ViewPrimitiveBlocks<>( this );
 	}
 
-	private RandomAccessibleBlocks( final RandomAccessibleBlocks< T, R > blocks )
+	private ViewPrimitiveBlocks( final ViewPrimitiveBlocks< T, R > blocks )
 	{
 		props = blocks.props;
 		copier = blocks.copier.newInstance();

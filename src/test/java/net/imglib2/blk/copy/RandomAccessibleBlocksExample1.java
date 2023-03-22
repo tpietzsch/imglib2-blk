@@ -41,8 +41,8 @@ public class RandomAccessibleBlocksExample1
 		final int[] srcPos = Util.long2int( interval.minAsLongArray() );
 		final int[] size = Util.long2int( interval.dimensionsAsLongArray() );
 
-		final ViewProperties< ?, ? > props = ViewBlocksPlayground.getViewProperties( img4 ).getViewProperties();
-		final PrimitiveBlocks< ? > blocks = new RandomAccessibleBlocks<>( props );
+		final ViewProperties< ?, ? > props = ViewAnalyzer.getViewProperties( img4 ).getViewProperties();
+		final PrimitiveBlocks< ? > blocks = new ViewPrimitiveBlocks<>( props );
 		blocks.copy( srcPos, dest, size );
 
 		BdvFunctions.show( target, "copied blocks", Bdv.options().addTo( bdv ) );
