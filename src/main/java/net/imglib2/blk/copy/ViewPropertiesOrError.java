@@ -28,7 +28,7 @@ class ViewPropertiesOrError< T extends NativeType< T >, R extends NativeType< R 
 	 */
 	public boolean isSupported()
 	{
-		return isFullySupported() || getFallbackProperties() != null;
+		return isFullySupported() || fallbackProperties != null;
 	}
 
 	/**
@@ -38,16 +38,18 @@ class ViewPropertiesOrError< T extends NativeType< T >, R extends NativeType< R 
 	 */
 	public boolean isFullySupported()
 	{
-		return getViewProperties() != null;
+		return viewProperties != null;
 	}
 
 	public ViewProperties< T, R > getViewProperties()
 	{
+		// TODO: null-check, throw Exception (which type?) with errorMessage
 		return viewProperties;
 	}
 
 	public ViewBlocksPlayground.FallbackProperties< T > getFallbackProperties()
 	{
+		// TODO: null-check, throw Exception (which type?) with errorMessage
 		return fallbackProperties;
 	}
 
