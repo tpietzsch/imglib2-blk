@@ -3,8 +3,6 @@ package net.imglib2.blk.copy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import net.imglib2.Interval;
-import net.imglib2.Point;
 import net.imglib2.RandomAccessible;
 import net.imglib2.blk.copy.ViewNodeImpl.ConverterViewNode;
 import net.imglib2.blk.copy.ViewNodeImpl.DefaultViewNode;
@@ -28,11 +26,12 @@ import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.MixedTransformView;
 
-// TODO make package-private
-public class ViewAnalyzer
+import static net.imglib2.blk.copy.PrimitiveBlocksUtils.getType;
+
+class ViewAnalyzer
 {
 	/**
-	 * The View.
+	 * The target {@code RandomAccessible}, that is, the View to analyze.
 	 */
 	private final RandomAccessible< ? > ra;
 
@@ -45,7 +44,7 @@ public class ViewAnalyzer
 
 	private final StringBuilder errorDescription = new StringBuilder();
 
-	ViewAnalyzer( final RandomAccessible< ? > ra )
+	private ViewAnalyzer( final RandomAccessible< ? > ra )
 	{
 		this.ra = ra;
 	}
@@ -424,21 +423,21 @@ public class ViewAnalyzer
 		}
 
 		if ( !converterViewNodes.isEmpty() )
-			converterSupplier = AccumulateConverters.getConverterSupplier( converterViewNodes );
+			converterSupplier = accumulateConverters( converterViewNodes );
 
 		return true;
 	}
 
-	static class AccumulateConverters
+	private static Supplier< ? extends Converter< ?, ? > > accumulateConverters(final List< ConverterViewNode< ?, ? > > nodes )
 	{
-		static Supplier< ? extends Converter< ?, ? > > getConverterSupplier(final List< ConverterViewNode< ?, ? > > nodes )
-		{
-			final AccumulateConverters acc = new AccumulateConverters();
-			for ( int i = nodes.size() - 1; i >= 0; --i )
-				acc.append( nodes.get( i ) );
-			return acc.converterSupplier;
-		}
+		final AccumulateConverters acc = new AccumulateConverters();
+		for ( int i = nodes.size() - 1; i >= 0; --i )
+			acc.append( nodes.get( i ) );
+		return acc.converterSupplier;
+	}
 
+	private static class AccumulateConverters
+	{
 		private Supplier< ? extends Converter< ?, ? > > converterSupplier = null;
 
 		private Supplier< ? > destinationSupplier = null;
@@ -561,15 +560,6 @@ public class ViewAnalyzer
 	{
 		final RandomAccessible< T > view = ( RandomAccessible< T > ) ra;
 		return new FallbackProperties<>( getType( view ), view );
-	}
-
-	// TODO replace with ra.getType() when that is available in imglib2 core
-	private static < T extends Type< T > > T getType( RandomAccessible< T > ra )
-	{
-		final Point p = new Point( ra.numDimensions() );
-		if ( ra instanceof Interval )
-			( ( Interval ) ra ).min( p );
-		return ra.getAt( p ).createVariable();
 	}
 
 	public static ViewPropertiesOrError< ?, ? > getViewProperties( RandomAccessible< ? > view )
