@@ -8,6 +8,7 @@ import net.imglib2.util.Intervals;
 
 import static net.imglib2.blk.copy.PrimitiveBlocksUtils.extractOobValue;
 
+// TODO: rename to ViewPrimitiveBlocks
 class RandomAccessibleBlocks< T extends NativeType< T >, R extends NativeType< R > > implements PrimitiveBlocks< T >
 {
 	private final ViewProperties< T, R > props;

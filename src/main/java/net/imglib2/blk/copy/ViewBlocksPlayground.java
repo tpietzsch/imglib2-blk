@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 import net.imglib2.Interval;
 import net.imglib2.Point;
 import net.imglib2.RandomAccessible;
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.blk.copy.ViewNodeImpl.ConverterViewNode;
 import net.imglib2.blk.copy.ViewNodeImpl.DefaultViewNode;
 import net.imglib2.blk.copy.ViewNodeImpl.ExtensionViewNode;
@@ -18,20 +17,19 @@ import net.imglib2.img.ImgView;
 import net.imglib2.img.NativeImg;
 import net.imglib2.img.WrappedImg;
 import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.transform.integer.BoundingBox;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.MixedTransformView;
-import net.imglib2.view.Views;
 
+// TODO rename to ViewAnalyzer
+// TODO make package-private
 public class ViewBlocksPlayground
 {
 	/**
@@ -432,6 +430,51 @@ public class ViewBlocksPlayground
 		return true;
 	}
 
+	static class AccumulateConverters
+	{
+		static Supplier< ? extends Converter< ?, ? > > getConverterSupplier(final List< ConverterViewNode< ?, ? > > nodes )
+		{
+			final AccumulateConverters acc = new AccumulateConverters();
+			for ( int i = nodes.size() - 1; i >= 0; --i )
+				acc.append( nodes.get( i ) );
+			return acc.converterSupplier;
+		}
+
+		private Supplier< ? extends Converter< ?, ? > > converterSupplier = null;
+
+		private Supplier< ? > destinationSupplier = null;
+
+		private < A, B, C > void append( ConverterViewNode< B, C > node )
+		{
+			if ( converterSupplier == null )
+			{
+				converterSupplier = node.getConverterSupplier();
+				destinationSupplier = node.getDestinationSupplier();
+			}
+			else
+			{
+				Supplier< Converter< A, B > > pcs = ( Supplier< Converter< A, B > > ) converterSupplier;
+				Supplier< ? extends B > pds = ( Supplier< ? extends B > ) destinationSupplier;
+				converterSupplier = () -> new Converter< A, C >()
+				{
+					final Converter< A, B > cAB = pcs.get();
+
+					final B b = pds.get();
+
+					final Converter< ? super B, ? super C > cBC = node.getConverterSupplier().get();
+
+					@Override
+					public void convert( final A a, final C c )
+					{
+						cAB.convert( a, b );
+						cBC.convert( b, c );
+					}
+				};
+				destinationSupplier = node.getDestinationSupplier();
+			}
+		}
+	}
+
 	/**
 	 * The concatenated transform from the View {@link #ra RandomAccessible} to the root.
 	 */
@@ -515,6 +558,12 @@ public class ViewBlocksPlayground
 		return new ViewProperties<>( viewType, root, rootType, oobExtension, transform, permuteInvertTransform, converterSupplier );
 	}
 
+	private < T extends NativeType< T > > FallbackProperties< T > getFallbackProperties()
+	{
+		final RandomAccessible< T > view = ( RandomAccessible< T > ) ra;
+		return new FallbackProperties<>( getType( view ), view );
+	}
+
 	// TODO replace with ra.getType() when that is available in imglib2 core
 	private static < T extends Type< T > > T getType( RandomAccessible< T > ra )
 	{
@@ -524,24 +573,7 @@ public class ViewBlocksPlayground
 		return ra.getAt( p ).createVariable();
 	}
 
-	// TEMPORARY. TODO REMOVE
-	public static ViewProperties< ?, ? > properties( RandomAccessible< ? > view )
-	{
-		final ViewBlocksPlayground v = new ViewBlocksPlayground( view );
-		v.analyze();
-		v.checkRootSupported();
-		v.checkRootTypeSupported();
-		v.checkExtensions1();
-		v.checkExtensions2();
-		v.checkExtensions3();
-		v.checkConverters();
-		v.concatenateTransforms();
-		v.checkNoDimensionsAdded();
-		v.splitTransform();
-		return v.getViewProperties();
-	}
-
-	public static ViewPropertiesOrError< ?, ? > tryGetProperties( RandomAccessible< ? > view )
+	public static ViewPropertiesOrError< ?, ? > getViewProperties( RandomAccessible< ? > view )
 	{
 		final ViewBlocksPlayground v = new ViewBlocksPlayground( view );
 
@@ -549,179 +581,92 @@ public class ViewBlocksPlayground
 		final boolean supportsFallback = v.checkViewTypeSupported();
 		if ( !supportsFallback )
 		{
-			// TODO
-			return null;
+			return new ViewPropertiesOrError<>( null, null, v.errorDescription.toString() );
 		}
 
 		final boolean fullySupported =
 				// Deconstruct the target view into a list of ViewNodes
 				v.analyze()
-				// check whether the root of the view is supported (PlanarImg, ArrayImg, CellImg)
+
+				// check whether the root of the view is supported
+				// (PlanarImg, ArrayImg, CellImg)
 				&& v.checkRootSupported()
-				// Check whether the pixel type of the root is supported (NativeType with entitiesPerPixel==1)
+
+				// Check whether the pixel type of the root is supported
+				// (NativeType with entitiesPerPixel==1)
 				&& v.checkRootTypeSupported()
+
 				// Check whether there is at most one out-of-bounds extension
 				&& v.checkExtensions1()
-				// Check whether the out-of-bounds extension (if any) is of a supported type (constant-value, border, mirror-single, mirror-double)
+
+				// Check whether the out-of-bounds extension (if any) is of a
+				// supported type (constant-value, border, mirror-single, mirror-double)
 				&& v.checkExtensions2()
+
 				// Check whether the interval at the out-of-bounds extension is compatible.
 				&& v.checkExtensions3()
+
 				// Connect all converters in the view sequence into a combined converter
 				&& v.checkConverters()
+
 				// Compute the concatenated MixedTransform
 				&& v.concatenateTransforms()
+
 				// Check that all View dimensions are used (mapped to some root dimension)
 				&& v.checkNoDimensionsAdded()
+
 				// Split concatenated transform into remainder * permuteInvert
 				&& v.splitTransform();
-		if (!fullySupported)
+		if ( !fullySupported )
 		{
-			final StringBuilder errorDescription = new StringBuilder();
-			errorDescription.append( "The RandomAccessible " + view + " can only be supported by fall-back copier. \n" );
-			errorDescription.append( v.errorDescription );
-			// TODO
-			return null;
+			final String errorMessage = "The RandomAccessible " + view +
+					" is only be supported through the fall-back implementation of PrimitiveBlocks. \n" +
+					v.errorDescription;
+			final FallbackProperties< ? > fallbackProperties = v.getFallbackProperties();
+			return new ViewPropertiesOrError<>( null, fallbackProperties, errorMessage );
 		}
 
-		// TODO
-		return null;
+		final ViewProperties viewProperties = v.getViewProperties();
+		final FallbackProperties fallbackProperties = v.getFallbackProperties();
+		return new ViewPropertiesOrError<>( viewProperties, fallbackProperties, "" );
 	}
 
-	static class ViewPropertiesOrError< T extends NativeType< T >, R extends NativeType< R > >
+	public static class FallbackProperties< T extends NativeType< T > >
 	{
-		boolean supportsRandomAccessibleBlocks()
+		private final T viewType;
+
+		private final RandomAccessible< T > view;
+
+		/**
+		 * TODO: javadoc
+		 *
+		 * @param viewType pixel type of the View to copy from
+		 * @param view
+		 */
+		FallbackProperties( final T viewType, final RandomAccessible< T > view )
 		{
-			// TODO
-//			true, if all checks go through
-			return false;
+			this.viewType = viewType;
+			this.view = view;
 		}
 
-		boolean supportsPrimitiveBlocksFallBack()
+		@Override
+		public String toString()
 		{
-			// TODO
-//			true, if the target type is a NativeType with entitiesPerPixel==1
-//			[ ] there is no check for this yet. Add checkViewTypeSupported()
-			return false;
+			return "FallbackProperties{" +
+					"viewType=" + viewType.getClass().getSimpleName() +
+					", view=" + view +
+					'}';
 		}
 
-		public String error()
+		public T getViewType()
 		{
-			// TODO
-//		description of why this cannot be handled by either
-//		RandomAccessibleBlocks or FallbackPrimitiveBlocks, or both.
-			return null;
+			return viewType;
 		}
 
-		ViewProperties<T, R> properties()
+		public RandomAccessible< T > getView()
 		{
-			// TODO
-//			null, if supportsRandomAccessibleBlocks() == false
-			return null;
-		}
-	}
-
-
-	static RandomAccessible< ? > example1()
-	{
-//		RandomAccessibleInterval< UnsignedByteType > img0 = ArrayImgs.unsignedBytes( 640, 480, 3 );
-//		RandomAccessibleInterval< UnsignedByteType > img1 = Views.rotate( img0, 1, 0 );
-//		RandomAccessibleInterval< UnsignedByteType > img2 = Views.zeroMin( img1 );
-//		RandomAccessible< UnsignedByteType > img3 = Views.extendBorder( img2 );
-//		RandomAccessible< UnsignedByteType > img4 = Views.hyperSlice( img3, 2, 1 );
-//		return img4;
-
-//		RandomAccessibleInterval< UnsignedByteType > img3 = Views.hyperSlice( img2, 2, 1 );
-//		RandomAccessible< UnsignedByteType > img4 = Views.extendBorder( img3 );
-//		return img4;
-
-		RandomAccessibleInterval< UnsignedByteType > img0 = ArrayImgs.unsignedBytes( 640, 480, 3 );
-		RandomAccessibleInterval< UnsignedByteType > img1 = Views.hyperSlice( img0, 2, 1 );
-		RandomAccessible< UnsignedByteType > img2 = Views.extendBorder( img1 );
-		RandomAccessible< UnsignedByteType > img3 = Views.translate( img2, 100, 50 );
-		return img3;
-	}
-
-	public static void main( String[] args )
-	{
-		System.out.println( "hello world!" );
-		final RandomAccessible< ? > rai = example1();
-		final ViewBlocksPlayground playground = new ViewBlocksPlayground( rai );
-		playground.analyze();
-		for ( int i = 0; i < playground.nodes.size(); i++ )
-		{
-			ViewNode node = playground.nodes.get( i );
-			System.out.println( i + ": " + node );
-		}
-
-		System.out.println( "playground.checkRootSupported() = " + playground.checkRootSupported() );
-		System.out.println( "playground.checkRootTypeSupported() = " + playground.checkRootTypeSupported() );
-		System.out.println( "playground.checkExtensions1() = " + playground.checkExtensions1() );
-		System.out.println( "playground.oobIndex = " + playground.oobIndex );
-		System.out.println( "playground.oobExtension.type() = " + playground.oobExtension );
-		System.out.println( "playground.checkExtensions2() = " + playground.checkExtensions2() );
-		System.out.println( "playground.checkExtensions3() = " + playground.checkExtensions3() );
-		System.out.println( "playground.checkConverters() = " + playground.checkConverters() );
-		playground.concatenateTransforms();
-		System.out.println( "playground.transform = " + playground.transform );
-		System.out.println( "playground.checkNoDimensionsAdded() = " + playground.checkNoDimensionsAdded() );
-		playground.splitTransform();
-		System.out.println( "playground.permuteInvertTransform = " + playground.permuteInvertTransform );
-		System.out.println( "playground.remainderTransform = " + playground.remainderTransform );
-
-		final ViewProperties< ?, ? > viewProperties = playground.getViewProperties();
-		System.out.println( "viewProperties = " + viewProperties );
-	}
-
-
-
-
-
-
-
-
-
-	static class AccumulateConverters
-	{
-		static Supplier< ? extends Converter< ?, ? > > getConverterSupplier(final List< ConverterViewNode< ?, ? > > nodes )
-		{
-			final AccumulateConverters acc = new AccumulateConverters();
-			for ( int i = nodes.size() - 1; i >= 0; --i )
-				acc.append( nodes.get( i ) );
-			return acc.converterSupplier;
-		}
-
-		private Supplier< ? extends Converter< ?, ? > > converterSupplier = null;
-
-		private Supplier< ? > destinationSupplier = null;
-
-		private < A, B, C > void append( ConverterViewNode< B, C > node )
-		{
-			if ( converterSupplier == null )
-			{
-				converterSupplier = node.getConverterSupplier();
-				destinationSupplier = node.getDestinationSupplier();
-			}
-			else
-			{
-				Supplier< Converter< A, B > > pcs = ( Supplier< Converter< A, B > > ) converterSupplier;
-				Supplier< ? extends B > pds = ( Supplier< ? extends B > ) destinationSupplier;
-				converterSupplier = () -> new Converter< A, C >()
-				{
-					final Converter< A, B > cAB = pcs.get();
-
-					final B b = pds.get();
-
-					final Converter< ? super B, ? super C > cBC = node.getConverterSupplier().get();
-
-					@Override
-					public void convert( final A a, final C c )
-					{
-						cAB.convert( a, b );
-						cBC.convert( b, c );
-					}
-				};
-				destinationSupplier = node.getDestinationSupplier();
-			}
+			return view;
 		}
 	}
+
 }

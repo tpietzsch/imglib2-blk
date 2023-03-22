@@ -41,7 +41,7 @@ public class RandomAccessibleBlocksExample2
 //		final int[] srcPos = Util.long2int( interval.minAsLongArray() );
 //		final int[] size = Util.long2int( interval.dimensionsAsLongArray() );
 
-		final ViewProperties< ?, ? > props = ViewBlocksPlayground.properties( img4 );
+		final ViewProperties< ?, ? > props = ViewBlocksPlayground.getViewProperties( img4 ).getViewProperties();
 		final PrimitiveBlocks< ? > blocks = new RandomAccessibleBlocks<>( props ).threadSafe();
 //		blocks.copy( srcPos, dest, size );
 

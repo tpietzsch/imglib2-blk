@@ -39,7 +39,7 @@ public class RandomAccessibleBlocksExample3
 
 		Bdv bdv = BdvFunctions.show( img5, "view", Bdv.options().is2D() );
 
-		final ViewProperties< ?, ? > props = ViewBlocksPlayground.properties( img5 );
+		final ViewProperties< ?, ? > props = ViewBlocksPlayground.getViewProperties( img5 ).getViewProperties();
 		System.out.println( "props.hasPermuteInvertTransform() = " + props.hasPermuteInvertTransform() );
 		final PrimitiveBlocks< ? > blocks = new RandomAccessibleBlocks<>( props ).threadSafe();
 //		blocks.copy( srcPos, dest, size );

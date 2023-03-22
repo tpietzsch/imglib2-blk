@@ -33,6 +33,17 @@ public class ViewProperties< T extends NativeType< T >, R extends NativeType< R 
 
 	private final Supplier< Converter< R, T > > converterSupplier;
 
+	/**
+	 * TODO: javadoc
+	 *
+	 * @param viewType pixel type of the View to copy from
+	 * @param root
+	 * @param rootType
+	 * @param extension
+	 * @param transform
+	 * @param permuteInvertTransform
+	 * @param converterSupplier
+	 */
 	ViewProperties(
 			final T viewType,
 			final NativeImg< R, ? > root,
