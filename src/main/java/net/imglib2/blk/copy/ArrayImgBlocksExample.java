@@ -54,7 +54,7 @@ public class ArrayImgBlocksExample
 			final byte[] data = new byte[ bw * bh ];
 			final Img< UnsignedByteType > output = ArrayImgs.unsignedBytes( data, bw, bh );
 
-			final ArrayImgBlocks< ? > blocks = new ArrayImgBlocks<>( arrayImg, extension );
+			final PrimitiveBlocks< ? > blocks = new NativeImgPrimitiveBlocks<>( arrayImg, extension );
 			blocks.copy( new int[] { ox, oy }, data, new int[] { bw, bh } );
 
 			bdv = BdvFunctions.show(

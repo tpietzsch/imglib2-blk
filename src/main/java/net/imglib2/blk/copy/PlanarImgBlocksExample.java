@@ -50,7 +50,7 @@ public class PlanarImgBlocksExample
 			final byte[] data = new byte[ bw * bh * bd ];
 			final Img< UnsignedByteType > output = ArrayImgs.unsignedBytes( data, bw, bh, bd );
 
-			final PlanarImgBlocks< ? > blocks = new PlanarImgBlocks<>( ( PlanarImg ) img, extension );
+			final PrimitiveBlocks< ? > blocks = new NativeImgPrimitiveBlocks<>( ( PlanarImg ) img, extension );
 			blocks.copy( new int[] { ox, oy, oz }, data, new int[] { bw, bh, bd } );
 
 			bdv = BdvFunctions.show(

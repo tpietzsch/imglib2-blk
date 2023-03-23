@@ -36,7 +36,7 @@ public class ReTilingFloatExample
 				"input",
 				Bdv.options().is2D().addTo( bdv ) );
 
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.constant( new FloatType( 0 ) ) );
+		final PrimitiveBlocks< FloatType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new FloatType( 0 ) ) );
 		final CellLoader< FloatType > loader = new CellLoader< FloatType >()
 		{
 			@Override

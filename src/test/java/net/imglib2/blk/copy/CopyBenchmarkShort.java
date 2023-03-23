@@ -6,6 +6,7 @@ import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.loops.LoopBuilder;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
@@ -94,21 +95,21 @@ public class CopyBenchmarkShort
 	@Benchmark
 	public void benchmarkCellImgBlocks()
 	{
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.constant( new UnsignedShortType( 0 ) ) );
+		final PrimitiveBlocks< UnsignedShortType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new UnsignedShortType( 0 ) ) );
 		blocks.copy( pos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobMirrorSingle()
 	{
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.mirrorSingle() );
+		final PrimitiveBlocks< UnsignedShortType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.mirrorSingle() );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobConstant()
 	{
-		final CellImgBlocks< ? > blocks = new CellImgBlocks<>( cellImg, Extension.constant( new UnsignedShortType( 0 ) ) );
+		final PrimitiveBlocks< UnsignedShortType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new UnsignedShortType( 0 ) ) );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 

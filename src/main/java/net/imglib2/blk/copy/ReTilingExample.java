@@ -35,7 +35,7 @@ public class ReTilingExample
 				"input",
 				Bdv.options().is2D().addTo( bdv ) );
 
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
+		final PrimitiveBlocks< UnsignedByteType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
 		final CellLoader< UnsignedByteType > loader = new CellLoader< UnsignedByteType >()
 		{
 			@Override

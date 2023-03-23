@@ -9,8 +9,9 @@ import bdv.viewer.DisplayMode;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.algorithm.gauss3.Gauss3;
-import net.imglib2.blk.copy.CellImgBlocks;
 import net.imglib2.blk.copy.Extension;
+import net.imglib2.blk.copy.NativeImgPrimitiveBlocks;
+import net.imglib2.blk.copy.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
@@ -52,7 +53,7 @@ public class GaussFloatExample
 
 //		final double[] sigmas = { 4, 4, 4 };
 		final double[] sigmas = { 8, 8, 8 };
-		final CellImgBlocks< FloatType > blocks = new CellImgBlocks<>( cellImg, Extension.constant( new FloatType( 0 ) ) );
+		final PrimitiveBlocks< FloatType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new FloatType( 0 ) ) );
 		final ThreadLocal< GaussFloatBlocked > tlgauss = ThreadLocal.withInitial( () -> new GaussFloatBlocked( sigmas ) );
 		final CellLoader< FloatType > loader = new CellLoader< FloatType >()
 		{

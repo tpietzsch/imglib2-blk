@@ -94,21 +94,21 @@ public class CopyBenchmark
 	@Benchmark
 	public void benchmarkCellImgBlocks()
 	{
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
+		final PrimitiveBlocks< UnsignedByteType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
 		blocks.copy( pos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobMirrorSingle()
 	{
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.mirrorSingle() );
+		final PrimitiveBlocks< UnsignedByteType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.mirrorSingle() );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobConstant()
 	{
-		final CellImgBlocks< ? > blocks = new CellImgBlocks<>( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
+		final PrimitiveBlocks< UnsignedByteType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 

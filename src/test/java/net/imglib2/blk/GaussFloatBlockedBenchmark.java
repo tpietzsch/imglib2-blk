@@ -9,8 +9,9 @@ import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.IterableInterval;
 import net.imglib2.algorithm.gauss3.Gauss3;
-import net.imglib2.blk.copy.CellImgBlocks;
 import net.imglib2.blk.copy.Extension;
+import net.imglib2.blk.copy.NativeImgPrimitiveBlocks;
+import net.imglib2.blk.copy.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
@@ -92,7 +93,7 @@ public class GaussFloatBlockedBenchmark
 	@Benchmark
 	public void benchmarkGaussFloatBlocked()
 	{
-		final CellImgBlocks blocks = new CellImgBlocks( source, Extension.constant( new FloatType( 0 ) ) );
+		final PrimitiveBlocks< FloatType > blocks = new NativeImgPrimitiveBlocks<>( source, Extension.constant( new FloatType( 0 ) ) );
 		final ThreadLocal< GaussFloatBlocked > tlgauss = ThreadLocal.withInitial( () -> new GaussFloatBlocked( sigmas ) );
 		final CellLoader< FloatType > loader = new CellLoader< FloatType >()
 		{
@@ -128,7 +129,7 @@ public class GaussFloatBlockedBenchmark
 
 	static CachedCellImg< FloatType, ? > smoothed(
 			final Interval sourceInterval,
-			final CellImgBlocks blocks,
+			final PrimitiveBlocks< FloatType > blocks,
 			final int dim,
 			final double sigma )
 	{
@@ -169,7 +170,7 @@ public class GaussFloatBlockedBenchmark
 		AbstractCellImg< FloatType, ?, ?, ? > s = source;
 		for ( int d = 0; d < source.numDimensions(); d++ )
 		{
-			smoothed[ d ] = smoothed( source, new CellImgBlocks( s, Extension.constant( new FloatType( 0 ) ) ), d, sigmas[ d ] );
+			smoothed[ d ] = smoothed( source, new NativeImgPrimitiveBlocks<>( s, Extension.constant( new FloatType( 0 ) ) ), d, sigmas[ d ] );
 			s = smoothed[ d ];
 		}
 

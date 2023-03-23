@@ -54,33 +54,33 @@ public class CopyBenchmarkPolymorphic
 		final CellImgFactory< UnsignedByteType > factoryByte = new CellImgFactory<>( new UnsignedByteType(), cellDimensions );
 		final CellImg< UnsignedByteType, ? > cellImgByte = factoryByte.create( srcDimensions );
 		final byte[] destByte = new byte[ ( int ) Intervals.numElements( destDimensions ) ];
-		CellImgBlocks blocksByte = new CellImgBlocks( cellImgByte, Extension.constant( new UnsignedByteType( 0 ) ) );
+		PrimitiveBlocks< UnsignedByteType > blocksByte = new NativeImgPrimitiveBlocks<>( cellImgByte, Extension.constant( new UnsignedByteType( 0 ) ) );
 		blocksByte.copy( pos, destByte, destDimensions );
-		blocksByte = new CellImgBlocks( cellImgByte, Extension.mirrorSingle() );
+		blocksByte = new NativeImgPrimitiveBlocks<>( cellImgByte, Extension.mirrorSingle() );
 		blocksByte.copy( oobPos, destByte, destDimensions );
-		blocksByte = new CellImgBlocks<>( cellImgByte, Extension.constant( new UnsignedByteType( 0 ) ) );
+		blocksByte = new NativeImgPrimitiveBlocks<>( cellImgByte, Extension.constant( new UnsignedByteType( 0 ) ) );
 		blocksByte.copy( oobPos, destByte, destDimensions );
 
 		// float
 		final CellImgFactory< FloatType > factoryFloat = new CellImgFactory<>( new FloatType(), cellDimensions );
 		final CellImg< FloatType, ? > cellImgFloat = factoryFloat.create( srcDimensions );
 		final float[] destFloat = new float[ ( int ) Intervals.numElements( destDimensions ) ];
-		CellImgBlocks blocksFloat = new CellImgBlocks( cellImgFloat, Extension.constant( new FloatType( 0 ) ) );
+		PrimitiveBlocks< FloatType > blocksFloat = new NativeImgPrimitiveBlocks<>( cellImgFloat, Extension.constant( new FloatType( 0 ) ) );
 		blocksFloat.copy( pos, destFloat, destDimensions );
-		blocksFloat = new CellImgBlocks( cellImgFloat, Extension.mirrorSingle() );
+		blocksFloat = new NativeImgPrimitiveBlocks<>( cellImgFloat, Extension.mirrorSingle() );
 		blocksFloat.copy( oobPos, destFloat, destDimensions );
-		blocksFloat = new CellImgBlocks<>( cellImgFloat, Extension.constant( new FloatType( 0 ) ) );
+		blocksFloat = new NativeImgPrimitiveBlocks<>( cellImgFloat, Extension.constant( new FloatType( 0 ) ) );
 		blocksFloat.copy( oobPos, destFloat, destDimensions );
 
 		// double
 		final CellImgFactory< DoubleType > factoryDouble = new CellImgFactory<>( new DoubleType(), cellDimensions );
 		final CellImg< DoubleType, ? > cellImgDouble = factoryDouble.create( srcDimensions );
 		final double[] destDouble = new double[ ( int ) Intervals.numElements( destDimensions ) ];
-		CellImgBlocks blocksDouble = new CellImgBlocks( cellImgDouble, Extension.constant( new DoubleType( 0 ) ) );
+		PrimitiveBlocks< DoubleType > blocksDouble = new NativeImgPrimitiveBlocks<>( cellImgDouble, Extension.constant( new DoubleType( 0 ) ) );
 		blocksDouble.copy( pos, destDouble, destDimensions );
-		blocksDouble = new CellImgBlocks( cellImgDouble, Extension.mirrorSingle() );
+		blocksDouble = new NativeImgPrimitiveBlocks<>( cellImgDouble, Extension.mirrorSingle() );
 		blocksDouble.copy( oobPos, destDouble, destDimensions );
-		blocksDouble = new CellImgBlocks<>( cellImgDouble, Extension.constant( new DoubleType( 0 ) ) );
+		blocksDouble = new NativeImgPrimitiveBlocks<>( cellImgDouble, Extension.constant( new DoubleType( 0 ) ) );
 		blocksDouble.copy( oobPos, destDouble, destDimensions );
 	}
 
@@ -144,21 +144,21 @@ public class CopyBenchmarkPolymorphic
 	@Benchmark
 	public void benchmarkCellImgBlocks()
 	{
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
+		final PrimitiveBlocks< UnsignedByteType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
 		blocks.copy( pos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobMirrorSingle()
 	{
-		final CellImgBlocks blocks = new CellImgBlocks( cellImg, Extension.mirrorSingle() );
+		final PrimitiveBlocks< UnsignedByteType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.mirrorSingle() );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobConstant()
 	{
-		final CellImgBlocks< ? > blocks = new CellImgBlocks<>( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
+		final PrimitiveBlocks< UnsignedByteType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 
