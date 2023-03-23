@@ -39,10 +39,8 @@ public class RandomAccessibleBlocksExample3
 
 		Bdv bdv = BdvFunctions.show( img5, "view", Bdv.options().is2D() );
 
-		final ViewProperties< ?, ? > props = ViewAnalyzer.getViewProperties( img5 ).getViewProperties();
-		System.out.println( "props.hasPermuteInvertTransform() = " + props.hasPermuteInvertTransform() );
-		final PrimitiveBlocks< ? > blocks = new ViewPrimitiveBlocks<>( props ).threadSafe();
-//		blocks.copy( srcPos, dest, size );
+		final PrimitiveBlocks< UnsignedByteType > blocks = PrimitiveBlocks.of( img5 ).threadSafe();
+		System.out.println( "blocks.getType().getClass().getSimpleName() = " + blocks.getType().getClass().getSimpleName() );
 
 		final CellLoader< UnsignedByteType > loader = cell -> {
 			final int[] srcPos = Intervals.minAsIntArray( cell );

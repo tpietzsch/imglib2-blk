@@ -562,7 +562,7 @@ class ViewAnalyzer
 		return new FallbackProperties<>( getType( view ), view );
 	}
 
-	public static ViewPropertiesOrError< ?, ? > getViewProperties( RandomAccessible< ? > view )
+	public static < T extends NativeType< T >, R extends NativeType< R > > ViewPropertiesOrError< T, R > getViewProperties( RandomAccessible< T > view )
 	{
 		final ViewAnalyzer v = new ViewAnalyzer( view );
 
@@ -611,7 +611,7 @@ class ViewAnalyzer
 			final String errorMessage = "The RandomAccessible " + view +
 					" is only be supported through the fall-back implementation of PrimitiveBlocks. \n" +
 					v.errorDescription;
-			final FallbackProperties< ? > fallbackProperties = v.getFallbackProperties();
+			final FallbackProperties fallbackProperties = v.getFallbackProperties();
 			return new ViewPropertiesOrError<>( null, fallbackProperties, errorMessage );
 		}
 

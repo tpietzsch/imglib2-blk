@@ -20,7 +20,11 @@ public class FallbackPrimitiveBlocks< T extends NativeType< T >, A extends Array
 
 	private final NativeTypeFactory< T, A > nativeTypeFactory;
 
-	@SuppressWarnings( "unchecked" )
+	public FallbackPrimitiveBlocks( final FallbackProperties< T > props )
+	{
+		this( props.getView(), props.getViewType() );
+	}
+
 	public FallbackPrimitiveBlocks( final RandomAccessible< T > source, final T type )
 	{
 		this.source = source;
