@@ -39,6 +39,46 @@ public interface MemCopy< T >
 	 */
 	void copyStrided( T src, int srcPos, T dest, int destPos, int destStride, int length );
 
+	/**
+	 * Copy {@code numLines} stretches of {@code lineLength} elements.
+	 *
+	 * @param lineDir {@code 1}, {@code -1}, or {@code 0}. This corresponds (for every line being copied) to the source position moving forward, backward, or not at all, as the dest position is moving forward.
+	 * @param lineLength how many elements to copy per line
+	 * @param numLines how many lines to copy
+	 * @param src source array
+	 * @param srcPos starting position in source array
+	 * @param srcStep offset to next line in src
+	 * @param dest dest array
+	 * @param destPos starting position in dest array
+	 * @param destStep offset to next line in dest
+	 */
+	// Note that this default implementation is overridden in each
+	// implementation (with identical code) to soften the performance hit from
+	// polymorphism. The default implementation is left here, to make additional
+	// implementations easier.
+	default void copyLines(
+			final int lineDir,
+			final int lineLength,
+			final int numLines,
+			final T src,
+			final int srcPos,
+			final int srcStep,
+			final T dest,
+			final int destPos,
+			final int destStep )
+	{
+		if ( lineDir == 1 )
+			for ( int i = 0; i < numLines; ++i )
+				copyForward( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+		else if ( lineDir == -1 )
+			for ( int i = 0; i < numLines; ++i )
+				copyReverse( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+		else // cstep0 == 0
+			for ( int i = 0; i < numLines; ++i )
+				copyValue( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+	}
+
+
 	MemCopyBoolean BOOLEAN = new MemCopyBoolean();
 	MemCopyByte BYTE = new MemCopyByte();
 	MemCopyChar CHAR = new MemCopyChar();
@@ -104,6 +144,20 @@ public interface MemCopy< T >
 				for ( int i = 0; i < length; ++i )
 					dest[ destPos + i * destStride ] = src[ srcPos + i ];
 		}
+
+		@Override
+		public void copyLines( final int lineDir, final int lineLength, final int numLines, final boolean[] src, final int srcPos, final int srcStep, final boolean[] dest, final int destPos, final int destStep )
+		{
+			if ( lineDir == 1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyForward( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else if ( lineDir == -1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyReverse( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else // cstep0 == 0
+				for ( int i = 0; i < numLines; ++i )
+					copyValue( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+		}
 	}
 
 	class MemCopyByte implements MemCopy< byte[] >
@@ -135,6 +189,20 @@ public interface MemCopy< T >
 			else
 				for ( int i = 0; i < length; ++i )
 					dest[ destPos + i * destStride ] = src[ srcPos + i ];
+		}
+
+		@Override
+		public void copyLines( final int lineDir, final int lineLength, final int numLines, final byte[] src, final int srcPos, final int srcStep, final byte[] dest, final int destPos, final int destStep )
+		{
+			if ( lineDir == 1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyForward( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else if ( lineDir == -1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyReverse( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else // cstep0 == 0
+				for ( int i = 0; i < numLines; ++i )
+					copyValue( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
 		}
 	}
 
@@ -169,6 +237,20 @@ public interface MemCopy< T >
 				for ( int i = 0; i < length; ++i )
 					dest[ destPos + i * destStride ] = src[ srcPos + i ];
 		}
+
+		@Override
+		public void copyLines( final int lineDir, final int lineLength, final int numLines, final short[] src, final int srcPos, final int srcStep, final short[] dest, final int destPos, final int destStep )
+		{
+			if ( lineDir == 1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyForward( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else if ( lineDir == -1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyReverse( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else // cstep0 == 0
+				for ( int i = 0; i < numLines; ++i )
+					copyValue( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+		}
 	}
 
 	class MemCopyChar implements MemCopy< char[] >
@@ -200,6 +282,20 @@ public interface MemCopy< T >
 			else
 				for ( int i = 0; i < length; ++i )
 					dest[ destPos + i * destStride ] = src[ srcPos + i ];
+		}
+
+		@Override
+		public void copyLines( final int lineDir, final int lineLength, final int numLines, final char[] src, final int srcPos, final int srcStep, final char[] dest, final int destPos, final int destStep )
+		{
+			if ( lineDir == 1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyForward( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else if ( lineDir == -1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyReverse( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else // cstep0 == 0
+				for ( int i = 0; i < numLines; ++i )
+					copyValue( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
 		}
 	}
 
@@ -233,6 +329,20 @@ public interface MemCopy< T >
 				for ( int i = 0; i < length; ++i )
 					dest[ destPos + i * destStride ] = src[ srcPos + i ];
 		}
+
+		@Override
+		public void copyLines( final int lineDir, final int lineLength, final int numLines, final int[] src, final int srcPos, final int srcStep, final int[] dest, final int destPos, final int destStep )
+		{
+			if ( lineDir == 1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyForward( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else if ( lineDir == -1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyReverse( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else // cstep0 == 0
+				for ( int i = 0; i < numLines; ++i )
+					copyValue( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+		}
 	}
 
 	class MemCopyLong implements MemCopy< long[] >
@@ -264,6 +374,20 @@ public interface MemCopy< T >
 			else
 				for ( int i = 0; i < length; ++i )
 					dest[ destPos + i * destStride ] = src[ srcPos + i ];
+		}
+
+		@Override
+		public void copyLines( final int lineDir, final int lineLength, final int numLines, final long[] src, final int srcPos, final int srcStep, final long[] dest, final int destPos, final int destStep )
+		{
+			if ( lineDir == 1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyForward( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else if ( lineDir == -1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyReverse( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else // cstep0 == 0
+				for ( int i = 0; i < numLines; ++i )
+					copyValue( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
 		}
 	}
 
@@ -297,6 +421,20 @@ public interface MemCopy< T >
 				for ( int i = 0; i < length; ++i )
 					dest[ destPos + i * destStride ] = src[ srcPos + i ];
 		}
+
+		@Override
+		public void copyLines( final int lineDir, final int lineLength, final int numLines, final float[] src, final int srcPos, final int srcStep, final float[] dest, final int destPos, final int destStep )
+		{
+			if ( lineDir == 1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyForward( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else if ( lineDir == -1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyReverse( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else // cstep0 == 0
+				for ( int i = 0; i < numLines; ++i )
+					copyValue( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+		}
 	}
 
 	class MemCopyDouble implements MemCopy< double[] >
@@ -328,6 +466,20 @@ public interface MemCopy< T >
 			else
 				for ( int i = 0; i < length; ++i )
 					dest[ destPos + i * destStride ] = src[ srcPos + i ];
+		}
+
+		@Override
+		public void copyLines( final int lineDir, final int lineLength, final int numLines, final double[] src, final int srcPos, final int srcStep, final double[] dest, final int destPos, final int destStep )
+		{
+			if ( lineDir == 1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyForward( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else if ( lineDir == -1 )
+				for ( int i = 0; i < numLines; ++i )
+					copyReverse( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
+			else // cstep0 == 0
+				for ( int i = 0; i < numLines; ++i )
+					copyValue( src, srcPos + i * srcStep, dest, destPos + i * destStep, lineLength );
 		}
 	}
 }

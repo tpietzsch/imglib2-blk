@@ -114,7 +114,7 @@ public class CopyBenchmark
 
 	public static void main( String... args ) throws RunnerException
 	{
-		Options options = new OptionsBuilder().include( CopyBenchmark.class.getSimpleName() ).build();
+		Options options = new OptionsBuilder().include( CopyBenchmark.class.getSimpleName() + "\\." ).build();
 		new Runner( options ).run();
 	}
 }

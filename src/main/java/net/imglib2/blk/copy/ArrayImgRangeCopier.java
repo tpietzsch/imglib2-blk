@@ -179,12 +179,7 @@ public class ArrayImgRangeCopier< T > implements RangeCopier< T >
 		{
 			final int l0 = lengths[ 0 ];
 			final int cstep0 = csteps[ 0 ];
-			if ( cstep0 == 1 )
-				memCopy.copyForward( src, sOffset, dest, dOffset, l0 );
-			else if ( cstep0 == -1 )
-				memCopy.copyReverse( src, sOffset, dest, dOffset, l0 );
-			else // cstep0 == 0
-				memCopy.copyValue( src, sOffset, dest, dOffset, l0 );
+			memCopy.copyLines( cstep0, l0, 1, src, sOffset, 0, dest, dOffset, 0 );
 		}
 	}
 
@@ -200,15 +195,7 @@ public class ArrayImgRangeCopier< T > implements RangeCopier< T >
 		{
 			final int l0 = lengths[ 0 ];
 			final int cstep0 = csteps[ 0 ];
-			if ( cstep0 == 1 )
-				for ( int i = 0; i < length; ++i )
-					memCopy.copyForward( src, srcPos + i * cstep, dest, destPos + i * dstep, l0 );
-			else if ( cstep0 == -1 )
-				for ( int i = 0; i < length; ++i )
-					memCopy.copyReverse( src, srcPos + i * cstep, dest, destPos + i * dstep, l0 );
-			else // cstep0 == 0
-				for ( int i = 0; i < length; ++i )
-					memCopy.copyValue( src, srcPos + i * cstep, dest, destPos + i * dstep, l0 );
+			memCopy.copyLines( cstep0, l0, length, src, srcPos, cstep, dest, destPos, dstep );
 		}
 	}
 
