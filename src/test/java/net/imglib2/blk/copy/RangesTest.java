@@ -1,7 +1,23 @@
 package net.imglib2.blk.copy;
 
+import java.util.List;
+import net.imglib2.blk.copy.Ranges.Range;
+
 public class RangesTest
 {
+
+	// simplified 1D copy() for testing computed ranges
+	static void copy( final List< Range > ranges, final int[][] data, final int[] dest )
+	{
+		int x = 0;
+		for ( Range range : ranges )
+		{
+			final int[] cell = data[ range.gridx ];
+			for ( int i = 0; i < range.w; ++i )
+				dest[ x++ ] = cell[ i + range.cellx ];
+		}
+	}
+
 
 //	(from RangePlayground, 9cbcc5ee)
 //  block to copy is within bounds of source image.
