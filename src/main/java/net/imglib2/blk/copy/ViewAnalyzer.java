@@ -301,7 +301,6 @@ class ViewAnalyzer
 
 		BoundingBox bbExtension = nodes.get( oobIndex + 1 ).bbox();
 		BoundingBox bb = nodes.get( nodes.size() - 1 ).bbox();
-		System.out.println( "bb.getInterval() = " + bb.getInterval() );
 		for ( int i = nodes.size() - 1; i > oobIndex; --i )
 		{
 			final ViewNode node = nodes.get( i );
@@ -391,17 +390,24 @@ class ViewAnalyzer
 	/**
 	 * Connect all converters in the view sequence into a combined converter. If
 	 * the out-of-bounds extension requires values of a specific type (like
-	 * constant-value extension), then all converters have to happen after the
-	 * out-of-bounds extension (because for example the constant-value
-	 * extension's oob value type does not match the pixel type after
-	 * conversion). If everything works, the combined converter is provided in
-	 * {@link #converterSupplier}.
+	 * constant-value extension), then all converters have to <em>happen
+	 * after</em> the out-of-bounds extension (that is, they have to occur
+	 * earlier in the {@code nodes} sequence).
+	 * <p>
+	 * For example if a constant-value extension is applied to a {@code
+	 * DoubleType} {@code RandomAccessible} the oob value will be of {@code
+	 * DoubleType}. If the RA was converted from a {@code UnsignedByteType}
+	 * {@code NativeImg} we don't know the {@code UnsignedByteType} oob value
+	 * for the underlying {@code NativeImg} which would lead to the same effect.
+	 * Therefore, this is not allowed.
+	 * <p>
+	 * If everything works, the combined converter is provided in {@link #converterSupplier}.
 	 *
 	 * @return {@code true}, if all converters could be combined and work with the out-of-bounds extension.
 	 */
 	private boolean checkConverters()
 	{
-		final boolean requiresConvertBeforeExtend = oobExtension != null && oobExtension.type().isValueDependent();
+		final boolean dontConvertBeforeExtend = oobExtension != null && oobExtension.type().isValueDependent();
 
 		final List< ConverterViewNode< ?, ? > > converterViewNodes = new ArrayList<>();
 		for ( int i = 0; i < nodes.size(); i++ )
@@ -409,10 +415,10 @@ class ViewAnalyzer
 			final ViewNode node = nodes.get( i );
 			if ( node.viewType() == ViewNode.ViewType.CONVERTER )
 			{
-				if ( i < oobIndex && requiresConvertBeforeExtend )
+				if ( i > oobIndex && dontConvertBeforeExtend )
 				{
 					errorDescription.append(
-							"The out-of-bounds extension in the view sequence requires that all converters happen before." );
+							"The out-of-bounds extension in the view sequence requires that no converter is applied before it." );
 					return false;
 				}
 				else

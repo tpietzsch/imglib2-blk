@@ -156,5 +156,11 @@ interface ViewNode
 		{
 			return converterSupplier;
 		}
+
+		@Override
+		public String toString()
+		{
+			return "ConverterViewNode{viewType=" + viewType + ", view=" + view + ", interval=" + interval + '}';
+		}
 	}
 }
