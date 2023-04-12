@@ -1,6 +1,7 @@
 package net.imglib2.blk.copy;
 
 import java.util.function.Supplier;
+import net.imglib2.RandomAccessible;
 import net.imglib2.converter.Converter;
 import net.imglib2.img.NativeImg;
 import net.imglib2.transform.integer.MixedTransform;
@@ -8,7 +9,11 @@ import net.imglib2.type.NativeType;
 import net.imglib2.view.TransformBuilder;
 
 /**
- * TODO javadoc
+ * Data that describes {@code RandomAccessible} View that can be copied from using
+ * {@link ViewPrimitiveBlocks}.
+ * <p>
+ * Use {@link ViewAnalyzer#getViewProperties(RandomAccessible)} to (try to)
+ * extract {@code ViewProperties} for a given {@code RandomAccessible}.
  *
  * @param <T>
  * 		type of the view {@code RandomAccessible}
@@ -34,15 +39,15 @@ public class ViewProperties< T extends NativeType< T >, R extends NativeType< R 
 	private final Supplier< Converter< R, T > > converterSupplier;
 
 	/**
-	 * TODO: javadoc
+	 * Create {@code ViewProperties}.
 	 *
 	 * @param viewType pixel type of the View to copy from
-	 * @param root
-	 * @param rootType
-	 * @param extension
-	 * @param transform
-	 * @param permuteInvertTransform
-	 * @param converterSupplier
+	 * @param root the {@code NativeImg} at the root of the View chain
+	 * @param rootType pixel type of the root {@code NativeImg}
+	 * @param extension out-of-bounds extension to apply to the root
+	 * @param transform the concatenated transform from the final View to the root.
+	 * @param permuteInvertTransform captures axis permutation and inversion part in {@code transform}.
+	 * @param converterSupplier creates {@code Converter} from {@code rootType} to {@code viewType}.
 	 */
 	ViewProperties(
 			final T viewType,
