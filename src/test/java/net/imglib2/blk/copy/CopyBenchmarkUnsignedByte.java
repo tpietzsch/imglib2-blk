@@ -24,13 +24,16 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+/**
+ * Benchmark copying from a CellImg with various out-of-bounds extensions.
+ */
 @State( Scope.Benchmark )
 @Warmup( iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS )
 @Measurement( iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS )
 @BenchmarkMode( Mode.AverageTime )
 @OutputTimeUnit( TimeUnit.MILLISECONDS )
 @Fork( 1 )
-public class CopyBenchmark
+public class CopyBenchmarkUnsignedByte
 {
 	private final int[] cellDimensions = { 64, 64, 64 };
 	private final int[] srcDimensions = { 300, 300, 300 };
@@ -44,7 +47,7 @@ public class CopyBenchmark
 
 	private final byte[] dest;
 
-	public CopyBenchmark()
+	public CopyBenchmarkUnsignedByte()
 	{
 		final CellImgFactory< UnsignedByteType > cellImgFactory = new CellImgFactory<>( new UnsignedByteType(), cellDimensions );
 		cellImg = cellImgFactory.create( srcDimensions );
@@ -114,7 +117,7 @@ public class CopyBenchmark
 
 	public static void main( String... args ) throws RunnerException
 	{
-		Options options = new OptionsBuilder().include( CopyBenchmark.class.getSimpleName() + "\\." ).build();
+		Options options = new OptionsBuilder().include( CopyBenchmarkUnsignedByte.class.getSimpleName() + "\\." ).build();
 		new Runner( options ).run();
 	}
 }

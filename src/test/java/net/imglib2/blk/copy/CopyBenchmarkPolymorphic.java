@@ -37,7 +37,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 public class CopyBenchmarkPolymorphic
 {
 	private final int[] cellDimensions = { 64, 64, 64 };
-	private final int[] srcDimensions = { 600, 600, 500 };
+	private final int[] srcDimensions = { 300, 300, 300 };
 	private final int[] destDimensions = { 100, 100, 100 };
 	private final int[] pos = { 64, 100, 100 };
 	private final int[] oobPos = { -64, -64, -64 };

@@ -6,8 +6,7 @@ import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.loops.LoopBuilder;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
@@ -29,28 +28,28 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @Warmup( iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS )
 @Measurement( iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS )
 @BenchmarkMode( Mode.AverageTime )
-@OutputTimeUnit( TimeUnit.MICROSECONDS )
+@OutputTimeUnit( TimeUnit.MILLISECONDS )
 @Fork( 1 )
-public class CopyBenchmarkShort
+public class CopyBenchmarkFloat
 {
 	private final int[] cellDimensions = { 64, 64, 64 };
-	private final int[] srcDimensions = { 1000, 1000, 1000 };
-	private final int[] destDimensions = { 100, 100, 100 };
+	private final int[] srcDimensions = { 300, 300, 300 };
+	private final int[] destDimensions = { 64, 64, 64 };
 	private final int[] pos = { 64, 100, 100 };
-	private final int[] oobPos = { -64, -64, -64 };
+	private final int[] oobPos = { -32, -32, -32 };
 
-	private final CellImg< UnsignedShortType, ? > cellImg;
+	private final CellImg< FloatType, ? > cellImg;
 
-	private final ArrayImg< UnsignedShortType, ? > destArrayImg;
+	private final ArrayImg< FloatType, ? > destArrayImg;
 
-	private final short[] dest;
+	private final float[] dest;
 
-	public CopyBenchmarkShort()
+	public CopyBenchmarkFloat()
 	{
-		final CellImgFactory< UnsignedShortType > cellImgFactory = new CellImgFactory<>( new UnsignedShortType(), cellDimensions );
+		final CellImgFactory< FloatType > cellImgFactory = new CellImgFactory<>( new FloatType(), cellDimensions );
 		cellImg = cellImgFactory.create( srcDimensions );
-		destArrayImg = new ArrayImgFactory<>( new UnsignedShortType() ).create( destDimensions );
-		dest = new short[ ( int ) Intervals.numElements( destDimensions ) ];
+		destArrayImg = new ArrayImgFactory<>( new FloatType() ).create( destDimensions );
+		dest = new float[ ( int ) Intervals.numElements( destDimensions ) ];
 	}
 
 	@Benchmark
@@ -95,27 +94,27 @@ public class CopyBenchmarkShort
 	@Benchmark
 	public void benchmarkCellImgBlocks()
 	{
-		final PrimitiveBlocks< UnsignedShortType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new UnsignedShortType( 0 ) ) );
+		final PrimitiveBlocks< FloatType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new FloatType( 0 ) ) );
 		blocks.copy( pos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobMirrorSingle()
 	{
-		final PrimitiveBlocks< UnsignedShortType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.mirrorSingle() );
+		final PrimitiveBlocks< FloatType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.mirrorSingle() );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobConstant()
 	{
-		final PrimitiveBlocks< UnsignedShortType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new UnsignedShortType( 0 ) ) );
+		final PrimitiveBlocks< FloatType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new FloatType( 0 ) ) );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 
 	public static void main( String... args ) throws RunnerException
 	{
-		Options options = new OptionsBuilder().include( CopyBenchmarkShort.class.getSimpleName() ).build();
+		Options options = new OptionsBuilder().include( CopyBenchmarkFloat.class.getSimpleName() + "\\." ).build();
 		new Runner( options ).run();
 	}
 }
