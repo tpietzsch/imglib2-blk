@@ -1,7 +1,12 @@
 package net.imglib2.blk.copy;
 
+import java.util.Arrays;
 import java.util.List;
 import net.imglib2.blk.copy.Ranges.Range;
+import org.junit.Assert;
+import org.junit.Test;
+
+import static net.imglib2.blk.copy.Ranges.Direction.FORWARD;
 
 public class RangesTest
 {
@@ -18,6 +23,36 @@ public class RangesTest
 		}
 	}
 
+
+	@Test
+	public void copyInBounds()
+	{
+		// test data:
+		// image consisting of 3 cells with 5 elements each.
+		// border cell is not truncated.
+		int[][] data = {
+				{ 0, 1, 2, 3, 4 },
+				{ 5, 6, 7, 8, 9 },
+				{ 10, 11, 12, 13, 14 }
+		};
+		final int iw = 15; // image width
+		final int cw = 5; // cell width
+
+		final int[] dest = new int[ 9 ];
+		final int bw = dest.length;
+		final List< Range > ranges = RangesImpl.findRanges_constant( 3, bw, iw, cw );
+
+		final Range[] expectedRanges = {
+				new Range( 0, 3, 2, FORWARD, 0 ),
+				new Range( 1, 0, 5, FORWARD, 2 ),
+				new Range( 2, 0, 2, FORWARD, 7 )
+		};
+		Assert.assertArrayEquals( expectedRanges, ranges.toArray() );
+
+		copy( ranges, data, dest );
+		final int[] expected = new int[] { 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+		Assert.assertArrayEquals( expected, dest );
+	}
 
 //	(from RangePlayground, 9cbcc5ee)
 //  block to copy is within bounds of source image.
@@ -46,10 +81,6 @@ public class RangesTest
 //	range = Range{gridx=1, cellx=0, w=5, dir=FORWARD, x=2}
 //	range = Range{gridx=2, cellx=0, w=2, dir=FORWARD, x=7}
 //	dest = [3, 4, 5, 6, 7, 8, 9, 10, 11]
-
-
-
-
 
 
 //	(from RangePlayground2, 9cbcc5ee)
@@ -99,12 +130,6 @@ public class RangesTest
 //	dest = [1, 2, 3, 4, 5, 4, 3, 2, 1, 0, 1, 2]
 
 
-
-
-
-
-
-
 //	(from RangePlayground3, 9cbcc5ee)
 //	border extension
 //
@@ -149,7 +174,6 @@ public class RangesTest
 //	dest = [0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5]          i = -7
 //	dest = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5]          i = -8
 //	dest = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5]          i = -9
-
 
 
 	public static void main( String[] args )
