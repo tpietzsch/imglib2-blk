@@ -17,7 +17,7 @@ import java.util.Objects;
  * Use {@link #forExtension(Extension)} to pick a particular strategy.
  */
 @FunctionalInterface
-public interface Ranges
+interface Ranges
 {
 	/**
 	 * Find ranges for one dimension.

@@ -10,7 +10,7 @@ import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
-public class FallbackPrimitiveBlocks< T extends NativeType< T >, A extends ArrayDataAccess< A > > implements PrimitiveBlocks< T >
+class FallbackPrimitiveBlocks< T extends NativeType< T >, A extends ArrayDataAccess< A > > implements PrimitiveBlocks< T >
 {
 	private final RandomAccessible< T > source;
 

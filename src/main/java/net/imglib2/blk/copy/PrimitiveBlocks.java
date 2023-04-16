@@ -2,6 +2,7 @@ package net.imglib2.blk.copy;
 
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.NativeType;
+import net.imglib2.view.TransformBuilder;
 
 import static net.imglib2.blk.copy.PrimitiveBlocks.OnFallback.FAIL;
 import static net.imglib2.blk.copy.PrimitiveBlocks.OnFallback.WARN;
@@ -20,7 +21,19 @@ public interface PrimitiveBlocks< T extends NativeType< T > >
 {
 	T getType();
 
-	void copy( final int[] srcPos, final Object dest, final int[] size );
+	/**
+	 * Copy a block from the ({@code T}-typed) source into primitive arrays (of the appropriate type).
+	 *
+	 * @param srcPos
+	 * 		min coordinate of the block to copy
+	 * @param dest
+	 * 		primitive array to copy into. Must correspond to {@code T}, for
+	 *      example, if {@code T} is {@code UnsignedByteType} then {@code dest} must
+	 *      be {@code byte[]}.
+	 * @param size
+	 * 		the size of the block to copy
+	 */
+	void copy( int[] srcPos, Object dest, int[] size );
 
 	PrimitiveBlocks< T > threadSafe();
 

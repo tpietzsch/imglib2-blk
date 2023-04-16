@@ -6,8 +6,12 @@ import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
-// T is a primitive array type
-public class ArrayImgRangeCopier< T > implements RangeCopier< T >
+/**
+ * Does the actual copying work from an {@code ArrayImg} into a primitive array.
+ *
+ * @param <T> a primitive array type, e.g., {@code byte[]}.
+ */
+class ArrayImgRangeCopier< T > implements RangeCopier< T >
 {
 	private final int n;
 	private final int[] srcDims;

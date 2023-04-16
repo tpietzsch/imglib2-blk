@@ -3,7 +3,7 @@ package net.imglib2.blk.copy;
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.NativeType;
 
-public class FallbackProperties< T extends NativeType< T > >
+class FallbackProperties< T extends NativeType< T > >
 {
 	private final T viewType;
 

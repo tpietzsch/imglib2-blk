@@ -8,7 +8,7 @@ import net.imglib2.type.NativeType;
 
 import static net.imglib2.blk.copy.PrimitiveBlocksUtils.extractOobValue;
 
-// TODO: should this be public (?)
+// TODO: Should NativeImgPrimitiveBlocks be public?? Maybe just detect special case in PrimitiveBlocks and make this package-private
 public class NativeImgPrimitiveBlocks< T extends NativeType< T > > implements PrimitiveBlocks< T >
 {
 	public NativeImgPrimitiveBlocks( final ArrayImg< T, ? > img, final Extension extension )
@@ -26,6 +26,28 @@ public class NativeImgPrimitiveBlocks< T extends NativeType< T > > implements Pr
 		this( img, extension, ( findRanges, memCopy, oob ) -> new CellImgRangeCopier( img, findRanges, memCopy, oob ) );
 	}
 
+	static < T extends NativeType< T > > NativeImgPrimitiveBlocks< T > of( final NativeImg< T, ? > img, final Extension extension )
+	{
+		if ( img instanceof ArrayImg )
+		{
+			return new NativeImgPrimitiveBlocks<>( img, extension,
+					( findRanges, memCopy, oob ) -> new ArrayImgRangeCopier( ( ArrayImg ) img, findRanges, memCopy, oob ) );
+		}
+		else if ( img instanceof PlanarImg )
+		{
+			return new NativeImgPrimitiveBlocks<>( img, extension,
+					( findRanges, memCopy, oob ) -> new PlanarImgRangeCopier( ( PlanarImg ) img, findRanges, memCopy, oob ) );
+		}
+		else if ( img instanceof AbstractCellImg )
+		{
+			return new NativeImgPrimitiveBlocks<>( img, extension,
+					( findRanges, memCopy, oob ) -> new CellImgRangeCopier( ( AbstractCellImg ) img, findRanges, memCopy, oob ) );
+		}
+		else
+		{
+			throw new IllegalArgumentException();
+		}
+	}
 
 
 	private interface RangeCopierFactory

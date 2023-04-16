@@ -2,8 +2,11 @@ package net.imglib2.blk.copy;
 
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
+import bdv.util.BdvSource;
+import bdv.util.BdvStackSource;
 import ij.IJ;
 import ij.ImagePlus;
+import java.nio.file.Paths;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -20,34 +23,42 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
-public class RandomAccessibleBlocksExample4
+/**
+ * How to use {@code PrimitiveBlocks} to copy from ImgLib2 {@code
+ * RandomAccessible} into a flat primitive array.
+ */
+public class PrimitiveBlocksExample
 {
 	public static void main( String[] args )
 	{
+		// load 3D input image
 		final String fn = "/Users/pietzsch/workspace/data/e002_stack_fused-8bit.tif";
 		final ImagePlus imp = IJ.openImage( fn );
 		final Img< UnsignedByteType > img = ImageJFunctions.wrapByte( imp );
+		BdvFunctions.show( img, Paths.get( fn ).getFileName().toString() );
 
-//		RandomAccessibleInterval< UnsignedByteType > img1 = Views.hyperSlice( img, 2, 80 );
-//		RandomAccessible< UnsignedByteType > img2 = Views.extendMirrorSingle( img1 );
-//		RandomAccessible< UnsignedByteType > img3 = Views.translate( img2, 200, 150 );
-
+		// do a few transformations, extend, and convert to FloatType
 		RandomAccessibleInterval< UnsignedByteType > img1 = Views.rotate( img, 1, 0 );
 		RandomAccessibleInterval< UnsignedByteType > img2 = Views.zeroMin( img1 );
-		RandomAccessible< UnsignedByteType > img3 = Views.extendBorder( img2 );
-		RandomAccessible< UnsignedByteType > img4 = Views.hyperSlice( img3, 2, 80 );
+		RandomAccessibleInterval< UnsignedByteType > img3 = Views.hyperSlice( img2, 2, 80 );
+		RandomAccessible< UnsignedByteType > img4 = Views.extendBorder( img3 );
+		RandomAccessible< FloatType > img5 = Converters.convert( img4, new RealFloatConverter<>(), new FloatType() );
 
-		final FinalInterval interval = Intervals.hyperSlice( img2, 2 );
-		RandomAccessibleInterval< UnsignedByteType > img5 = Views.interval( img4, interval );
-		RandomAccessibleInterval< FloatType > img6 = Converters.convert( img5, new RealFloatConverter<>(), new FloatType() );
+		// show the resulting RandomAccessible<FloatType>
+		final BdvSource viewSource = BdvFunctions.show( img5, img3, "view", Bdv.options().is2D() );
+		Bdv bdv = viewSource;
 
-		Bdv bdv = BdvFunctions.show( img6, "view", Bdv.options().is2D() );
+		// Get PrimitiveBlocks of the view
+		final PrimitiveBlocks< FloatType > blocks = PrimitiveBlocks.of( img5 ).threadSafe();
 
-		final ViewProperties< ?, ? > props = ViewAnalyzer.getViewProperties( img6 ).getViewProperties();
-		System.out.println( "props.hasPermuteInvertTransform() = " + props.hasPermuteInvertTransform() );
-		System.out.println( "props.hasConverterSupplier() = " + props.hasConverterSupplier() );
-		final PrimitiveBlocks< ? > blocks = new ViewPrimitiveBlocks<>( props ).threadSafe();
-//		blocks.copy( srcPos, dest, size );
+		// PrimitiveBlocks has one method
+		//      void copy( int[] srcPos, Object dest, int[] size );
+		// to copy a block out of the source of the PrimitiveBlocks into a primitive array.
+		// dest is the array to copy into. In this example, we have
+		// PrimitiveBlocks<FloatType>, so dest must be a float[] array.
+		// srcPos and size
+
+		// .threadSafe() means we
 
 		final CellLoader< FloatType > loader = cell -> {
 			final int[] srcPos = Intervals.minAsIntArray( cell );
@@ -57,14 +68,17 @@ public class RandomAccessibleBlocksExample4
 		};
 
 		final CachedCellImg< FloatType, ? > retiled = new ReadOnlyCachedCellImgFactory().create(
-				img5.dimensionsAsLongArray(),
+				img3.dimensionsAsLongArray(),
 				new FloatType(),
 				loader,
-				ReadOnlyCachedCellImgOptions.options().cellDimensions( 64, 128 ) );
+				ReadOnlyCachedCellImgOptions.options().cellDimensions( 64, 64 ) );
 
-		BdvFunctions.show(
+		BdvSource retiledSource = BdvFunctions.show(
 				retiled,
-				"output",
+				"retiled",
 				Bdv.options().is2D().addTo( bdv ) );
+
+		viewSource.setDisplayRangeBounds( 0, 255 );
+		retiledSource.setDisplayRangeBounds( 0, 255 );
 	}
 }

@@ -32,6 +32,8 @@ public class ViewProperties< T extends NativeType< T >, R extends NativeType< R 
 
 	private final MixedTransform transform;
 
+	private final boolean hasTransform;
+
 	private final MixedTransform permuteInvertTransform;
 
 	private final boolean hasPermuteInvertTransform;
@@ -63,6 +65,7 @@ public class ViewProperties< T extends NativeType< T >, R extends NativeType< R 
 		this.rootType = rootType;
 		this.extension = extension;
 		this.transform = transform;
+		hasTransform = !TransformBuilder.isIdentity( transform );
 		this.permuteInvertTransform = permuteInvertTransform;
 		hasPermuteInvertTransform = !TransformBuilder.isIdentity( permuteInvertTransform );
 		this.converterSupplier = converterSupplier == null ? null : () -> ( Converter< R, T > ) converterSupplier.get();
@@ -101,6 +104,16 @@ public class ViewProperties< T extends NativeType< T >, R extends NativeType< R 
 	public Extension getExtension()
 	{
 		return extension;
+	}
+
+	/**
+	 * Returns {@code true} if there is a non-identity {@link #getTransform() transform}.
+	 *
+	 * @return {@code true} iff the {@link #getTransform() transform} is not identity.
+	 */
+	public boolean hasTransform()
+	{
+		return hasTransform;
 	}
 
 	public MixedTransform getTransform()

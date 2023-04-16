@@ -9,8 +9,13 @@ import net.imglib2.img.cell.CellGrid;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
-// T is a primitive array type
-public class CellImgRangeCopier< T > implements RangeCopier< T >
+/**
+ * Does the actual copying work from an {@code AbstractCellImg} into a primitive
+ * array.
+ *
+ * @param <T> a primitive array type, e.g., {@code byte[]}.
+ */
+class CellImgRangeCopier< T > implements RangeCopier< T >
 {
 	private final int n;
 	private final CellGrid cellGrid;

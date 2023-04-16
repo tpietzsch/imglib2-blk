@@ -30,8 +30,9 @@ class ViewPrimitiveBlocks< T extends NativeType< T >, R extends NativeType< R > 
 		this.props = props;
 		final PrimitiveType primitiveType = props.getRootType().getNativeTypeFactory().getPrimitiveType();
 		final MemCopy memCopy = MemCopy.forPrimitiveType( primitiveType );
-		final Object oob = extractOobValue( props.getRootType(), props.getExtension() );
-		final Ranges findRanges = Ranges.forExtension( props.getExtension() );
+		final Extension extension = props.getExtension() != null ? props.getExtension() : Extension.border();
+		final Object oob = extractOobValue( props.getRootType(), extension );
+		final Ranges findRanges = Ranges.forExtension( extension );
 		copier = RangeCopier.create( props.getRoot(), findRanges, memCopy, oob );
 		tempArrayConvert = Cast.unchecked( TempArray.forPrimitiveType( primitiveType ) );
 		tempArrayPermute = Cast.unchecked( TempArray.forPrimitiveType( primitiveType ) );
@@ -58,26 +59,36 @@ class ViewPrimitiveBlocks< T extends NativeType< T >, R extends NativeType< R > 
 	 */
 	public void copy( final int[] srcPos, final Object dest, final int[] size )
 	{
-		final MixedTransform transform = props.getTransform();
-		final int n = transform.numTargetDimensions();
-		final int[] destPos = new int[ n ];
-		final int[] destSize = new int[ n ];
-		for ( int d = 0; d < n; d++ )
+		final int[] destPos;
+		final int[] destSize;
+		if ( props.hasTransform() )
 		{
-			final int t = ( int ) transform.getTranslation( d );
-			if ( transform.getComponentZero( d ) )
+			final MixedTransform transform = props.getTransform();
+			final int n = transform.numTargetDimensions();
+			destPos = new int[ n ];
+			destSize = new int[ n ];
+			for ( int d = 0; d < n; d++ )
 			{
-				destPos[ d ] = t;
-				destSize[ d ] = 1;
+				final int t = ( int ) transform.getTranslation( d );
+				if ( transform.getComponentZero( d ) )
+				{
+					destPos[ d ] = t;
+					destSize[ d ] = 1;
+				}
+				else
+				{
+					final int c = transform.getComponentMapping( d );
+					destPos[ d ] = transform.getComponentInversion( d )
+							? t - srcPos[ c ] - size[ c ] + 1
+							: t + srcPos[ c ];
+					destSize[ d ] = size[ c ];
+				}
 			}
-			else
-			{
-				final int c = transform.getComponentMapping( d );
-				destPos[ d ] = transform.getComponentInversion( d )
-						? t - srcPos[ c ] - size[ c ] + 1
-						: t + srcPos[ c ];
-				destSize[ d ] = size[ c ];
-			}
+		}
+		else
+		{
+			destPos = srcPos;
+			destSize = size;
 		}
 
 		final boolean doPermute = props.hasPermuteInvertTransform();

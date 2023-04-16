@@ -6,8 +6,12 @@ import net.imglib2.img.planar.PlanarImg;
 
 import static net.imglib2.blk.copy.Ranges.Direction.CONSTANT;
 
-// T is a primitive array type
-public class PlanarImgRangeCopier< T > implements RangeCopier< T >
+/**
+ * Does the actual copying work from a {@code PlanarImg} into a primitive array.
+ *
+ * @param <T> a primitive array type, e.g., {@code byte[]}.
+ */
+class PlanarImgRangeCopier< T > implements RangeCopier< T >
 {
 	private final int n;
 	private final SliceAccess< T > sliceAccess;

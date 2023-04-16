@@ -28,7 +28,7 @@ import static net.imglib2.type.PrimitiveType.SHORT;
  * @param <P> a primitive array type, e.g., {@code byte[]}.
  * @param <A> the corresponding {@code ArrayDataAccess} type.
  */
-public class PrimitiveTypeProperties< P, A extends ArrayDataAccess< A > >
+class PrimitiveTypeProperties< P, A extends ArrayDataAccess< A > >
 {
 	final Class< P > primitiveArrayClass;
 
@@ -46,6 +46,12 @@ public class PrimitiveTypeProperties< P, A extends ArrayDataAccess< A > >
 		return props;
 	}
 
+	/**
+	 * Wrap a primitive array {@code data} into a corresponding {@code ArrayDataAccess}.
+	 *
+	 * @param data primitive array to wrap (actually type {@code P} instead of {@code Object}, but its easier to use this way)
+	 * @return {@code ArrayDataAccess} wrapping {@code data}
+	 */
 	A wrap( Object data )
 	{
 		if ( data == null )
@@ -55,11 +61,17 @@ public class PrimitiveTypeProperties< P, A extends ArrayDataAccess< A > >
 		return wrapAsAccess.apply( ( P ) data );
 	}
 
+	/**
+	 * Allocate a primitive array (type {@code P}) with {@code length} elements.
+	 */
 	P allocate( int length )
 	{
 		return createPrimitiveArray.apply( length );
 	}
 
+	/**
+	 * Get the length of a primitive array (type {@code P}).
+	 */
 	int length( P array )
 	{
 		return primitiveArrayLength.applyAsInt( array );

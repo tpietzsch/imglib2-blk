@@ -7,7 +7,7 @@ import net.imglib2.type.PrimitiveType;
 // low-level copying methods
 // implementations for all primitive types
 // T is a primitive array type
-public interface MemCopy< T >
+interface MemCopy< T >
 {
 	/**
 	 * Copy {@code length} components from the {@code src} array to the {@code

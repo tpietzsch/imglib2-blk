@@ -6,10 +6,16 @@ import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.planar.PlanarImg;
 
-// TODO javadoc
-// this does the actual copying work
-// T is a primitive array type
-public interface RangeCopier< T >
+/**
+ * {@code RangeCopier} does the actual copying work from a {@code NativeImg}
+ * into a primitive array.
+ * <p>
+ * The static {@link RangeCopier#create} method will pick the correct
+ * implementation for a given {@NativeImg}.
+ *
+ * @param <T> a primitive array type, e.g., {@code byte[]}.
+ */
+interface RangeCopier< T >
 {
 	/**
 	 * Copy the block starting at {@code srcPos} with the given {@code size}
