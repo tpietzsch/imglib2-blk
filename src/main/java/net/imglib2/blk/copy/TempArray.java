@@ -13,7 +13,7 @@ import net.imglib2.type.PrimitiveType;
  * @param <T> a primitive array type
  */
 // TODO: make public? This will be reused in blk algorithms probably?
-public interface TempArray< T >
+interface TempArray< T >
 {
 	T get( final int minSize );
 

@@ -20,7 +20,7 @@ import net.imglib2.view.TransformBuilder;
  * @param <R>
  * 		type of the root {@code NativeImg}
  */
-public class ViewProperties< T extends NativeType< T >, R extends NativeType< R > >
+class ViewProperties< T extends NativeType< T >, R extends NativeType< R > >
 {
 	private final T viewType;
 
