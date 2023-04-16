@@ -10,9 +10,7 @@ import ij.ImagePlus;
 import java.util.Arrays;
 import net.imglib2.Interval;
 import net.imglib2.algorithm.gauss3.Gauss3;
-import net.imglib2.blk.copy.Extension;
-import net.imglib2.blk.copy.NativeImgPrimitiveBlocks;
-import net.imglib2.blk.copy.PrimitiveBlocks;
+import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
@@ -96,7 +94,7 @@ public class GaussFloatExample1D
 		for ( int d = 0; d < cellImg.numDimensions(); ++d )
 			smoothed = smoothed(
 					cellImg,
-					new NativeImgPrimitiveBlocks<>( smoothed, Extension.constant( new FloatType( 0 ) ) ),
+					PrimitiveBlocks.of( Views.extendZero( smoothed ) ),
 					d,
 					sigmas[ d ] );
 

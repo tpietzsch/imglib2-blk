@@ -12,6 +12,7 @@ import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.blk.GaussFloatBlocked;
+import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
@@ -53,12 +54,12 @@ public class ViewBlocksBenchmark
 {
 	static final int CELL_SIZE = 64;
 
-//	@Param( { "true", "false" } )
-	@Param( { "true" } )
+	@Param( { "true", "false" } )
+//	@Param( { "true" } )
 //	@Param( { "false" } )
 	public boolean multiThreaded;
 
-	final double[] sigmas = { 8, 8, 8 };
+	final double[] sigmas = { 3, 3, 3 };
 	final int[] sourceImgSize = { 334, 388, 357, 2 };
 	final long[] outputSize;
 
@@ -101,8 +102,7 @@ public class ViewBlocksBenchmark
 	@Benchmark
 	public void benchmarkGaussViewBlocks()
 	{
-		final ViewProps props = new ViewProps( source );
-		final ThreadLocal< ViewBlocks > blocks = ThreadLocal.withInitial( () -> new ViewBlocks( props, new FloatType() ) );
+		final PrimitiveBlocks< FloatType > blocks = PrimitiveBlocks.of( source ).threadSafe();
 		final ThreadLocal< GaussFloatBlocked > tlgauss = ThreadLocal.withInitial( () -> new GaussFloatBlocked( sigmas ) );
 		final CellLoader< FloatType > loader = new CellLoader< FloatType >()
 		{
@@ -120,7 +120,7 @@ public class ViewBlocksBenchmark
 					srcPos[ d ] += sourceOffset[ d ];
 				final int[] size = gauss.getSourceSize();
 				final float[] src = gauss.getSourceBuffer();;
-				blocks.get().copy( srcPos, src, size );
+				blocks.copy( srcPos, src, size );
 				gauss.compute( src, dest );
 
 			}
