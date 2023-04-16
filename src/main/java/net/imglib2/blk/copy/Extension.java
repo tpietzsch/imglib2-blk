@@ -7,8 +7,7 @@ import net.imglib2.outofbounds.OutOfBoundsMirrorFactory;
 
 import static net.imglib2.outofbounds.OutOfBoundsMirrorFactory.Boundary.SINGLE;
 
-// TODO: Extension is public because of NativeImgPrimitiveBlocks. Maybe just detect special case in PrimitiveBlocks and make this package-private ??
-public interface Extension
+interface Extension
 {
 	enum Type
 	{

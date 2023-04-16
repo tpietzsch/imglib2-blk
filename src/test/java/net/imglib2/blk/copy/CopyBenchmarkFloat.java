@@ -94,21 +94,21 @@ public class CopyBenchmarkFloat
 	@Benchmark
 	public void benchmarkCellImgBlocks()
 	{
-		final PrimitiveBlocks< FloatType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new FloatType( 0 ) ) );
+		final PrimitiveBlocks< FloatType > blocks = PrimitiveBlocks.of( cellImg );
 		blocks.copy( pos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobMirrorSingle()
 	{
-		final PrimitiveBlocks< FloatType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.mirrorSingle() );
+		final PrimitiveBlocks< FloatType > blocks = PrimitiveBlocks.of( Views.extendMirrorSingle( cellImg ) );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobConstant()
 	{
-		final PrimitiveBlocks< FloatType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new FloatType( 0 ) ) );
+		final PrimitiveBlocks< FloatType > blocks = PrimitiveBlocks.of( Views.extendZero( cellImg ) );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 

@@ -54,33 +54,33 @@ public class CopyBenchmarkPolymorphic
 		final CellImgFactory< UnsignedByteType > factoryByte = new CellImgFactory<>( new UnsignedByteType(), cellDimensions );
 		final CellImg< UnsignedByteType, ? > cellImgByte = factoryByte.create( srcDimensions );
 		final byte[] destByte = new byte[ ( int ) Intervals.numElements( destDimensions ) ];
-		PrimitiveBlocks< UnsignedByteType > blocksByte = new NativeImgPrimitiveBlocks<>( cellImgByte, Extension.constant( new UnsignedByteType( 0 ) ) );
+		PrimitiveBlocks< UnsignedByteType > blocksByte = PrimitiveBlocks.of( cellImgByte );
 		blocksByte.copy( pos, destByte, destDimensions );
-		blocksByte = new NativeImgPrimitiveBlocks<>( cellImgByte, Extension.mirrorSingle() );
+		blocksByte = PrimitiveBlocks.of( Views.extendMirrorSingle( cellImgByte ) );
 		blocksByte.copy( oobPos, destByte, destDimensions );
-		blocksByte = new NativeImgPrimitiveBlocks<>( cellImgByte, Extension.constant( new UnsignedByteType( 0 ) ) );
+		blocksByte = PrimitiveBlocks.of( Views.extendZero( cellImgByte ) );
 		blocksByte.copy( oobPos, destByte, destDimensions );
 
 		// float
 		final CellImgFactory< FloatType > factoryFloat = new CellImgFactory<>( new FloatType(), cellDimensions );
 		final CellImg< FloatType, ? > cellImgFloat = factoryFloat.create( srcDimensions );
 		final float[] destFloat = new float[ ( int ) Intervals.numElements( destDimensions ) ];
-		PrimitiveBlocks< FloatType > blocksFloat = new NativeImgPrimitiveBlocks<>( cellImgFloat, Extension.constant( new FloatType( 0 ) ) );
+		PrimitiveBlocks< FloatType > blocksFloat = PrimitiveBlocks.of( cellImgFloat );
 		blocksFloat.copy( pos, destFloat, destDimensions );
-		blocksFloat = new NativeImgPrimitiveBlocks<>( cellImgFloat, Extension.mirrorSingle() );
+		blocksFloat = PrimitiveBlocks.of( Views.extendMirrorSingle( cellImgFloat ) );
 		blocksFloat.copy( oobPos, destFloat, destDimensions );
-		blocksFloat = new NativeImgPrimitiveBlocks<>( cellImgFloat, Extension.constant( new FloatType( 0 ) ) );
+		blocksFloat = PrimitiveBlocks.of( Views.extendZero( cellImgFloat ) );
 		blocksFloat.copy( oobPos, destFloat, destDimensions );
 
 		// double
 		final CellImgFactory< DoubleType > factoryDouble = new CellImgFactory<>( new DoubleType(), cellDimensions );
 		final CellImg< DoubleType, ? > cellImgDouble = factoryDouble.create( srcDimensions );
 		final double[] destDouble = new double[ ( int ) Intervals.numElements( destDimensions ) ];
-		PrimitiveBlocks< DoubleType > blocksDouble = new NativeImgPrimitiveBlocks<>( cellImgDouble, Extension.constant( new DoubleType( 0 ) ) );
+		PrimitiveBlocks< DoubleType > blocksDouble = PrimitiveBlocks.of( cellImgDouble );
 		blocksDouble.copy( pos, destDouble, destDimensions );
-		blocksDouble = new NativeImgPrimitiveBlocks<>( cellImgDouble, Extension.mirrorSingle() );
+		blocksDouble = PrimitiveBlocks.of( Views.extendMirrorSingle( cellImgDouble ) );
 		blocksDouble.copy( oobPos, destDouble, destDimensions );
-		blocksDouble = new NativeImgPrimitiveBlocks<>( cellImgDouble, Extension.constant( new DoubleType( 0 ) ) );
+		blocksDouble = PrimitiveBlocks.of( Views.extendZero( cellImgDouble ) );
 		blocksDouble.copy( oobPos, destDouble, destDimensions );
 	}
 
@@ -144,21 +144,21 @@ public class CopyBenchmarkPolymorphic
 	@Benchmark
 	public void benchmarkCellImgBlocks()
 	{
-		final PrimitiveBlocks< UnsignedByteType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
+		final PrimitiveBlocks< UnsignedByteType > blocks = PrimitiveBlocks.of( cellImg );
 		blocks.copy( pos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobMirrorSingle()
 	{
-		final PrimitiveBlocks< UnsignedByteType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.mirrorSingle() );
+		final PrimitiveBlocks< UnsignedByteType > blocks = PrimitiveBlocks.of( Views.extendMirrorSingle( cellImg ) );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 
 	@Benchmark
 	public void benchmarkCellImgBlocksOobConstant()
 	{
-		final PrimitiveBlocks< UnsignedByteType > blocks = new NativeImgPrimitiveBlocks<>( cellImg, Extension.constant( new UnsignedByteType( 0 ) ) );
+		final PrimitiveBlocks< UnsignedByteType > blocks = PrimitiveBlocks.of( Views.extendZero( cellImg ) );
 		blocks.copy( oobPos, dest, destDimensions );
 	}
 
