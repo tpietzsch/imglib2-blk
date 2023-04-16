@@ -57,15 +57,15 @@ class ViewPrimitiveBlocks< T extends NativeType< T >, R extends NativeType< R > 
 	 * @param size
 	 * 		dimensions of block to copy from src Img.
 	 */
-	public void copy( final int[] srcPos, final Object dest, final int[] size )
+	public void copy( final long[] srcPos, final Object dest, final int[] size )
 	{
-		final int[] destPos;
+		final long[] destPos;
 		final int[] destSize;
 		if ( props.hasTransform() )
 		{
 			final MixedTransform transform = props.getTransform();
 			final int n = transform.numTargetDimensions();
-			destPos = new int[ n ];
+			destPos = new long[ n ];
 			destSize = new int[ n ];
 			for ( int d = 0; d < n; d++ )
 			{

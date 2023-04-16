@@ -37,9 +37,9 @@ class RangesImpl
 	 * 		source cell width (in pixels)
 	 */
 	static List< Ranges.Range > findRanges_constant(
-			int bx, // start of block in source coordinates (in pixels)
+			long bx, // start of block in source coordinates (in pixels)
 			int bw, // width of block to copy (in pixels)
-			final int iw, // source image width (in pixels)
+			final long iw, // source image width (in pixels)
 			final int cw  // source cell width (in pixels)
 	)
 	{
@@ -51,7 +51,7 @@ class RangesImpl
 		int x = 0;
 		if ( bx < 0 )
 		{
-			int w = Math.min( bw, -bx );
+			int w = ( int ) Math.min( bw, -bx );
 			ranges.add( new Ranges.Range( -1, -1, w, CONSTANT, x ) );
 			bw -= w;
 			bx += w; // = 0
@@ -61,8 +61,8 @@ class RangesImpl
 		if ( bw <= 0 )
 			return ranges;
 
-		int gx = bx / cw;
-		int cx = bx - ( gx * cw );
+		int gx = ( int ) ( bx / cw );
+		int cx = ( int ) ( bx - ( ( long ) gx * cw ) );
 		while ( bw > 0 && bx < iw )
 		{
 			final int w = Math.min( bw, cellWidth( gx, cw, iw ) - cx );
@@ -103,9 +103,9 @@ class RangesImpl
 	 * 		source cell width (in pixels)
 	 */
 	static List< Ranges.Range > findRanges_border(
-			int bx, // start of block in source coordinates (in pixels)
+			long bx, // start of block in source coordinates (in pixels)
 			int bw, // width of block to copy (in pixels)
-			final int iw, // source image width (in pixels)
+			final long iw, // source image width (in pixels)
 			final int cw  // source cell width (in pixels)
 	)
 	{
@@ -117,7 +117,7 @@ class RangesImpl
 		int x = 0;
 		if ( bx < 0 )
 		{
-			int w = Math.min( bw, -bx );
+			int w = ( int ) Math.min( bw, -bx );
 			ranges.add( new Ranges.Range( 0, 0, w, STAY, x ) );
 			bw -= w;
 			bx += w; // = 0
@@ -127,8 +127,8 @@ class RangesImpl
 		if ( bw <= 0 )
 			return ranges;
 
-		int gx = bx / cw;
-		int cx = bx - ( gx * cw );
+		int gx = ( int ) ( bx / cw );
+		int cx = ( int ) ( bx - ( ( long ) gx * cw ) );
 		while ( bw > 0 && bx < iw )
 		{
 			final int w = Math.min( bw, cellWidth( gx, cw, iw ) - cx );
@@ -143,7 +143,7 @@ class RangesImpl
 		if ( bw <= 0 )
 			return ranges;
 
-		gx = ( iw - 1 ) / cw;
+		gx = ( int ) ( ( iw - 1 ) / cw );
 		cx = cellWidth( gx, cw, iw ) - 1;
 		ranges.add( new Ranges.Range( gx, cx, bw, STAY, x ) );
 
@@ -173,15 +173,15 @@ class RangesImpl
 	 * 		source cell width (in pixels)
 	 */
 	static List< Ranges.Range > findRanges_mirror_double(
-			int bx, // start of block in source coordinates (in pixels)
+			long bx, // start of block in source coordinates (in pixels)
 			int bw, // width of block to copy (in pixels)
-			final int iw, // source image width (in pixels)
+			final long iw, // source image width (in pixels)
 			final int cw  // source cell width (in pixels)
 	)
 	{
 		List< Ranges.Range > ranges = new ArrayList<>();
 
-		final int pi = 2 * iw;
+		final long pi = 2 * iw;
 		bx = ( bx < 0 )
 				? ( bx + 1 ) % pi + pi - 1
 				: bx % pi;
@@ -192,8 +192,8 @@ class RangesImpl
 			dir = BACKWARD;
 		}
 
-		int gx = bx / cw;
-		int cx = bx - ( gx * cw );
+		int gx = ( int ) ( bx / cw );
+		int cx = ( int ) ( bx - ( ( long ) gx * cw ) );
 		int x = 0;
 		while ( bw > 0 )
 		{
@@ -207,7 +207,7 @@ class RangesImpl
 				bw -= w;
 				x += w;
 
-				if ( ++gx * cw >= iw ) // moving out of bounds
+				if ( ( long ) ++gx * cw >= iw ) // moving out of bounds
 				{
 					--gx;
 					cx = gxw - 1;
@@ -265,15 +265,15 @@ class RangesImpl
 	 * 		source cell width (in pixels)
 	 */
 	static List< Ranges.Range > findRanges_mirror_single(
-			int bx, // start of block in source coordinates (in pixels)
+			long bx, // start of block in source coordinates (in pixels)
 			int bw, // width of block to copy (in pixels)
-			final int iw, // source image width (in pixels)
+			final long iw, // source image width (in pixels)
 			final int cw  // source cell width (in pixels)
 	)
 	{
 		List< Ranges.Range > ranges = new ArrayList<>();
 
-		final int pi = 2 * iw - 2;
+		final long pi = 2 * iw - 2;
 		bx = ( bx < 0 )
 				? ( bx + 1 ) % pi + pi - 1
 				: bx % pi;
@@ -284,8 +284,8 @@ class RangesImpl
 			dir = BACKWARD;
 		}
 
-		int gx = bx / cw;
-		int cx = bx - ( gx * cw );
+		int gx = ( int ) ( bx / cw );
+		int cx = ( int ) ( bx - ( ( long ) gx * cw ) );
 		int x = 0;
 		while ( bw > 0 )
 		{
@@ -299,7 +299,7 @@ class RangesImpl
 				bw -= w;
 				x += w;
 
-				if ( ++gx * cw >= iw ) // moving out of bounds
+				if ( ( long ) ++gx * cw >= iw ) // moving out of bounds
 				{
 					--gx;
 					cx = gxw - 2;
@@ -346,13 +346,13 @@ class RangesImpl
 	 *
 	 * @return cell width
 	 */
-	private static int cellWidth( final int gx, final int cw, final int iw )
+	private static int cellWidth( final int gx, final int cw, final long iw )
 	{
-		final int gw = iw / cw;
+		final int gw = ( int ) ( iw / cw );
 		if ( gx < gw )
 			return cw;
 		else if ( gx == gw )
-			return iw - cw * gw;
+			return ( int ) ( iw - cw * gw );
 		else
 			throw new IllegalArgumentException();
 	}

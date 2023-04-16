@@ -41,7 +41,7 @@ interface Ranges
 	 * @param cw
 	 * 		source cell width (in pixels)
 	 */
-	List< Range > findRanges( int bx, int bw, int iw, int cw );
+	List< Range > findRanges( long bx, int bw, long iw, int cw );
 
 	/**
 	 *

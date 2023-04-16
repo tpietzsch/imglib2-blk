@@ -96,7 +96,7 @@ class ArrayImgRangeCopier< T > implements RangeCopier< T >
 	 * 		dimensions of block to copy from src Img.
 	 */
 	@Override
-	public void copy( final int[] srcPos, final T dest, final int[] size )
+	public void copy( final long[] srcPos, final T dest, final int[] size )
 	{
 		// find ranges
 		for ( int d = 0; d < n; ++d )

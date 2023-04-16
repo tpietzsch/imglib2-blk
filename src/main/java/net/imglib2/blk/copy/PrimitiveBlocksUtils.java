@@ -26,7 +26,7 @@ class PrimitiveBlocksUtils
 			}
 
 			@Override
-			public void copy( final int[] srcPos, final Object dest, final int[] size )
+			public void copy( final long[] srcPos, final Object dest, final int[] size )
 			{
 				tl.get().copy( srcPos, dest, size );
 			}

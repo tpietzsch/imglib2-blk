@@ -2,6 +2,7 @@ package net.imglib2.blk.copy;
 
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.NativeType;
+import net.imglib2.util.Util;
 
 import static net.imglib2.blk.copy.PrimitiveBlocks.OnFallback.FAIL;
 import static net.imglib2.blk.copy.PrimitiveBlocks.OnFallback.WARN;
@@ -79,7 +80,12 @@ public interface PrimitiveBlocks< T extends NativeType< T > >
 	 * @param size
 	 * 		the size of the block to copy
 	 */
-	void copy( int[] srcPos, Object dest, int[] size );
+	void copy( long[] srcPos, Object dest, int[] size );
+
+	default void copy( int[] srcPos, Object dest, int[] size )
+	{
+		copy( Util.int2long( srcPos ), dest, size );
+	}
 
 	/**
 	 * Get a thread-safe version of this {@code PrimitiveBlocks}.

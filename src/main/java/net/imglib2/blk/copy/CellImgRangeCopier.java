@@ -20,7 +20,7 @@ class CellImgRangeCopier< T > implements RangeCopier< T >
 	private final int n;
 	private final CellGrid cellGrid;
 	private final RandomAccess< ? extends Cell< ? > > cellAccess;
-	private final int[] srcDims;
+	private final long[] srcDims;
 	private final Ranges findRanges;
 	private final MemCopy< T > memCopy;
 	private final T oob;
@@ -43,13 +43,7 @@ class CellImgRangeCopier< T > implements RangeCopier< T >
 		n = cellImg.numDimensions();
 		cellGrid = cellImg.getCellGrid();
 		cellAccess = cellImg.getCells().randomAccess();
-
-		srcDims = new int[ n ];
-		for ( int d = 0; d < n; d++ )
-		{
-			// TODO check whether it fits into Integer
-			srcDims[ d ] = ( int ) cellGrid.imgDimension( d );
-		}
+		srcDims = cellImg.dimensionsAsLongArray();
 
 		this.findRanges = findRanges;
 		this.memCopy = memCopy;
@@ -107,7 +101,7 @@ class CellImgRangeCopier< T > implements RangeCopier< T >
 	 * 		dimensions of block to copy from src Img.
 	 */
 	@Override
-	public void copy( final int[] srcPos, final T dest, final int[] size )
+	public void copy( final long[] srcPos, final T dest, final int[] size )
 	{
 		// find ranges
 		for ( int d = 0; d < n; ++d )

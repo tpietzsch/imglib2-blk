@@ -44,11 +44,11 @@ class FallbackPrimitiveBlocks< T extends NativeType< T >, A extends ArrayDataAcc
 	}
 
 	@Override
-	public void copy( final int[] srcPos, final Object dest, final int[] size )
+	public void copy( final long[] srcPos, final Object dest, final int[] size )
 	{
 		final ArrayImg< T, A > img = new ArrayImg<>( primitiveTypeProperties.wrap( dest ), Util.int2long( size ), type.getEntitiesPerPixel() );
 		img.setLinkedType( nativeTypeFactory.createLinkedType( img ) );
-		final FinalInterval interval = FinalInterval.createMinSize( Util.int2long( srcPos ), Util.int2long( size ) );
+		final FinalInterval interval = FinalInterval.createMinSize( srcPos, Util.int2long( size ) );
 		LoopBuilder.setImages( Views.interval( source, interval ), img ).forEachPixel( ( a, b ) -> b.set( a ) );
 	}
 
