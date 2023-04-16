@@ -9,8 +9,8 @@ import static net.imglib2.blk.copy.PrimitiveBlocks.OnFallback.WARN;
 
 
 /**
- * Copy blocks of data out of a {@code NativeType<T>} source into primitive arrays (of
- * the appropriate type).
+ * Copy blocks of data out of a {@code NativeType<T>} source into primitive
+ * arrays (of the appropriate type).
  * <p>
  * Use the static method {@link PrimitiveBlocks#of(RandomAccessible)
  * PrimitiveBlocks.of} to create a {@code PrimitiveBlocks} accessor for an
@@ -41,18 +41,22 @@ import static net.imglib2.blk.copy.PrimitiveBlocks.OnFallback.WARN;
  * 		blocks.copy( new int[] { 10, 20 }, data, new int[] { 40, 50 } );
  * }</pre>
  * <p>
- * If a source {@code RandomAccessible} cannot be understood, {@link PrimitiveBlocks#of(RandomAccessible) PrimitiveBlocks.of}
- * will return a fall-back implementation (based on {@code LoopBuilder}).
+ * If a source {@code RandomAccessible} cannot be understood, {@link
+ * PrimitiveBlocks#of(RandomAccessible) PrimitiveBlocks.of} will return a
+ * fall-back implementation (based on {@code LoopBuilder}).
+ *
  * With the optional {@link OnFallback OnFallback} argument to {@link
  * PrimitiveBlocks#of(RandomAccessible, OnFallback) PrimitiveBlocks.of} it can
- * be configured, whether fall-back should be silently accepted ({@link OnFallback#ACCEPT ACCEPT}),
+ * be configured, whether
+ * fall-back should be silently accepted ({@link OnFallback#ACCEPT ACCEPT}),
  * a warning should be printed ({@link OnFallback#WARN WARN}), or
  * an {@code IllegalArgumentException} thrown ({@link OnFallback#FAIL FAIL}).
- * The Warning/exception message explains what about the input {@code RandomAccessible} required the fall-back.
+ * The warning/exception message explains why the input {@code RandomAccessible}
+ * requires fall-back.
  * <p>
  * The only really un-supported case is if the pixel type {@code T} does not map
- * one-to-one to a primitive type.
- * (E.g. {@code ComplexDoubleType} and {@code Unsigned4BitType} are not supported.)
+ * one-to-one to a primitive type. (For example, {@code ComplexDoubleType} or
+ * {@code Unsigned4BitType} are not supported.)
  * <p>
  * Implementations are not thread-safe in general. Use {@link #threadSafe()} to
  * obtain a thread-safe instance (implemented using {@link ThreadLocal} copies).
@@ -69,7 +73,8 @@ public interface PrimitiveBlocks< T extends NativeType< T > >
 	T getType();
 
 	/**
-	 * Copy a block from the ({@code T}-typed) source into primitive arrays (of the appropriate type).
+	 * Copy a block from the ({@code T}-typed) source into primitive arrays (of
+	 * the appropriate type).
 	 *
 	 * @param srcPos
 	 * 		min coordinate of the block to copy
@@ -82,6 +87,19 @@ public interface PrimitiveBlocks< T extends NativeType< T > >
 	 */
 	void copy( long[] srcPos, Object dest, int[] size );
 
+	/**
+	 * Copy a block from the ({@code T}-typed) source into primitive arrays (of
+	 * the appropriate type).
+	 *
+	 * @param srcPos
+	 * 		min coordinate of the block to copy
+	 * @param dest
+	 * 		primitive array to copy into. Must correspond to {@code T}, for
+	 *      example, if {@code T} is {@code UnsignedByteType} then {@code dest} must
+	 *      be {@code byte[]}.
+	 * @param size
+	 * 		the size of the block to copy
+	 */
 	default void copy( int[] srcPos, Object dest, int[] size )
 	{
 		copy( Util.int2long( srcPos ), dest, size );
