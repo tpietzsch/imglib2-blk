@@ -1,9 +1,9 @@
 package net.imglib2.blk;
 
+import bdv.cache.SharedQueue;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvSource;
-import bdv.util.volatiles.SharedQueue;
 import bdv.util.volatiles.VolatileViews;
 import ij.IJ;
 import ij.ImagePlus;
