@@ -19,7 +19,6 @@ import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
-import static net.imglib2.blk.downsample.DownsamplePlayground.downsample;
 import static net.imglib2.blk.downsample.DownsamplePlayground.getSizes;
 
 public class DownsamplePlayground3D
@@ -31,8 +30,6 @@ public class DownsamplePlayground3D
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 
 		final String fn = "/Users/pietzsch/workspace/data/e002_stack_fused-8bit.tif";
-//		final String fn = "/Users/pietzsch/workspace/data/DrosophilaWing.tif";
-//		final String fn = "/Users/pietzsch/workspace/data/leafcrop.tif";
 		final ImagePlus imp = IJ.openImage( fn );
 		final Img< UnsignedByteType > img = ImageJFunctions.wrapByte( imp );
 
@@ -51,7 +48,7 @@ public class DownsamplePlayground3D
 		final int[] outputSize = new int[ n ];
 		final int[] inputSize = new int[ n ];
 
-		final int downsampleDim = 0;
+		final int downsampleDim = 1;
 		getSizes( imgSize, downsampleDim, inputSize, outputSize );
 
 		System.out.println( "outputSize = " + Arrays.toString( outputSize ) );
@@ -62,10 +59,10 @@ public class DownsamplePlayground3D
 		Arrays.setAll(srcPos, d -> d == downsampleDim ? -1 : 0 );
 
 		final float input[] = new float[ ( int ) Intervals.numElements( inputSize ) ];
-		blocks.copy( srcPos, input, imgSize );
+		blocks.copy( srcPos, input, inputSize );
 
 		final float output[] = new float[ ( int ) Intervals.numElements( outputSize ) ];
-		downsample( input, outputSize, output, downsampleDim );
+		DownsampleFloat.downsample( input, outputSize, output, downsampleDim );
 
 		final Img< FloatType > outputImg = ArrayImgs.floats( output, Util.int2long( outputSize ) );
 		final double[] calib = new double[ n ];

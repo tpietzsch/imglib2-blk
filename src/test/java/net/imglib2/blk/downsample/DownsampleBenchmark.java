@@ -62,7 +62,7 @@ public class DownsampleBenchmark
 	@Benchmark
 	public void benchmarkDownsampleX()
 	{
-		DownsamplePlayground.downsampleX( inputX, outputSizeX, outputX );
+		DownsampleFloat.downsampleX( inputX, outputSizeX, outputX );
 	}
 
 	@Benchmark
@@ -92,7 +92,7 @@ public class DownsampleBenchmark
 	@Benchmark
 	public void benchmarkDownsampleN()
 	{
-		DownsamplePlayground.downsample( inputY, outputSizeY, outputY, 1 );
+		DownsampleFloat.downsample( inputY, outputSizeY, outputY, 1 );
 	}
 
 	public static void main( String... args ) throws RunnerException

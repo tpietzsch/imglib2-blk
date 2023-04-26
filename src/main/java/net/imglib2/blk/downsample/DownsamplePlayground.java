@@ -19,6 +19,8 @@ import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
+import static net.imglib2.blk.downsample.DownsampleFloat.downsample;
+
 public class DownsamplePlayground
 {
 
@@ -27,9 +29,7 @@ public class DownsamplePlayground
 	{
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-//		final String fn = "/Users/pietzsch/workspace/data/e002_stack_fused-8bit.tif";
 		final String fn = "/Users/pietzsch/workspace/data/DrosophilaWing.tif";
-//		final String fn = "/Users/pietzsch/workspace/data/leafcrop.tif";
 		final ImagePlus imp = IJ.openImage( fn );
 		final Img< UnsignedByteType > img = ImageJFunctions.wrapByte( imp );
 		img.getAt( 50, 50 ).set( 0 );
@@ -60,7 +60,7 @@ public class DownsamplePlayground
 		Arrays.setAll(srcPos, d -> d == downsampleDim ? -1 : 0 );
 
 		final float input[] = new float[ ( int ) Intervals.numElements( inputSize ) ];
-		blocks.copy( srcPos, input, imgSize );
+		blocks.copy( srcPos, input, inputSize );
 
 		final float output[] = new float[ ( int ) Intervals.numElements( outputSize ) ];
 		downsample( input, outputSize, output, 1 );
@@ -76,58 +76,6 @@ public class DownsamplePlayground
 	{
 		Arrays.setAll( outputSize, d -> d == downsampleDim ? ( imgSize[ d ] + 1 ) / 2 : imgSize[ d ] );
 		Arrays.setAll( inputSize, d -> d == downsampleDim ? outputSize[ d ] * 2 + 1 : outputSize[ d ] );
-	}
-
-	static void downsampleX( final float[] input, final int[] outputSize, final float[] output )
-	{
-		final int sx = outputSize[ 0 ];
-		int sy = 1;
-		for ( int d = 1; d < outputSize.length; ++d )
-			sy *= outputSize[ d ];
-		for ( int y = 0; y < sy; ++y )
-		{
-			final int so = y * sx;
-			for ( int x = 0; x < sx; ++x )
-			{
-				final int si = 2 * ( so + x );
-				output[ so + x ] =
-						0.25f * input[ si ] +
-								0.5f * input[ si + 1 ] +
-								0.25f * input[ si + 2 ];
-			}
-		}
-	}
-
-	static void downsample( final float[] input, final int[] outputSize, final float[] output, final int dim )
-	{
-		if ( dim == 0 )
-			downsampleX( input, outputSize, output );
-		else
-			downsampleN( input, outputSize, output, dim );
-	}
-
-	private static void downsampleN( final float[] input, final int[] outputSize, final float[] output, final int dim )
-	{
-		int sx = 1;
-		for ( int d = 0; d < dim; ++d )
-			sx *= outputSize[ d ];
-
-		int sy = 1;
-		for ( int d = dim; d < outputSize.length; ++d )
-			sy *= outputSize[ d ];
-
-		for ( int y = 0; y < sy; ++y )
-		{
-			final int so = y * sx;
-			final int si = 2 * so;
-			for ( int x = 0; x < sx; ++x )
-			{
-				output[ so + x ] =
-						0.25f * input[ si + x ] +
-								0.5f * input[ si + x + sx ] +
-								0.25f * input[ si + x + 2 * sx ];
-			}
-		}
 	}
 
 	static void downsampleY4( final float[] input, final int[] outputSize, final float[] output )

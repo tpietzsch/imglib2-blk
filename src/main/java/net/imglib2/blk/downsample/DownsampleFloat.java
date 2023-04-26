@@ -135,9 +135,10 @@ public class DownsampleFloat
 			downsampleN( source, destSize, dest, dim );
 	}
 
-	private static void downsampleX( final float[] source, final int[] destSize, final float[] dest )
+	static void downsampleX( final float[] source, final int[] destSize, final float[] dest )
 	{
 		final int destLineLength = destSize[ 0 ];
+		final int srcLineLength = 2 * destSize[ 0 ] + 1;
 
 		int nLines = 1;
 		for ( int d = 1; d < destSize.length; ++d )
@@ -146,9 +147,10 @@ public class DownsampleFloat
 		for ( int y = 0; y < nLines; ++y )
 		{
 			final int destOffset = y * destLineLength;
+			final int srcOffset = y * srcLineLength;
 			for ( int x = 0; x < destLineLength; ++x )
 			{
-				final int si = 2 * ( destOffset + x );
+				final int si = srcOffset + 2 * x;
 				dest[ destOffset + x ] =
 						0.25f * source[ si ] +
 								0.5f * source[ si + 1 ] +
@@ -163,19 +165,24 @@ public class DownsampleFloat
 		for ( int d = 0; d < dim; ++d )
 			lineLength *= destSize[ d ];
 
-		int nLines = 1;
-		for ( int d = dim; d < destSize.length; ++d )
-			nLines *= destSize[ d ];
+		final int nLines = destSize[ dim ];
 
-		for ( int y = 0; y < nLines; ++y )
+		int nPlanes = 1;
+		for ( int d = dim + 1; d < destSize.length; ++d )
+			nPlanes *= destSize[ d ];
+
+		for ( int z = 0; z < nPlanes; ++z )
 		{
-			final int destOffset = y * lineLength;
-			final int srcOffset = 2 * destOffset;
-			for ( int x = 0; x < lineLength; ++x )
+			for ( int y = 0; y < nLines; ++y )
 			{
-				dest[ destOffset + x ] = 0.25f * source[ srcOffset + x ] +
-						0.5f * source[ srcOffset + x + lineLength ] +
-						0.25f * source[ srcOffset + x + 2 * lineLength ];
+				final int destOffset = ( z * nLines * lineLength ) + ( y * lineLength );
+				final int srcOffset = ( z * ( 2 * nLines + 1 ) * lineLength ) + ( 2 * y * lineLength );
+				for ( int x = 0; x < lineLength; ++x )
+				{
+					dest[ destOffset + x ] = 0.25f * source[ srcOffset + x ] +
+							0.5f * source[ srcOffset + x + lineLength ] +
+							0.25f * source[ srcOffset + x + 2 * lineLength ];
+				}
 			}
 		}
 	}

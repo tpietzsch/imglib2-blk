@@ -58,7 +58,7 @@ public class DownsampleBenchmark3D
 	@Benchmark
 	public void benchmarkDownsampleN()
 	{
-		DownsamplePlayground.downsample( input, outputSize, output, downsampleDim );
+		DownsampleFloat.downsample( input, outputSize, output, downsampleDim );
 	}
 
 	public static void main( String... args ) throws RunnerException
