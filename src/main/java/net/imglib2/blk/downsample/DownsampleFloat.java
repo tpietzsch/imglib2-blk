@@ -1,15 +1,19 @@
 package net.imglib2.blk.downsample;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
+import net.imglib2.Interval;
+import net.imglib2.blk.downsample.algo.BlockProcessor;
 import net.imglib2.blocks.TempArray;
 import net.imglib2.util.Intervals;
 
 import static net.imglib2.type.PrimitiveType.FLOAT;
 
-public class DownsampleFloat
+public class DownsampleFloat implements BlockProcessor< float[] >
 {
 	private final int n;
 	private final int[] destSize;
+	private final long[] sourcePos;
 	private final int[] sourceSize;
 	private final int[] sourceOffset;
 
@@ -29,25 +33,14 @@ public class DownsampleFloat
 		destSize = new int[ n ];
 		sourceSize = new int[ n ];
 		sourceOffset = new int[ n ];
+		sourcePos = new long[ n ];
 		Arrays.setAll( sourceOffset, d -> downsampleInDim[ d ] ? -1 : 0 );
 
 		this.downsampleInDim = downsampleInDim;
 		downsampleDims = downsampleDimIndices( downsampleInDim );
 		steps = downsampleDims.length;
 
-		tempArrays = new TempArray[ steps ];
-		tempArrays[ 0 ] = TempArray.forPrimitiveType( FLOAT );
-		if ( steps >= 2 )
-		{
-			tempArrays[ 1 ] = TempArray.forPrimitiveType( FLOAT );
-			if ( steps >= 3 )
-			{
-				tempArrays[ 2 ] = TempArray.forPrimitiveType( FLOAT );
-				for ( int i = 3; i < steps; ++i )
-					tempArrays[ i ] = tempArrays[ i - 2 ];
-			}
-		}
-
+		tempArrays = createTempArrays( steps );
 		tempArraySizes = new int[ steps ];
 	}
 
@@ -62,7 +55,56 @@ public class DownsampleFloat
 		return Arrays.copyOf( dims, j );
 	}
 
-	public void setTargetSize( final int[] destSize )
+	private static TempArray<float[]>[] createTempArrays( final int steps )
+	{
+		final TempArray< float[] > tempArrays[] = new TempArray[ steps ];
+		tempArrays[ 0 ] = TempArray.forPrimitiveType( FLOAT );
+		if ( steps >= 2 )
+		{
+			tempArrays[ 1 ] = TempArray.forPrimitiveType( FLOAT );
+			if ( steps >= 3 )
+			{
+				tempArrays[ 2 ] = TempArray.forPrimitiveType( FLOAT );
+				for ( int i = 3; i < steps; ++i )
+					tempArrays[ i ] = tempArrays[ i - 2 ];
+			}
+		}
+		return tempArrays;
+	}
+
+	private DownsampleFloat( DownsampleFloat downsample )
+	{
+		// re-use
+		n = downsample.n;
+		sourceOffset = downsample.sourceOffset;
+		downsampleInDim = downsample.downsampleInDim;
+		downsampleDims = downsample.downsampleDims;
+		steps = downsample.steps;
+
+		// init empty
+		destSize = new int[ n ];
+		sourcePos = new long[ n ];
+		sourceSize = new int[ n ];
+		tempArraySizes = new int[ steps ];
+
+		// init new instance
+		tempArrays = createTempArrays( steps );
+	}
+
+	public DownsampleFloat newInstance()
+	{
+		return new DownsampleFloat( this );
+	}
+
+	@Override
+	public Supplier< DownsampleFloat > threadSafeSupplier()
+	{
+		// TODO make idempotent: always return the same ThreadLocal, e.g., threadSafeSupplier().get().threadSafeSupplier() == threadSafeSupplier()
+		return ThreadLocal.withInitial( this::newInstance )::get;
+	}
+
+	// TODO REMOVE
+	void setTargetSize( final int[] destSize )
 	{
 		if ( Arrays.equals( destSize, this.destSize ) )
 			return;
@@ -81,12 +123,59 @@ public class DownsampleFloat
 		}
 	}
 
+	@Override
+	public void setTargetInterval( final Interval interval )
+	{
+		boolean destSizeChanged = false;
+		for ( int d = 0; d < n; ++d )
+		{
+			final long tpos = interval.min( d );
+			// TODO: sourceOffset directly here...
+			sourcePos[ d ] = downsampleInDim[ d ] ? tpos * 2 + sourceOffset[ d ] : tpos;
+
+			final int tdim = safeInt( interval.dimension( d ) );
+			if ( tdim != destSize[ d ] )
+			{
+				destSize[ d ] = tdim;
+				sourceSize[ d ] = downsampleInDim[ d ] ? tdim * 2 + 1 : tdim;
+				destSizeChanged = true;
+			}
+		}
+
+		if ( destSizeChanged )
+		{
+			int size = safeInt( Intervals.numElements( sourceSize ) );
+			tempArraySizes[ 0 ] = size;
+			for ( int i = 1; i < steps; ++i )
+			{
+				final int d = downsampleDims[ i - 1 ];
+				size = size / sourceSize[ d ] * destSize[ d ];
+				tempArraySizes[ i ] = size;
+			}
+		}
+	}
+
+	private static int safeInt( final long value )
+	{
+		if ( value > Integer.MAX_VALUE )
+			throw new IllegalArgumentException( "value too large" );
+		return ( int ) value;
+	}
+
+	@Override
 	public int[] getSourceSize()
 	{
 		return sourceSize;
 	}
 
-	public int[] getSourceOffset()
+	@Override
+	public long[] getSourcePos()
+	{
+		return sourcePos;
+	}
+
+	// TODO REMOVE
+	int[] getSourceOffset()
 	{
 		return sourceOffset;
 	}
@@ -102,6 +191,7 @@ public class DownsampleFloat
 		return tempArrays[ i ].get( tempArraySizes[ i ] );
 	}
 
+	@Override
 	public void compute( final float[] src, final float[] dest )
 	{
 		float[] itSrc = src;
@@ -127,6 +217,7 @@ public class DownsampleFloat
 		return destSize;
 	}
 
+	// TODO: make private
 	static void downsample( final float[] source, final int[] destSize, final float[] dest, final int dim )
 	{
 		if ( dim == 0 )
@@ -135,6 +226,7 @@ public class DownsampleFloat
 			downsampleN( source, destSize, dest, dim );
 	}
 
+	// TODO: make private
 	static void downsampleX( final float[] source, final int[] destSize, final float[] dest )
 	{
 		final int destLineLength = destSize[ 0 ];
@@ -159,7 +251,8 @@ public class DownsampleFloat
 		}
 	}
 
-	private static void downsampleN( final float[] source, final int[] destSize, final float[] dest, final int dim )
+	// TODO: make private
+	static void downsampleN( final float[] source, final int[] destSize, final float[] dest, final int dim )
 	{
 		int lineLength = 1;
 		for ( int d = 0; d < dim; ++d )
