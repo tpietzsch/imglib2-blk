@@ -206,7 +206,7 @@ public class DownsampleFloat implements BlockProcessor< float[], float[] >
 			itDestSize[ d ] = destSize[ d ];
 			final boolean lastStep = ( i == steps - 1 );
 			final float[] itDest = lastStep ? dest : getSourceBuffer( i + 1 );
-			downsample( itSrc, itDestSize, itDest, d );
+			downsampleStatic( itSrc, itDestSize, itDest, d );
 			itSrc = itDest;
 		}
 	}
@@ -221,8 +221,16 @@ public class DownsampleFloat implements BlockProcessor< float[], float[] >
 		return destSize;
 	}
 
-	// TODO: make private
 	static void downsample( final float[] source, final int[] destSize, final float[] dest, final int dim )
+	{
+		if ( dim == 0 )
+			downsampleX( source, destSize, dest );
+		else
+			downsampleN( source, destSize, dest, dim );
+	}
+
+	// TODO: make private
+	static void downsampleStatic( final float[] source, final int[] destSize, final float[] dest, final int dim )
 	{
 		if ( dim == 0 )
 			downsampleX( source, destSize, dest );

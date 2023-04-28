@@ -3,6 +3,7 @@ package net.imglib2.blk.downsample;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import net.imglib2.FinalInterval;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -35,9 +36,12 @@ public class DownsampleBenchmarkFull
 
 	int[] outputSize;
 	int[] inputSize;
-	float[] input;
-	float[] output;
-	DownsampleFloat downsampleFloat;
+	float[] inputF;
+	float[] outputF;
+	double[] inputD;
+	double[] outputD;
+	AbstractDownsample.DownsampleFloat downsampleFloat;
+	AbstractDownsample.DownsampleDouble downsampleDouble;
 
 	@Param( { "X", "Y", "Z", "XYZ" } )
 	public String scenario;
@@ -68,23 +72,35 @@ public class DownsampleBenchmarkFull
 			break;
 		}
 
-		final long[] destSize = DownsampleFloat.getDownsampledDimensions( Util.int2long( imgSize ), downsampleInDim );
+		final long[] destSize = AbstractDownsample.getDownsampledDimensions( Util.int2long( imgSize ), downsampleInDim );
 		Arrays.setAll( outputSize, d -> ( int ) destSize[ d ] );
-		downsampleFloat = new DownsampleFloat( downsampleInDim );
-		downsampleFloat.setTargetSize( outputSize );
+
+		downsampleFloat = new AbstractDownsample.DownsampleFloat( downsampleInDim );
+		downsampleFloat.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
 		System.arraycopy( downsampleFloat.getSourceSize(), 0, inputSize, 0, inputSize.length );
-		System.out.println( "inputSize = " + Arrays.toString( inputSize ) );
-		System.out.println( "outputSize = " + Arrays.toString( outputSize ) );
-		input = new float[ ( int ) Intervals.numElements( inputSize ) ];
-		for ( int i = 0; i < input.length; i++ )
-			input[ i ] = random.nextFloat();
-		output = new float[ ( int ) Intervals.numElements( outputSize ) ];
+		inputF = new float[ ( int ) Intervals.numElements( inputSize ) ];
+		for ( int i = 0; i < inputF.length; i++ )
+			inputF[ i ] = random.nextFloat();
+		outputF = new float[ ( int ) Intervals.numElements( outputSize ) ];
+
+		downsampleDouble = new AbstractDownsample.DownsampleDouble( downsampleInDim );
+		downsampleDouble.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
+		inputD = new double[ ( int ) Intervals.numElements( inputSize ) ];
+		for ( int i = 0; i < inputD.length; i++ )
+			inputD[ i ] = random.nextDouble();
+		outputD = new double[ ( int ) Intervals.numElements( outputSize ) ];
 	}
 
 	@Benchmark
 	public void benchmarkDownsampleFloat()
 	{
-		downsampleFloat.compute( input, output );
+		downsampleFloat.compute( inputF, outputF );
+	}
+
+	@Benchmark
+	public void benchmarkDownsampleDouble()
+	{
+		downsampleDouble.compute( inputD, outputD );
 	}
 
 	public static void main( String... args ) throws RunnerException

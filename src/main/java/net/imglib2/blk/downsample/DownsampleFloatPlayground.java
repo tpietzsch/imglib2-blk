@@ -11,17 +11,15 @@ import net.imglib2.blk.downsample.algo.AlgoUtils;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.converter.Converters;
-import net.imglib2.converter.RealDoubleConverter;
 import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 
-public class DownsamplePlaygroundDoubleFull
+public class DownsampleFloatPlayground
 {
 	public static void main( String[] args )
 	{
@@ -38,15 +36,15 @@ public class DownsamplePlaygroundDoubleFull
 		bdv.setColor( new ARGBType( 0xffffff ) );
 		bdv.setDisplayRange( 0, 255 );
 
-		final PrimitiveBlocks< DoubleType > blocks = PrimitiveBlocks.of(
-				Converters.convert( Views.extendBorder( img ), new RealDoubleConverter<>(), new DoubleType() )
+		final PrimitiveBlocks< FloatType > blocks = PrimitiveBlocks.of(
+				Converters.convert( Views.extendBorder( img ), new RealFloatConverter<>(), new FloatType() )
 		).threadSafe();
 
 		final boolean[] downsampleInDim = { true, true, true };
-		final long[] downsampledDimensions = DownsampleDouble.getDownsampledDimensions( img.dimensionsAsLongArray(), downsampleInDim );
+		final long[] downsampledDimensions = DownsampleFloat.getDownsampledDimensions( img.dimensionsAsLongArray(), downsampleInDim );
 		final int[] cellDimensions = { 64, 64, 64 };
-		final CachedCellImg< DoubleType, ? > downsampled = AlgoUtils.cellImg(
-				blocks, new DownsampleDouble( downsampleInDim ), new DoubleType(), downsampledDimensions, cellDimensions );
+		final CachedCellImg< FloatType, ? > downsampled = AlgoUtils.cellImg(
+				blocks, new AbstractDownsample.DownsampleFloat( downsampleInDim ), new FloatType(), downsampledDimensions, cellDimensions );
 
 		final double[] calib = new double[ 3 ];
 		Arrays.setAll(calib, d -> downsampleInDim[ d ] ? 2 : 1 );

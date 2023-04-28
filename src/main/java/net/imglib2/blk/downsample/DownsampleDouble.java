@@ -206,7 +206,7 @@ public class DownsampleDouble implements BlockProcessor< double[], double[] >
 			itDestSize[ d ] = destSize[ d ];
 			final boolean lastStep = ( i == steps - 1 );
 			final double[] itDest = lastStep ? dest : getSourceBuffer( i + 1 );
-			downsample( itSrc, itDestSize, itDest, d );
+			downsampleStatic( itSrc, itDestSize, itDest, d );
 			itSrc = itDest;
 		}
 	}
@@ -221,8 +221,16 @@ public class DownsampleDouble implements BlockProcessor< double[], double[] >
 		return destSize;
 	}
 
+	void downsample( final double[] source, final int[] destSize, final double[] dest, final int dim )
+	{
+		if ( dim == 0 )
+			downsampleX( source, destSize, dest );
+		else
+			downsampleN( source, destSize, dest, dim );
+	}
+
 	// TODO: make private
-	static void downsample( final double[] source, final int[] destSize, final double[] dest, final int dim )
+	static void downsampleStatic( final double[] source, final int[] destSize, final double[] dest, final int dim )
 	{
 		if ( dim == 0 )
 			downsampleX( source, destSize, dest );
