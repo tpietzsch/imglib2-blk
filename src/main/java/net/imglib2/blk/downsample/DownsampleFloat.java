@@ -9,7 +9,7 @@ import net.imglib2.util.Intervals;
 
 import static net.imglib2.type.PrimitiveType.FLOAT;
 
-public class DownsampleFloat implements BlockProcessor< float[] >
+public class DownsampleFloat implements BlockProcessor< float[], float[] >
 {
 	private final int n;
 	private final int[] destSize;
@@ -26,6 +26,8 @@ public class DownsampleFloat implements BlockProcessor< float[] >
 	// tempArrays[0] can be used to copy the source block into.
 	private final TempArray<float[]> tempArrays[];
 	private final int[] tempArraySizes;
+
+	private Supplier< DownsampleFloat > threadSafeSupplier;
 
 	public DownsampleFloat( final boolean[] downsampleInDim )
 	{
@@ -80,6 +82,7 @@ public class DownsampleFloat implements BlockProcessor< float[] >
 		downsampleInDim = downsample.downsampleInDim;
 		downsampleDims = downsample.downsampleDims;
 		steps = downsample.steps;
+		threadSafeSupplier = downsample.threadSafeSupplier;
 
 		// init empty
 		destSize = new int[ n ];
@@ -97,10 +100,11 @@ public class DownsampleFloat implements BlockProcessor< float[] >
 	}
 
 	@Override
-	public Supplier< DownsampleFloat > threadSafeSupplier()
+	public synchronized Supplier< DownsampleFloat > threadSafeSupplier()
 	{
-		// TODO make idempotent: always return the same ThreadLocal, e.g., threadSafeSupplier().get().threadSafeSupplier() == threadSafeSupplier()
-		return ThreadLocal.withInitial( this::newInstance )::get;
+		if ( threadSafeSupplier == null )
+			threadSafeSupplier = ThreadLocal.withInitial( this::newInstance )::get;
+		return threadSafeSupplier;
 	}
 
 	// TODO REMOVE

@@ -2,17 +2,17 @@ package net.imglib2.blk.downsample.algo;
 
 import java.util.function.Supplier;
 import net.imglib2.Interval;
-import net.imglib2.blk.downsample.DownsampleFloat;
 
 /**
- * @param <P> primitive array type, e.g., float[]
+ * @param <I> input primitive array type, e.g., float[]
+ * @param <O> output primitive array type, e.g., float[]
  */
 // TODO rename
 // TODO rename package
 // TODO javadoc
-public interface BlockProcessor< P >
+public interface BlockProcessor< I, O >
 {
-	Supplier< ? extends BlockProcessor< P > > threadSafeSupplier();
+	Supplier< ? extends BlockProcessor< I, O > > threadSafeSupplier();
 
 	void setTargetInterval( Interval interval );
 
@@ -20,7 +20,7 @@ public interface BlockProcessor< P >
 
 	int[] getSourceSize();
 
-	P getSourceBuffer();
+	I getSourceBuffer();
 
-	void compute( P src, P dest );
+	void compute( I src, O dest );
 }

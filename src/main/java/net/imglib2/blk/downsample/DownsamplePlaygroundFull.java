@@ -26,8 +26,6 @@ import net.imglib2.view.Views;
 
 public class DownsamplePlaygroundFull
 {
-
-
 	public static void main( String[] args )
 	{
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
@@ -48,15 +46,10 @@ public class DownsamplePlaygroundFull
 		).threadSafe();
 
 		final boolean[] downsampleInDim = { true, true, true };
-		final CellLoader< FloatType > loader = AlgoUtils.cellLoader( blocks, new DownsampleFloat( downsampleInDim ) );
-
 		final long[] downsampledDimensions = DownsampleFloat.getDownsampledDimensions( img.dimensionsAsLongArray(), downsampleInDim );
-		System.out.println( "downsampledDimensions = " + Arrays.toString( downsampledDimensions ) );
-		final CachedCellImg< FloatType, ? > downsampled = new ReadOnlyCachedCellImgFactory().create(
-				downsampledDimensions,
-				new FloatType(),
-				loader,
-				ReadOnlyCachedCellImgOptions.options().cellDimensions( 64, 64, 64 ) );
+		final int[] cellDimensions = { 64, 64, 64 };
+		final CachedCellImg< FloatType, ? > downsampled = AlgoUtils.cellImg(
+				blocks, new DownsampleFloat( downsampleInDim ), new FloatType(), downsampledDimensions, cellDimensions );
 
 		final double[] calib = new double[ 3 ];
 		Arrays.setAll(calib, d -> downsampleInDim[ d ] ? 2 : 1 );
