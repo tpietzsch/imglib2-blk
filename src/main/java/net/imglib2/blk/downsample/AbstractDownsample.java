@@ -8,11 +8,7 @@ import net.imglib2.blocks.TempArray;
 import net.imglib2.type.PrimitiveType;
 import net.imglib2.util.Intervals;
 
-import static net.imglib2.type.PrimitiveType.FLOAT;
-import static net.imglib2.type.PrimitiveType.DOUBLE;
-
-abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P >
-		implements BlockProcessor< P, P >
+abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P > implements BlockProcessor< P, P >
 {
 	PrimitiveType primitiveType;
 
@@ -33,7 +29,7 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P >
 
 	Supplier< T > threadSafeSupplier;
 
-	public AbstractDownsample( final boolean[] downsampleInDim, final PrimitiveType primitiveType )
+	AbstractDownsample( final boolean[] downsampleInDim, final PrimitiveType primitiveType )
 	{
 		n = downsampleInDim.length;
 		this.primitiveType = primitiveType;
@@ -97,7 +93,7 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P >
 		tempArrays = createTempArrays( steps, primitiveType );
 	}
 
-	public abstract T newInstance();
+	abstract T newInstance();
 
 	@Override
 	public synchronized Supplier< T > threadSafeSupplier()
@@ -158,6 +154,7 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P >
 	}
 
 	// optional. also other arrays can be passed to compute()
+	@Override
 	public P getSourceBuffer()
 	{
 		return getSourceBuffer( 0 );
@@ -184,175 +181,5 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P >
 		}
 	}
 
-	public static long[] getDownsampledDimensions( final long[] imgDimensions, final boolean[] downsampleInDim )
-	{
-		final int n = imgDimensions.length;
-		if ( downsampleInDim.length != n )
-			throw new IllegalArgumentException();
-		final long[] destSize = new long[ n ];
-		Arrays.setAll( destSize, d -> downsampleInDim[ d ] ? ( imgDimensions[ d ] + 1 ) / 2 : imgDimensions[ d ] );
-		return destSize;
-	}
-
 	abstract void downsample( final P source, final int[] destSize, final P dest, final int dim );
-
-	static class DownsampleFloat extends AbstractDownsample< DownsampleFloat, float[] >
-	{
-		public DownsampleFloat( final boolean[] downsampleInDim )
-		{
-			super( downsampleInDim, FLOAT );
-		}
-
-		DownsampleFloat( DownsampleFloat downsample )
-		{
-			super( downsample );
-		}
-
-		@Override
-		public DownsampleFloat newInstance()
-		{
-			return new DownsampleFloat( this );
-		}
-
-		@Override
-		void downsample( final float[] source, final int[] destSize, final float[] dest, final int dim )
-		{
-			if ( dim == 0 )
-				downsampleX( source, destSize, dest );
-			else
-				downsampleN( source, destSize, dest, dim );
-		}
-
-		private static void downsampleX( final float[] source, final int[] destSize, final float[] dest )
-		{
-			final int destLineLength = destSize[ 0 ];
-			final int srcLineLength = 2 * destSize[ 0 ] + 1;
-
-			int nLines = 1;
-			for ( int d = 1; d < destSize.length; ++d )
-				nLines *= destSize[ d ];
-
-			for ( int y = 0; y < nLines; ++y )
-			{
-				final int destOffset = y * destLineLength;
-				final int srcOffset = y * srcLineLength;
-				for ( int x = 0; x < destLineLength; ++x )
-				{
-					final int si = srcOffset + 2 * x;
-					dest[ destOffset + x ] =
-							0.25f * source[ si ] +
-									0.5f * source[ si + 1 ] +
-									0.25f * source[ si + 2 ];
-				}
-			}
-		}
-
-		private static void downsampleN( final float[] source, final int[] destSize, final float[] dest, final int dim )
-		{
-			int lineLength = 1;
-			for ( int d = 0; d < dim; ++d )
-				lineLength *= destSize[ d ];
-
-			final int nLines = destSize[ dim ];
-
-			int nPlanes = 1;
-			for ( int d = dim + 1; d < destSize.length; ++d )
-				nPlanes *= destSize[ d ];
-
-			for ( int z = 0; z < nPlanes; ++z )
-			{
-				for ( int y = 0; y < nLines; ++y )
-				{
-					final int destOffset = ( z * nLines * lineLength ) + ( y * lineLength );
-					final int srcOffset = ( z * ( 2 * nLines + 1 ) * lineLength ) + ( 2 * y * lineLength );
-					for ( int x = 0; x < lineLength; ++x )
-					{
-						dest[ destOffset + x ] = 0.25f * source[ srcOffset + x ] +
-								0.5f * source[ srcOffset + x + lineLength ] +
-								0.25f * source[ srcOffset + x + 2 * lineLength ];
-					}
-				}
-			}
-		}
-	}
-
-	static class DownsampleDouble extends AbstractDownsample< DownsampleDouble, double[] >
-	{
-		public DownsampleDouble( final boolean[] downsampleInDim )
-		{
-			super( downsampleInDim, DOUBLE );
-		}
-
-		DownsampleDouble( DownsampleDouble downsample )
-		{
-			super( downsample );
-		}
-
-		@Override
-		public DownsampleDouble newInstance()
-		{
-			return new DownsampleDouble( this );
-		}
-
-		@Override
-		void downsample( final double[] source, final int[] destSize, final double[] dest, final int dim )
-		{
-			if ( dim == 0 )
-				downsampleX( source, destSize, dest );
-			else
-				downsampleN( source, destSize, dest, dim );
-		}
-
-		private static void downsampleX( final double[] source, final int[] destSize, final double[] dest )
-		{
-			final int destLineLength = destSize[ 0 ];
-			final int srcLineLength = 2 * destSize[ 0 ] + 1;
-
-			int nLines = 1;
-			for ( int d = 1; d < destSize.length; ++d )
-				nLines *= destSize[ d ];
-
-			for ( int y = 0; y < nLines; ++y )
-			{
-				final int destOffset = y * destLineLength;
-				final int srcOffset = y * srcLineLength;
-				for ( int x = 0; x < destLineLength; ++x )
-				{
-					final int si = srcOffset + 2 * x;
-					dest[ destOffset + x ] =
-							0.25 * source[ si ] +
-									0.5 * source[ si + 1 ] +
-									0.25 * source[ si + 2 ];
-				}
-			}
-		}
-
-		private static void downsampleN( final double[] source, final int[] destSize, final double[] dest, final int dim )
-		{
-			int lineLength = 1;
-			for ( int d = 0; d < dim; ++d )
-				lineLength *= destSize[ d ];
-
-			final int nLines = destSize[ dim ];
-
-			int nPlanes = 1;
-			for ( int d = dim + 1; d < destSize.length; ++d )
-				nPlanes *= destSize[ d ];
-
-			for ( int z = 0; z < nPlanes; ++z )
-			{
-				for ( int y = 0; y < nLines; ++y )
-				{
-					final int destOffset = ( z * nLines * lineLength ) + ( y * lineLength );
-					final int srcOffset = ( z * ( 2 * nLines + 1 ) * lineLength ) + ( 2 * y * lineLength );
-					for ( int x = 0; x < lineLength; ++x )
-					{
-						dest[ destOffset + x ] = 0.25 * source[ srcOffset + x ] +
-								0.5 * source[ srcOffset + x + lineLength ] +
-								0.25 * source[ srcOffset + x + 2 * lineLength ];
-					}
-				}
-			}
-		}
-	}
 }

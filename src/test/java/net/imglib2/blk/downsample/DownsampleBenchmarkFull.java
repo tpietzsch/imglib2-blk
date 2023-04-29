@@ -31,8 +31,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @Fork( 1 )
 public class DownsampleBenchmarkFull
 {
-	final int[] imgSize = { 64, 64, 64 };
-//	final int[] imgSize = { 256, 256, 256 };
+	int[] imgSize;
 
 	int[] outputSize;
 	int[] inputSize;
@@ -40,18 +39,22 @@ public class DownsampleBenchmarkFull
 	float[] outputF;
 	double[] inputD;
 	double[] outputD;
-	AbstractDownsample.DownsampleFloat downsampleFloat;
-	AbstractDownsample.DownsampleDouble downsampleDouble;
+	Downsample.Float downsampleFloat;
+	Downsample.Double downsampleDouble;
 
-	@Param( { "X", "Y", "Z", "XYZ" } )
+//	@Param( { "X", "Y", "Z", "XYZ" } )
+	@Param( { "XYZ" } )
 	public String scenario;
+
+	@Param( { "32", "64", "128", "265" } )
+	public int size;
 
 
 	@Setup(Level.Trial)
 	public void setUp() {
 		final Random random = new Random( 1 );
 
-		final int n = imgSize.length;
+		final int n = 3;
 		inputSize = new int[ n ];
 		outputSize = new int[ n ];
 
@@ -72,10 +75,13 @@ public class DownsampleBenchmarkFull
 			break;
 		}
 
-		final long[] destSize = AbstractDownsample.getDownsampledDimensions( Util.int2long( imgSize ), downsampleInDim );
+		imgSize = new int[] { size, size, size };
+
+		final long[] destSize = Downsample.getDownsampledDimensions( Util.int2long( imgSize ), downsampleInDim );
+		System.out.println( "destSize = " + Arrays.toString( destSize ) );
 		Arrays.setAll( outputSize, d -> ( int ) destSize[ d ] );
 
-		downsampleFloat = new AbstractDownsample.DownsampleFloat( downsampleInDim );
+		downsampleFloat = new Downsample.Float( downsampleInDim );
 		downsampleFloat.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
 		System.arraycopy( downsampleFloat.getSourceSize(), 0, inputSize, 0, inputSize.length );
 		inputF = new float[ ( int ) Intervals.numElements( inputSize ) ];
@@ -83,7 +89,7 @@ public class DownsampleBenchmarkFull
 			inputF[ i ] = random.nextFloat();
 		outputF = new float[ ( int ) Intervals.numElements( outputSize ) ];
 
-		downsampleDouble = new AbstractDownsample.DownsampleDouble( downsampleInDim );
+		downsampleDouble = new Downsample.Double( downsampleInDim );
 		downsampleDouble.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
 		inputD = new double[ ( int ) Intervals.numElements( inputSize ) ];
 		for ( int i = 0; i < inputD.length; i++ )

@@ -41,10 +41,10 @@ public class DownsampleDoublePlayground
 		).threadSafe();
 
 		final boolean[] downsampleInDim = { true, true, true };
-		final long[] downsampledDimensions = DownsampleDouble.getDownsampledDimensions( img.dimensionsAsLongArray(), downsampleInDim );
+		final long[] downsampledDimensions = Downsample.getDownsampledDimensions( img.dimensionsAsLongArray(), downsampleInDim );
 		final int[] cellDimensions = { 64, 64, 64 };
 		final CachedCellImg< DoubleType, ? > downsampled = AlgoUtils.cellImg(
-				blocks, new AbstractDownsample.DownsampleDouble( downsampleInDim ), new DoubleType(), downsampledDimensions, cellDimensions );
+				blocks, new Downsample.Double( downsampleInDim ), new DoubleType(), downsampledDimensions, cellDimensions );
 
 		final double[] calib = new double[ 3 ];
 		Arrays.setAll(calib, d -> downsampleInDim[ d ] ? 2 : 1 );
