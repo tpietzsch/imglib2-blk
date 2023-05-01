@@ -4,6 +4,7 @@ import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvSource;
 import bdv.util.volatiles.VolatileViews;
+import bdv.viewer.DisplayMode;
 import ij.IJ;
 import ij.ImagePlus;
 import java.util.Arrays;
@@ -35,6 +36,7 @@ public class DownsampleDoublePlayground
 				Bdv.options() );
 		bdv.setColor( new ARGBType( 0xffffff ) );
 		bdv.setDisplayRange( 0, 255 );
+		bdv.getBdvHandle().getViewerPanel().setDisplayMode( DisplayMode.SINGLE );
 
 		final PrimitiveBlocks< DoubleType > blocks = PrimitiveBlocks.of(
 				Converters.convert( Views.extendBorder( img ), new RealDoubleConverter<>(), new DoubleType() )
@@ -55,5 +57,18 @@ public class DownsampleDoublePlayground
 						.addTo( bdv )
 						.sourceTransform( calib ) );
 		out.setDisplayRange( 0, 255 );
+//		out.setColor( new ARGBType( 0xff0000 ) );
+
+		final CachedCellImg< DoubleType, ? > downsampled2 = AlgoUtils.cellImg(
+				blocks, new DownsampleHalfPixel.Double( downsampleInDim ), new DoubleType(), downsampledDimensions, cellDimensions );
+		final BdvSource out2 = BdvFunctions.show(
+				VolatileViews.wrapAsVolatile( downsampled2 ),
+				"downsampled half-pixel",
+				Bdv.options()
+						.addTo( bdv )
+						.sourceTransform( calib ) );
+		out2.setDisplayRange( 0, 255 );
+//		out2.setColor( new ARGBType( 0x00ff00 ) );
+
 	}
 }

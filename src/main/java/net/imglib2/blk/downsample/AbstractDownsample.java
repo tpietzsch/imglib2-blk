@@ -13,9 +13,9 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P > imp
 	PrimitiveType primitiveType;
 
 	final int n;
-	private final int[] destSize;
-	private final long[] sourcePos;
-	private final int[] sourceSize;
+	final int[] destSize;
+	final long[] sourcePos;
+	final int[] sourceSize;
 
 	final boolean[] downsampleInDim;
 	final int[] downsampleDims;
@@ -25,7 +25,7 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P > imp
 	// dest is the tempArray of the next step, or final dest for the last step.
 	// tempArrays[0] can be used to copy the source block into.
 	private final TempArray< P > tempArrays[];
-	private final int[] tempArraySizes;
+	final int[] tempArraySizes;
 
 	Supplier< T > threadSafeSupplier;
 
@@ -134,7 +134,7 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P > imp
 		}
 	}
 
-	private static int safeInt( final long value )
+	static int safeInt( final long value )
 	{
 		if ( value > Integer.MAX_VALUE )
 			throw new IllegalArgumentException( "value too large" );

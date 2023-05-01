@@ -41,12 +41,14 @@ public class DownsampleBenchmarkFull
 	double[] outputD;
 	Downsample.Float downsampleFloat;
 	Downsample.Double downsampleDouble;
+	DownsampleHalfPixel.Float downsampleHalfFloat;
+	DownsampleHalfPixel.Double downsampleHalfDouble;
 
 //	@Param( { "X", "Y", "Z", "XYZ" } )
 	@Param( { "XYZ" } )
 	public String scenario;
 
-	@Param( { "32", "64", "128", "265" } )
+	@Param( { "32", "64", "128", "256" } )
 	public int size;
 
 
@@ -95,6 +97,12 @@ public class DownsampleBenchmarkFull
 		for ( int i = 0; i < inputD.length; i++ )
 			inputD[ i ] = random.nextDouble();
 		outputD = new double[ ( int ) Intervals.numElements( outputSize ) ];
+
+		downsampleHalfFloat = new DownsampleHalfPixel.Float( downsampleInDim );
+		downsampleHalfFloat.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
+
+		downsampleHalfDouble = new DownsampleHalfPixel.Double( downsampleInDim );
+		downsampleHalfDouble.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
 	}
 
 	@Benchmark
@@ -107,6 +115,18 @@ public class DownsampleBenchmarkFull
 	public void benchmarkDownsampleDouble()
 	{
 		downsampleDouble.compute( inputD, outputD );
+	}
+
+	@Benchmark
+	public void benchmarkDownsampleHalfPixelFloat()
+	{
+		downsampleHalfFloat.compute( inputF, outputF );
+	}
+
+	@Benchmark
+	public void benchmarkDownsampleHalfPixelDouble()
+	{
+		downsampleHalfDouble.compute( inputD, outputD );
 	}
 
 	public static void main( String... args ) throws RunnerException
