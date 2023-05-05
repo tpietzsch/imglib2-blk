@@ -26,7 +26,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 @State( Scope.Benchmark )
 @Warmup( iterations = 3, time = 100, timeUnit = TimeUnit.MILLISECONDS )
-@Measurement( iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS )
+@Measurement( iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS )
 @BenchmarkMode( Mode.AverageTime )
 @OutputTimeUnit( TimeUnit.MILLISECONDS )
 @Fork( 1 )
@@ -52,7 +52,8 @@ public class DownsampleBenchmarkFull
 	@Param( { "XYZ" } )
 	public String scenario;
 
-	@Param( { "64", "128", "256" } )
+	//	@Param( { "64", "128", "256" } )
+	@Param( { "128" } )
 	public int size;
 
 
@@ -128,6 +129,13 @@ public class DownsampleBenchmarkFull
 		downsampleDouble.compute( inputD, outputD );
 	}
 
+	@Benchmark
+	public void benchmarkDownsampleBoth()
+	{
+		downsampleFloat.compute( inputF, outputF );
+		downsampleDouble.compute( inputD, outputD );
+	}
+
 //	@Benchmark
 //	public void benchmarkDownsampleHalfPixelFloat()
 //	{
@@ -140,11 +148,11 @@ public class DownsampleBenchmarkFull
 //		downsampleHalfDouble.compute( inputD, outputD );
 //	}
 //
-	@Benchmark
-	public void benchmarkDownsampleU8ViaFloat()
-	{
-		downsampleUnsignedByteViaFloat.compute( inputU8, outputU8 );
-	}
+//	@Benchmark
+//	public void benchmarkDownsampleU8ViaFloat()
+//	{
+//		downsampleUnsignedByteViaFloat.compute( inputU8, outputU8 );
+//	}
 
 	public static void main( String... args ) throws RunnerException
 	{

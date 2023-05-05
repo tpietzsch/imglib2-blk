@@ -130,7 +130,7 @@ abstract class AbstractDownsampleMultiple< T extends AbstractDownsampleMultiple<
 			tempArraySizes[ 0 ] = size;
 			for ( int i = 1; i < steps; ++i )
 			{
-				final int d = downsampleDims[ steps - i ];
+				final int d = downsampleDims[ i - 1 ];
 				size = size / sourceSize[ d ] * destSize[ d ];
 				tempArraySizes[ i ] = size;
 			}
@@ -175,7 +175,7 @@ abstract class AbstractDownsampleMultiple< T extends AbstractDownsampleMultiple<
 		final int[] itDestSize = sourceSize.clone();
 		for ( int i = 0; i < steps; ++i )
 		{
-			final int d = downsampleDims[ steps - i - 1 ];
+			final int d = downsampleDims[ i ];
 			itDestSize[ d ] = destSize[ d ];
 			final boolean firstStep = ( i == 0 );
 			final boolean lastStep = ( i == steps - 1 );
