@@ -238,4 +238,56 @@ public class Routines
 		return getCodedSignedByte( ( int ) unsignedByte );
 	}
 
+
+	public static void main( String[] args )
+	{
+		int int_a = 0x10f7;
+		long long_a = 0x3451ef0;
+
+		System.out.println( "int_a = " + int_a );
+		System.out.println( "to_u8_1(int_a) = " + to_u8_1( int_a ) + " = " + getUnsignedByte( to_u8_1( int_a ) ) );
+		System.out.println( "to_u8_2(int_a) = " + to_u8_2( int_a ) + " = " + getUnsignedByte( to_u8_2( int_a ) ) );
+
+		System.out.println( "long_a = " + long_a );
+		System.out.println( "to_u8_1(long_a) = " + to_u8_1( long_a ) + " = " + getUnsignedByte( to_u8_1( long_a ) ) );
+		System.out.println( "to_u8_2(long_a) = " + to_u8_2( long_a ) + " = " + getUnsignedByte( to_u8_2( long_a ) ) );
+	}
+
+	private static byte to_u8_1( int value ) { return ( byte ) ( value & 0xff ); }
+	private static byte to_u8_1( long value ) { return ( byte ) ( value & 0xff ); }
+	private static byte to_u8_2( int value ) { return ( byte ) value; }
+	private static byte to_u8_2( long value ) { return ( byte ) value; }
+
+
+
+
+	private static byte to_i8( int value ) { return ( byte ) value; }
+	private static byte to_i8( long value ) { return ( byte ) value; }
+
+	// TODO mask unnecessary
+	private static byte to_u8( int value ) { return ( byte ) ( value & 0xff ); }
+	private static byte to_u8( long value ) { return ( byte ) ( value & 0xff ); }
+
+	private static short to_i16( int value ) { return ( short ) value; }
+	private static short to_i16( long value ) { return ( short ) value; }
+
+	// TODO mask unnecessary
+	private static short to_u16( int value ) { return ( short ) ( value & 0xffff ); }
+	private static short to_u16( long value ) { return ( short ) ( value & 0xffff ); }
+
+	// TODO cast unnecessary
+	private static int to_i32( int value ) { return ( int ) value; }
+
+	private static int to_i32( long value ) { return ( int ) value; }
+
+	// TODO mask unnecessary, cast unnecessary
+	private static int to_u32( int value ) { return ( int ) ( value & 0xffffffffL ); }
+
+	// TODO mask unnecessary
+	private static int to_u32( long value ) { return ( int ) ( value & 0xffffffffL ); }
+
+	// cast unnecessary
+	private static long to_i64( int value ) { return ( long ) value; }
+	private static long to_i64( long value ) { return ( long ) value; }
+
 }

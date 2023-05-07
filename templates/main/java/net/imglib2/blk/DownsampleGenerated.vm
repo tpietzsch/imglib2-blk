@@ -7,7 +7,7 @@
  * corresponding template in templates/ and rerun bin/generate.groovy.
  */
 
-package net.imglib2.blk.downsample;
+package net.imglib2.blk;
 
 /**
  * @author Tobias Pietzsch
@@ -44,14 +44,6 @@ public class DownsampleGenerated
     ["f64", "f64"],
     ["u8", "u8"]
 ] )
-
-#foreach($prim1 in $primitive.keySet())
-    #foreach($prim2 in $primitive.keySet())
-        ${prim1}-${prim2}
-    #end
-#end
-
-
 
 #foreach($iotype in $iotypes)
     #set( $inP = $primitive[$iotype[0]] )
