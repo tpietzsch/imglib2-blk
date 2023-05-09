@@ -40,13 +40,10 @@ public class DownsampleBenchmarkFull
 	float[] outputF;
 	double[] inputD;
 	double[] outputD;
-	byte[] inputU8;
-	byte[] outputU8;
 	Downsample.Float downsampleFloat;
 	Downsample.Double downsampleDouble;
 	DownsampleHalfPixel.Float downsampleHalfFloat;
 	DownsampleHalfPixel.Double downsampleHalfDouble;
-	DownsampleMultiple.UnsignedByteViaFloat downsampleUnsignedByteViaFloat;
 
 //	@Param( { "X", "Y", "Z", "XYZ" } )
 	@Param( { "XYZ" } )
@@ -108,13 +105,6 @@ public class DownsampleBenchmarkFull
 
 		downsampleHalfDouble = new DownsampleHalfPixel.Double( downsampleInDim );
 		downsampleHalfDouble.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
-
-		downsampleUnsignedByteViaFloat = new DownsampleMultiple.UnsignedByteViaFloat( downsampleInDim );
-		downsampleUnsignedByteViaFloat.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
-		inputU8 = new byte[ ( int ) Intervals.numElements( inputSize ) ];
-		for ( int i = 0; i < inputF.length; i++ )
-			inputU8[ i ] = UnsignedByteType.getCodedSignedByte( random.nextInt(256) );
-		outputU8 = new byte[ ( int ) Intervals.numElements( outputSize ) ];
 	}
 
 	@Benchmark
@@ -141,17 +131,11 @@ public class DownsampleBenchmarkFull
 //	{
 //		downsampleHalfFloat.compute( inputF, outputF );
 //	}
-//
+
 //	@Benchmark
 //	public void benchmarkDownsampleHalfPixelDouble()
 //	{
 //		downsampleHalfDouble.compute( inputD, outputD );
-//	}
-//
-//	@Benchmark
-//	public void benchmarkDownsampleU8ViaFloat()
-//	{
-//		downsampleUnsignedByteViaFloat.compute( inputU8, outputU8 );
 //	}
 
 	public static void main( String... args ) throws RunnerException

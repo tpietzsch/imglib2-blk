@@ -42,18 +42,18 @@ public class DownsampleMultiplePlayground
 		final boolean[] downsampleInDim = { true, true, true };
 		final long[] downsampledDimensions = Downsample.getDownsampledDimensions( img.dimensionsAsLongArray(), downsampleInDim );
 		final int[] cellDimensions = { 64, 64, 64 };
-		final CachedCellImg< UnsignedByteType, ? > downsampled = AlgoUtils.cellImg(
-				blocks, new DownsampleMultiple.UnsignedByteViaFloat( downsampleInDim ), new UnsignedByteType(), downsampledDimensions, cellDimensions );
-
-		final double[] calib = new double[ 3 ];
-		Arrays.setAll(calib, d -> downsampleInDim[ d ] ? 2 : 1 );
-		final BdvSource out = BdvFunctions.show(
-				VolatileViews.wrapAsVolatile( downsampled ),
-				"downsampled",
-				Bdv.options()
-						.addTo( bdv )
-						.sourceTransform( calib ) );
-		out.setDisplayRange( 0, 255 );
-		out.setColor( new ARGBType( 0xff0000 ) );
+//		final CachedCellImg< UnsignedByteType, ? > downsampled = AlgoUtils.cellImg(
+//				blocks, new DownsampleMultiple.UnsignedByteViaFloat( downsampleInDim ), new UnsignedByteType(), downsampledDimensions, cellDimensions );
+//
+//		final double[] calib = new double[ 3 ];
+//		Arrays.setAll(calib, d -> downsampleInDim[ d ] ? 2 : 1 );
+//		final BdvSource out = BdvFunctions.show(
+//				VolatileViews.wrapAsVolatile( downsampled ),
+//				"downsampled",
+//				Bdv.options()
+//						.addTo( bdv )
+//						.sourceTransform( calib ) );
+//		out.setDisplayRange( 0, 255 );
+//		out.setColor( new ARGBType( 0xff0000 ) );
 	}
 }
