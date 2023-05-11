@@ -69,6 +69,13 @@ public class TypeConversion
 		}
 
 		@Override
+		public Interval getSourceInterval()
+		{
+			throw new UnsupportedOperationException();
+			// TODO
+		}
+
+		@Override
 		public byte[] getSourceBuffer()
 		{
 			return tempArray.get( sourceLength );

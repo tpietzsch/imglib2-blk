@@ -20,6 +20,11 @@ public interface BlockProcessor< I, O >
 
 	int[] getSourceSize();
 
+	// TODO: Its cumbersome to have both getSourcePos()/getSourceSize() *and* getSourceInterval()
+	//       Only have getSourcePos()/getSourceSize() ?
+	//       Have a modifiable SourceInterval class exposing getSourcePos()/getSourceSize() ?
+	Interval getSourceInterval();
+
 	I getSourceBuffer();
 
 	void compute( I src, O dest );

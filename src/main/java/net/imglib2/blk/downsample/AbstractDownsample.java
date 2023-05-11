@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 import net.imglib2.Interval;
 import net.imglib2.blk.downsample.algo.BlockProcessor;
+import net.imglib2.blk.downsample.algo.BlockProcessorSourceInterval;
 import net.imglib2.blocks.TempArray;
 import net.imglib2.type.PrimitiveType;
 import net.imglib2.util.Intervals;
@@ -27,6 +28,8 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P > imp
 	private final TempArray< P > tempArrays[];
 	final int[] tempArraySizes;
 
+	private final BlockProcessorSourceInterval sourceInterval;
+
 	Supplier< T > threadSafeSupplier;
 
 	AbstractDownsample( final boolean[] downsampleInDim, final PrimitiveType primitiveType )
@@ -43,6 +46,8 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P > imp
 
 		tempArrays = createTempArrays( steps, primitiveType );
 		tempArraySizes = new int[ steps ];
+
+		sourceInterval = new BlockProcessorSourceInterval( this );
 	}
 
 	private static int[] downsampleDimIndices( final boolean[] downsampleInDim )
@@ -91,6 +96,7 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P > imp
 
 		// init new instance
 		tempArrays = createTempArrays( steps, primitiveType );
+		sourceInterval = new BlockProcessorSourceInterval( this );
 	}
 
 	abstract T newInstance();
@@ -151,6 +157,12 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P > imp
 	public long[] getSourcePos()
 	{
 		return sourcePos;
+	}
+
+	@Override
+	public Interval getSourceInterval()
+	{
+		return sourceInterval;
 	}
 
 	// optional. also other arrays can be passed to compute()

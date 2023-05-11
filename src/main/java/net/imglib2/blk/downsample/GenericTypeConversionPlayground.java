@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 import net.imglib2.Interval;
 import net.imglib2.blk.downsample.algo.BlockProcessor;
+import net.imglib2.blk.downsample.algo.BlockProcessorSourceInterval;
 import net.imglib2.blocks.TempArray;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.integer.IntType;
@@ -153,12 +154,15 @@ public class GenericTypeConversionPlayground
 		private int[] sourceSize;
 		private int sourceLength;
 
+		private final BlockProcessorSourceInterval sourceInterval;
+
 		public TypeConvert( final S sourceType, final T targetType )
 		{
 			this.sourceType = sourceType;
 			this.targetType = targetType;
 			tempArray = TempArray.forPrimitiveType( sourceType.getNativeTypeFactory().getPrimitiveType() );
 			loop = ConvertLoop.get( UnaryOperatorType.of( sourceType, targetType ) );
+			sourceInterval = new BlockProcessorSourceInterval( this );
 		}
 
 		private TypeConvert( TypeConvert< S, T, I, O > convert )
@@ -167,6 +171,7 @@ public class GenericTypeConversionPlayground
 			targetType = convert.targetType;
 			tempArray = convert.tempArray.newInstance();
 			loop = convert.loop;
+			sourceInterval = new BlockProcessorSourceInterval( this );
 			threadSafeSupplier = convert.threadSafeSupplier;
 		}
 
@@ -207,6 +212,12 @@ public class GenericTypeConversionPlayground
 		public int[] getSourceSize()
 		{
 			return sourceSize;
+		}
+
+		@Override
+		public Interval getSourceInterval()
+		{
+			return sourceInterval;
 		}
 
 		@Override
