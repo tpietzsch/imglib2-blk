@@ -28,4 +28,9 @@ public interface BlockProcessor< I, O >
 	I getSourceBuffer();
 
 	void compute( I src, O dest );
+
+	default < P > BlockProcessor< I, P > andThen( BlockProcessor< O, P > processor )
+	{
+		return new ConcatenatedBlockProcessor<>( this, processor );
+	}
 }
