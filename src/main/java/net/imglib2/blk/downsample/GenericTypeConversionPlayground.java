@@ -13,6 +13,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Cast;
 import net.imglib2.util.Intervals;
 
+import static net.imglib2.blk.downsample.TypeConversionGenerated.from_f32;
 import static net.imglib2.blk.downsample.TypeConversionGenerated.from_i32;
 import static net.imglib2.blk.downsample.TypeConversionGenerated.from_u8;
 import static net.imglib2.blk.downsample.TypeConversionGenerated.to_f32;
@@ -39,7 +40,7 @@ public class GenericTypeConversionPlayground
 	// incomplete dummy
 	enum UnaryOperatorType
 	{
-		U8_TO_F32, I32_TO_U8;
+		U8_TO_F32, F32_TO_U8, I32_TO_U8;
 
 		static UnaryOperatorType of( NativeType< ? > source, NativeType<?> target )
 		{
@@ -63,6 +64,14 @@ public class GenericTypeConversionPlayground
 				{
 				case U8:
 					return I32_TO_U8;
+				default:
+					throw new UnsupportedOperationException( "TODO" );
+				}
+			case F32:
+				switch ( target )
+				{
+				case U8:
+					return F32_TO_U8;
 				default:
 					throw new UnsupportedOperationException( "TODO" );
 				}
@@ -104,6 +113,18 @@ public class GenericTypeConversionPlayground
 		}
 	}
 
+	static class Convert_f32_to_u8 implements ConvertLoop< float[], byte[] >
+	{
+		static final Convert_f32_to_u8 INSTANCE = new Convert_f32_to_u8();
+
+		@Override
+		public void apply( final float[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u8( from_f32( src[ i ] ) );
+		}
+	}
+
 	static class Convert_i32_to_u8 implements ConvertLoop< int[], byte[] >
 	{
 		static final Convert_i32_to_u8 INSTANCE = new Convert_i32_to_u8();
@@ -128,6 +149,8 @@ public class GenericTypeConversionPlayground
 			case U8_TO_F32:
 				return Cast.unchecked( Convert_u8_to_f32.INSTANCE );
 //				return Cast.unchecked( ( ConvertLoop< byte[], float[] > ) GenericTypeConversionPlayground::convert_u8_to_f32 );
+			case F32_TO_U8:
+				return Cast.unchecked( Convert_f32_to_u8.INSTANCE );
 			case I32_TO_U8:
 				return Cast.unchecked( Convert_i32_to_u8.INSTANCE );
 			default:
@@ -238,12 +261,5 @@ public class GenericTypeConversionPlayground
 		if ( value > Integer.MAX_VALUE )
 			throw new IllegalArgumentException( "value too large" );
 		return ( int ) value;
-	}
-
-
-
-	public static void main( String[] args )
-	{
-
 	}
 }
