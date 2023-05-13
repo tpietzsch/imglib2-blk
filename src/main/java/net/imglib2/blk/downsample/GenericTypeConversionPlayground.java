@@ -7,9 +7,6 @@ import net.imglib2.blk.downsample.algo.BlockProcessor;
 import net.imglib2.blk.downsample.algo.BlockProcessorSourceInterval;
 import net.imglib2.blocks.TempArray;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.integer.IntType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Cast;
 import net.imglib2.util.Intervals;
 
@@ -78,25 +75,6 @@ public class GenericTypeConversionPlayground
 			default:
 				throw new UnsupportedOperationException( "TODO" );
 			}
-		}
-	}
-
-	enum OperandType
-	{
-		U8,
-		F32,
-		I32;
-
-		static OperandType of( NativeType< ? > type )
-		{
-			if ( type instanceof UnsignedByteType )
-				return U8;
-			else if ( type instanceof FloatType )
-				return F32;
-			else if ( type instanceof IntType )
-				return I32;
-			else
-				throw new IllegalArgumentException( "Unsupported Type: " + type.getClass().getSimpleName() );
 		}
 	}
 
