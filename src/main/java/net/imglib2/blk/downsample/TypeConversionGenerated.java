@@ -9,6 +9,8 @@
 
 package net.imglib2.blk.downsample;
 
+import net.imglib2.type.NativeType;
+import net.imglib2.util.Cast;
 
 
 
@@ -148,7 +150,7 @@ class TypeConversionGenerated
 
 
 
-enum UnaryOperatorTypes
+enum UnaryOperatorType
 {
     I8_TO_I8, I8_TO_U8, I8_TO_I16, I8_TO_U16, I8_TO_I32, I8_TO_U32, I8_TO_I64, I8_TO_F32, I8_TO_F64, 
     U8_TO_I8, U8_TO_U8, U8_TO_I16, U8_TO_U16, U8_TO_I32, U8_TO_U32, U8_TO_I64, U8_TO_F32, U8_TO_F64, 
@@ -159,6 +161,1388 @@ enum UnaryOperatorTypes
     I64_TO_I8, I64_TO_U8, I64_TO_I16, I64_TO_U16, I64_TO_I32, I64_TO_U32, I64_TO_I64, I64_TO_F32, I64_TO_F64, 
     F32_TO_I8, F32_TO_U8, F32_TO_I16, F32_TO_U16, F32_TO_I32, F32_TO_U32, F32_TO_I64, F32_TO_F32, F32_TO_F64, 
     F64_TO_I8, F64_TO_U8, F64_TO_I16, F64_TO_U16, F64_TO_I32, F64_TO_U32, F64_TO_I64, F64_TO_F32, F64_TO_F64, 
+    ;
+
+	static UnaryOperatorType of( NativeType< ? > source, NativeType<?> target )
+	{
+		return of( OperandType.of( source ), OperandType.of( target ) );
+	}
+
+	static UnaryOperatorType of( OperandType source, OperandType target )
+	{
+		switch ( source )
+		{
+        case I8:
+            switch ( target)
+            {
+            case I8:
+				return I8_TO_I8;
+            case U8:
+				return I8_TO_U8;
+            case I16:
+				return I8_TO_I16;
+            case U16:
+				return I8_TO_U16;
+            case I32:
+				return I8_TO_I32;
+            case U32:
+				return I8_TO_U32;
+            case I64:
+				return I8_TO_I64;
+            case F32:
+				return I8_TO_F32;
+            case F64:
+				return I8_TO_F64;
+			default:
+				throw new IllegalArgumentException();
+			}
+        case U8:
+            switch ( target)
+            {
+            case I8:
+				return U8_TO_I8;
+            case U8:
+				return U8_TO_U8;
+            case I16:
+				return U8_TO_I16;
+            case U16:
+				return U8_TO_U16;
+            case I32:
+				return U8_TO_I32;
+            case U32:
+				return U8_TO_U32;
+            case I64:
+				return U8_TO_I64;
+            case F32:
+				return U8_TO_F32;
+            case F64:
+				return U8_TO_F64;
+			default:
+				throw new IllegalArgumentException();
+			}
+        case I16:
+            switch ( target)
+            {
+            case I8:
+				return I16_TO_I8;
+            case U8:
+				return I16_TO_U8;
+            case I16:
+				return I16_TO_I16;
+            case U16:
+				return I16_TO_U16;
+            case I32:
+				return I16_TO_I32;
+            case U32:
+				return I16_TO_U32;
+            case I64:
+				return I16_TO_I64;
+            case F32:
+				return I16_TO_F32;
+            case F64:
+				return I16_TO_F64;
+			default:
+				throw new IllegalArgumentException();
+			}
+        case U16:
+            switch ( target)
+            {
+            case I8:
+				return U16_TO_I8;
+            case U8:
+				return U16_TO_U8;
+            case I16:
+				return U16_TO_I16;
+            case U16:
+				return U16_TO_U16;
+            case I32:
+				return U16_TO_I32;
+            case U32:
+				return U16_TO_U32;
+            case I64:
+				return U16_TO_I64;
+            case F32:
+				return U16_TO_F32;
+            case F64:
+				return U16_TO_F64;
+			default:
+				throw new IllegalArgumentException();
+			}
+        case I32:
+            switch ( target)
+            {
+            case I8:
+				return I32_TO_I8;
+            case U8:
+				return I32_TO_U8;
+            case I16:
+				return I32_TO_I16;
+            case U16:
+				return I32_TO_U16;
+            case I32:
+				return I32_TO_I32;
+            case U32:
+				return I32_TO_U32;
+            case I64:
+				return I32_TO_I64;
+            case F32:
+				return I32_TO_F32;
+            case F64:
+				return I32_TO_F64;
+			default:
+				throw new IllegalArgumentException();
+			}
+        case U32:
+            switch ( target)
+            {
+            case I8:
+				return U32_TO_I8;
+            case U8:
+				return U32_TO_U8;
+            case I16:
+				return U32_TO_I16;
+            case U16:
+				return U32_TO_U16;
+            case I32:
+				return U32_TO_I32;
+            case U32:
+				return U32_TO_U32;
+            case I64:
+				return U32_TO_I64;
+            case F32:
+				return U32_TO_F32;
+            case F64:
+				return U32_TO_F64;
+			default:
+				throw new IllegalArgumentException();
+			}
+        case I64:
+            switch ( target)
+            {
+            case I8:
+				return I64_TO_I8;
+            case U8:
+				return I64_TO_U8;
+            case I16:
+				return I64_TO_I16;
+            case U16:
+				return I64_TO_U16;
+            case I32:
+				return I64_TO_I32;
+            case U32:
+				return I64_TO_U32;
+            case I64:
+				return I64_TO_I64;
+            case F32:
+				return I64_TO_F32;
+            case F64:
+				return I64_TO_F64;
+			default:
+				throw new IllegalArgumentException();
+			}
+        case F32:
+            switch ( target)
+            {
+            case I8:
+				return F32_TO_I8;
+            case U8:
+				return F32_TO_U8;
+            case I16:
+				return F32_TO_I16;
+            case U16:
+				return F32_TO_U16;
+            case I32:
+				return F32_TO_I32;
+            case U32:
+				return F32_TO_U32;
+            case I64:
+				return F32_TO_I64;
+            case F32:
+				return F32_TO_F32;
+            case F64:
+				return F32_TO_F64;
+			default:
+				throw new IllegalArgumentException();
+			}
+        case F64:
+            switch ( target)
+            {
+            case I8:
+				return F64_TO_I8;
+            case U8:
+				return F64_TO_U8;
+            case I16:
+				return F64_TO_I16;
+            case U16:
+				return F64_TO_U16;
+            case I32:
+				return F64_TO_I32;
+            case U32:
+				return F64_TO_U32;
+            case I64:
+				return F64_TO_I64;
+            case F32:
+				return F64_TO_F32;
+            case F64:
+				return F64_TO_F64;
+			default:
+				throw new IllegalArgumentException();
+			}
+		default:
+			throw new IllegalArgumentException();
+        }
+	}
 }
 
+
+
+    @FunctionalInterface
+    interface ConvertLoop< I, O >
+    {
+        void apply( final I src, final O dest, final int length );
+
+        static < I, O > ConvertLoop< I, O > get( UnaryOperatorType type )
+        {
+            switch( type )
+            {
+            case I8_TO_I8:
+				return Cast.unchecked( Convert_i8_to_i8.INSTANCE );
+            case I8_TO_U8:
+				return Cast.unchecked( Convert_i8_to_u8.INSTANCE );
+            case I8_TO_I16:
+				return Cast.unchecked( Convert_i8_to_i16.INSTANCE );
+            case I8_TO_U16:
+				return Cast.unchecked( Convert_i8_to_u16.INSTANCE );
+            case I8_TO_I32:
+				return Cast.unchecked( Convert_i8_to_i32.INSTANCE );
+            case I8_TO_U32:
+				return Cast.unchecked( Convert_i8_to_u32.INSTANCE );
+            case I8_TO_I64:
+				return Cast.unchecked( Convert_i8_to_i64.INSTANCE );
+            case I8_TO_F32:
+				return Cast.unchecked( Convert_i8_to_f32.INSTANCE );
+            case I8_TO_F64:
+				return Cast.unchecked( Convert_i8_to_f64.INSTANCE );
+            case U8_TO_I8:
+				return Cast.unchecked( Convert_u8_to_i8.INSTANCE );
+            case U8_TO_U8:
+				return Cast.unchecked( Convert_u8_to_u8.INSTANCE );
+            case U8_TO_I16:
+				return Cast.unchecked( Convert_u8_to_i16.INSTANCE );
+            case U8_TO_U16:
+				return Cast.unchecked( Convert_u8_to_u16.INSTANCE );
+            case U8_TO_I32:
+				return Cast.unchecked( Convert_u8_to_i32.INSTANCE );
+            case U8_TO_U32:
+				return Cast.unchecked( Convert_u8_to_u32.INSTANCE );
+            case U8_TO_I64:
+				return Cast.unchecked( Convert_u8_to_i64.INSTANCE );
+            case U8_TO_F32:
+				return Cast.unchecked( Convert_u8_to_f32.INSTANCE );
+            case U8_TO_F64:
+				return Cast.unchecked( Convert_u8_to_f64.INSTANCE );
+            case I16_TO_I8:
+				return Cast.unchecked( Convert_i16_to_i8.INSTANCE );
+            case I16_TO_U8:
+				return Cast.unchecked( Convert_i16_to_u8.INSTANCE );
+            case I16_TO_I16:
+				return Cast.unchecked( Convert_i16_to_i16.INSTANCE );
+            case I16_TO_U16:
+				return Cast.unchecked( Convert_i16_to_u16.INSTANCE );
+            case I16_TO_I32:
+				return Cast.unchecked( Convert_i16_to_i32.INSTANCE );
+            case I16_TO_U32:
+				return Cast.unchecked( Convert_i16_to_u32.INSTANCE );
+            case I16_TO_I64:
+				return Cast.unchecked( Convert_i16_to_i64.INSTANCE );
+            case I16_TO_F32:
+				return Cast.unchecked( Convert_i16_to_f32.INSTANCE );
+            case I16_TO_F64:
+				return Cast.unchecked( Convert_i16_to_f64.INSTANCE );
+            case U16_TO_I8:
+				return Cast.unchecked( Convert_u16_to_i8.INSTANCE );
+            case U16_TO_U8:
+				return Cast.unchecked( Convert_u16_to_u8.INSTANCE );
+            case U16_TO_I16:
+				return Cast.unchecked( Convert_u16_to_i16.INSTANCE );
+            case U16_TO_U16:
+				return Cast.unchecked( Convert_u16_to_u16.INSTANCE );
+            case U16_TO_I32:
+				return Cast.unchecked( Convert_u16_to_i32.INSTANCE );
+            case U16_TO_U32:
+				return Cast.unchecked( Convert_u16_to_u32.INSTANCE );
+            case U16_TO_I64:
+				return Cast.unchecked( Convert_u16_to_i64.INSTANCE );
+            case U16_TO_F32:
+				return Cast.unchecked( Convert_u16_to_f32.INSTANCE );
+            case U16_TO_F64:
+				return Cast.unchecked( Convert_u16_to_f64.INSTANCE );
+            case I32_TO_I8:
+				return Cast.unchecked( Convert_i32_to_i8.INSTANCE );
+            case I32_TO_U8:
+				return Cast.unchecked( Convert_i32_to_u8.INSTANCE );
+            case I32_TO_I16:
+				return Cast.unchecked( Convert_i32_to_i16.INSTANCE );
+            case I32_TO_U16:
+				return Cast.unchecked( Convert_i32_to_u16.INSTANCE );
+            case I32_TO_I32:
+				return Cast.unchecked( Convert_i32_to_i32.INSTANCE );
+            case I32_TO_U32:
+				return Cast.unchecked( Convert_i32_to_u32.INSTANCE );
+            case I32_TO_I64:
+				return Cast.unchecked( Convert_i32_to_i64.INSTANCE );
+            case I32_TO_F32:
+				return Cast.unchecked( Convert_i32_to_f32.INSTANCE );
+            case I32_TO_F64:
+				return Cast.unchecked( Convert_i32_to_f64.INSTANCE );
+            case U32_TO_I8:
+				return Cast.unchecked( Convert_u32_to_i8.INSTANCE );
+            case U32_TO_U8:
+				return Cast.unchecked( Convert_u32_to_u8.INSTANCE );
+            case U32_TO_I16:
+				return Cast.unchecked( Convert_u32_to_i16.INSTANCE );
+            case U32_TO_U16:
+				return Cast.unchecked( Convert_u32_to_u16.INSTANCE );
+            case U32_TO_I32:
+				return Cast.unchecked( Convert_u32_to_i32.INSTANCE );
+            case U32_TO_U32:
+				return Cast.unchecked( Convert_u32_to_u32.INSTANCE );
+            case U32_TO_I64:
+				return Cast.unchecked( Convert_u32_to_i64.INSTANCE );
+            case U32_TO_F32:
+				return Cast.unchecked( Convert_u32_to_f32.INSTANCE );
+            case U32_TO_F64:
+				return Cast.unchecked( Convert_u32_to_f64.INSTANCE );
+            case I64_TO_I8:
+				return Cast.unchecked( Convert_i64_to_i8.INSTANCE );
+            case I64_TO_U8:
+				return Cast.unchecked( Convert_i64_to_u8.INSTANCE );
+            case I64_TO_I16:
+				return Cast.unchecked( Convert_i64_to_i16.INSTANCE );
+            case I64_TO_U16:
+				return Cast.unchecked( Convert_i64_to_u16.INSTANCE );
+            case I64_TO_I32:
+				return Cast.unchecked( Convert_i64_to_i32.INSTANCE );
+            case I64_TO_U32:
+				return Cast.unchecked( Convert_i64_to_u32.INSTANCE );
+            case I64_TO_I64:
+				return Cast.unchecked( Convert_i64_to_i64.INSTANCE );
+            case I64_TO_F32:
+				return Cast.unchecked( Convert_i64_to_f32.INSTANCE );
+            case I64_TO_F64:
+				return Cast.unchecked( Convert_i64_to_f64.INSTANCE );
+            case F32_TO_I8:
+				return Cast.unchecked( Convert_f32_to_i8.INSTANCE );
+            case F32_TO_U8:
+				return Cast.unchecked( Convert_f32_to_u8.INSTANCE );
+            case F32_TO_I16:
+				return Cast.unchecked( Convert_f32_to_i16.INSTANCE );
+            case F32_TO_U16:
+				return Cast.unchecked( Convert_f32_to_u16.INSTANCE );
+            case F32_TO_I32:
+				return Cast.unchecked( Convert_f32_to_i32.INSTANCE );
+            case F32_TO_U32:
+				return Cast.unchecked( Convert_f32_to_u32.INSTANCE );
+            case F32_TO_I64:
+				return Cast.unchecked( Convert_f32_to_i64.INSTANCE );
+            case F32_TO_F32:
+				return Cast.unchecked( Convert_f32_to_f32.INSTANCE );
+            case F32_TO_F64:
+				return Cast.unchecked( Convert_f32_to_f64.INSTANCE );
+            case F64_TO_I8:
+				return Cast.unchecked( Convert_f64_to_i8.INSTANCE );
+            case F64_TO_U8:
+				return Cast.unchecked( Convert_f64_to_u8.INSTANCE );
+            case F64_TO_I16:
+				return Cast.unchecked( Convert_f64_to_i16.INSTANCE );
+            case F64_TO_U16:
+				return Cast.unchecked( Convert_f64_to_u16.INSTANCE );
+            case F64_TO_I32:
+				return Cast.unchecked( Convert_f64_to_i32.INSTANCE );
+            case F64_TO_U32:
+				return Cast.unchecked( Convert_f64_to_u32.INSTANCE );
+            case F64_TO_I64:
+				return Cast.unchecked( Convert_f64_to_i64.INSTANCE );
+            case F64_TO_F32:
+				return Cast.unchecked( Convert_f64_to_f32.INSTANCE );
+            case F64_TO_F64:
+				return Cast.unchecked( Convert_f64_to_f64.INSTANCE );
+            default:
+                throw new IllegalArgumentException();
+            }
+        }
+    }
+
+
+	static class Convert_i8_to_i8 implements ConvertLoop< byte[], byte[] >
+	{
+		static final Convert_i8_to_i8 INSTANCE = new Convert_i8_to_i8();
+
+		@Override
+		public void apply( final byte[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i8( from_i8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i8_to_u8 implements ConvertLoop< byte[], byte[] >
+	{
+		static final Convert_i8_to_u8 INSTANCE = new Convert_i8_to_u8();
+
+		@Override
+		public void apply( final byte[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u8( from_i8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i8_to_i16 implements ConvertLoop< byte[], short[] >
+	{
+		static final Convert_i8_to_i16 INSTANCE = new Convert_i8_to_i16();
+
+		@Override
+		public void apply( final byte[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i16( from_i8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i8_to_u16 implements ConvertLoop< byte[], short[] >
+	{
+		static final Convert_i8_to_u16 INSTANCE = new Convert_i8_to_u16();
+
+		@Override
+		public void apply( final byte[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u16( from_i8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i8_to_i32 implements ConvertLoop< byte[], int[] >
+	{
+		static final Convert_i8_to_i32 INSTANCE = new Convert_i8_to_i32();
+
+		@Override
+		public void apply( final byte[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i32( from_i8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i8_to_u32 implements ConvertLoop< byte[], int[] >
+	{
+		static final Convert_i8_to_u32 INSTANCE = new Convert_i8_to_u32();
+
+		@Override
+		public void apply( final byte[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u32( from_i8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i8_to_i64 implements ConvertLoop< byte[], long[] >
+	{
+		static final Convert_i8_to_i64 INSTANCE = new Convert_i8_to_i64();
+
+		@Override
+		public void apply( final byte[] src, final long[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i64( from_i8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i8_to_f32 implements ConvertLoop< byte[], float[] >
+	{
+		static final Convert_i8_to_f32 INSTANCE = new Convert_i8_to_f32();
+
+		@Override
+		public void apply( final byte[] src, final float[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f32( from_i8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i8_to_f64 implements ConvertLoop< byte[], double[] >
+	{
+		static final Convert_i8_to_f64 INSTANCE = new Convert_i8_to_f64();
+
+		@Override
+		public void apply( final byte[] src, final double[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f64( from_i8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u8_to_i8 implements ConvertLoop< byte[], byte[] >
+	{
+		static final Convert_u8_to_i8 INSTANCE = new Convert_u8_to_i8();
+
+		@Override
+		public void apply( final byte[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i8( from_u8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u8_to_u8 implements ConvertLoop< byte[], byte[] >
+	{
+		static final Convert_u8_to_u8 INSTANCE = new Convert_u8_to_u8();
+
+		@Override
+		public void apply( final byte[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u8( from_u8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u8_to_i16 implements ConvertLoop< byte[], short[] >
+	{
+		static final Convert_u8_to_i16 INSTANCE = new Convert_u8_to_i16();
+
+		@Override
+		public void apply( final byte[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i16( from_u8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u8_to_u16 implements ConvertLoop< byte[], short[] >
+	{
+		static final Convert_u8_to_u16 INSTANCE = new Convert_u8_to_u16();
+
+		@Override
+		public void apply( final byte[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u16( from_u8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u8_to_i32 implements ConvertLoop< byte[], int[] >
+	{
+		static final Convert_u8_to_i32 INSTANCE = new Convert_u8_to_i32();
+
+		@Override
+		public void apply( final byte[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i32( from_u8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u8_to_u32 implements ConvertLoop< byte[], int[] >
+	{
+		static final Convert_u8_to_u32 INSTANCE = new Convert_u8_to_u32();
+
+		@Override
+		public void apply( final byte[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u32( from_u8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u8_to_i64 implements ConvertLoop< byte[], long[] >
+	{
+		static final Convert_u8_to_i64 INSTANCE = new Convert_u8_to_i64();
+
+		@Override
+		public void apply( final byte[] src, final long[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i64( from_u8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u8_to_f32 implements ConvertLoop< byte[], float[] >
+	{
+		static final Convert_u8_to_f32 INSTANCE = new Convert_u8_to_f32();
+
+		@Override
+		public void apply( final byte[] src, final float[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f32( from_u8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u8_to_f64 implements ConvertLoop< byte[], double[] >
+	{
+		static final Convert_u8_to_f64 INSTANCE = new Convert_u8_to_f64();
+
+		@Override
+		public void apply( final byte[] src, final double[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f64( from_u8( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i16_to_i8 implements ConvertLoop< short[], byte[] >
+	{
+		static final Convert_i16_to_i8 INSTANCE = new Convert_i16_to_i8();
+
+		@Override
+		public void apply( final short[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i8( from_i16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i16_to_u8 implements ConvertLoop< short[], byte[] >
+	{
+		static final Convert_i16_to_u8 INSTANCE = new Convert_i16_to_u8();
+
+		@Override
+		public void apply( final short[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u8( from_i16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i16_to_i16 implements ConvertLoop< short[], short[] >
+	{
+		static final Convert_i16_to_i16 INSTANCE = new Convert_i16_to_i16();
+
+		@Override
+		public void apply( final short[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i16( from_i16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i16_to_u16 implements ConvertLoop< short[], short[] >
+	{
+		static final Convert_i16_to_u16 INSTANCE = new Convert_i16_to_u16();
+
+		@Override
+		public void apply( final short[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u16( from_i16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i16_to_i32 implements ConvertLoop< short[], int[] >
+	{
+		static final Convert_i16_to_i32 INSTANCE = new Convert_i16_to_i32();
+
+		@Override
+		public void apply( final short[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i32( from_i16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i16_to_u32 implements ConvertLoop< short[], int[] >
+	{
+		static final Convert_i16_to_u32 INSTANCE = new Convert_i16_to_u32();
+
+		@Override
+		public void apply( final short[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u32( from_i16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i16_to_i64 implements ConvertLoop< short[], long[] >
+	{
+		static final Convert_i16_to_i64 INSTANCE = new Convert_i16_to_i64();
+
+		@Override
+		public void apply( final short[] src, final long[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i64( from_i16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i16_to_f32 implements ConvertLoop< short[], float[] >
+	{
+		static final Convert_i16_to_f32 INSTANCE = new Convert_i16_to_f32();
+
+		@Override
+		public void apply( final short[] src, final float[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f32( from_i16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i16_to_f64 implements ConvertLoop< short[], double[] >
+	{
+		static final Convert_i16_to_f64 INSTANCE = new Convert_i16_to_f64();
+
+		@Override
+		public void apply( final short[] src, final double[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f64( from_i16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u16_to_i8 implements ConvertLoop< short[], byte[] >
+	{
+		static final Convert_u16_to_i8 INSTANCE = new Convert_u16_to_i8();
+
+		@Override
+		public void apply( final short[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i8( from_u16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u16_to_u8 implements ConvertLoop< short[], byte[] >
+	{
+		static final Convert_u16_to_u8 INSTANCE = new Convert_u16_to_u8();
+
+		@Override
+		public void apply( final short[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u8( from_u16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u16_to_i16 implements ConvertLoop< short[], short[] >
+	{
+		static final Convert_u16_to_i16 INSTANCE = new Convert_u16_to_i16();
+
+		@Override
+		public void apply( final short[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i16( from_u16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u16_to_u16 implements ConvertLoop< short[], short[] >
+	{
+		static final Convert_u16_to_u16 INSTANCE = new Convert_u16_to_u16();
+
+		@Override
+		public void apply( final short[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u16( from_u16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u16_to_i32 implements ConvertLoop< short[], int[] >
+	{
+		static final Convert_u16_to_i32 INSTANCE = new Convert_u16_to_i32();
+
+		@Override
+		public void apply( final short[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i32( from_u16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u16_to_u32 implements ConvertLoop< short[], int[] >
+	{
+		static final Convert_u16_to_u32 INSTANCE = new Convert_u16_to_u32();
+
+		@Override
+		public void apply( final short[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u32( from_u16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u16_to_i64 implements ConvertLoop< short[], long[] >
+	{
+		static final Convert_u16_to_i64 INSTANCE = new Convert_u16_to_i64();
+
+		@Override
+		public void apply( final short[] src, final long[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i64( from_u16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u16_to_f32 implements ConvertLoop< short[], float[] >
+	{
+		static final Convert_u16_to_f32 INSTANCE = new Convert_u16_to_f32();
+
+		@Override
+		public void apply( final short[] src, final float[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f32( from_u16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u16_to_f64 implements ConvertLoop< short[], double[] >
+	{
+		static final Convert_u16_to_f64 INSTANCE = new Convert_u16_to_f64();
+
+		@Override
+		public void apply( final short[] src, final double[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f64( from_u16( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i32_to_i8 implements ConvertLoop< int[], byte[] >
+	{
+		static final Convert_i32_to_i8 INSTANCE = new Convert_i32_to_i8();
+
+		@Override
+		public void apply( final int[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i8( from_i32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i32_to_u8 implements ConvertLoop< int[], byte[] >
+	{
+		static final Convert_i32_to_u8 INSTANCE = new Convert_i32_to_u8();
+
+		@Override
+		public void apply( final int[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u8( from_i32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i32_to_i16 implements ConvertLoop< int[], short[] >
+	{
+		static final Convert_i32_to_i16 INSTANCE = new Convert_i32_to_i16();
+
+		@Override
+		public void apply( final int[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i16( from_i32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i32_to_u16 implements ConvertLoop< int[], short[] >
+	{
+		static final Convert_i32_to_u16 INSTANCE = new Convert_i32_to_u16();
+
+		@Override
+		public void apply( final int[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u16( from_i32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i32_to_i32 implements ConvertLoop< int[], int[] >
+	{
+		static final Convert_i32_to_i32 INSTANCE = new Convert_i32_to_i32();
+
+		@Override
+		public void apply( final int[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i32( from_i32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i32_to_u32 implements ConvertLoop< int[], int[] >
+	{
+		static final Convert_i32_to_u32 INSTANCE = new Convert_i32_to_u32();
+
+		@Override
+		public void apply( final int[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u32( from_i32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i32_to_i64 implements ConvertLoop< int[], long[] >
+	{
+		static final Convert_i32_to_i64 INSTANCE = new Convert_i32_to_i64();
+
+		@Override
+		public void apply( final int[] src, final long[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i64( from_i32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i32_to_f32 implements ConvertLoop< int[], float[] >
+	{
+		static final Convert_i32_to_f32 INSTANCE = new Convert_i32_to_f32();
+
+		@Override
+		public void apply( final int[] src, final float[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f32( from_i32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i32_to_f64 implements ConvertLoop< int[], double[] >
+	{
+		static final Convert_i32_to_f64 INSTANCE = new Convert_i32_to_f64();
+
+		@Override
+		public void apply( final int[] src, final double[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f64( from_i32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u32_to_i8 implements ConvertLoop< int[], byte[] >
+	{
+		static final Convert_u32_to_i8 INSTANCE = new Convert_u32_to_i8();
+
+		@Override
+		public void apply( final int[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i8( from_u32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u32_to_u8 implements ConvertLoop< int[], byte[] >
+	{
+		static final Convert_u32_to_u8 INSTANCE = new Convert_u32_to_u8();
+
+		@Override
+		public void apply( final int[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u8( from_u32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u32_to_i16 implements ConvertLoop< int[], short[] >
+	{
+		static final Convert_u32_to_i16 INSTANCE = new Convert_u32_to_i16();
+
+		@Override
+		public void apply( final int[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i16( from_u32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u32_to_u16 implements ConvertLoop< int[], short[] >
+	{
+		static final Convert_u32_to_u16 INSTANCE = new Convert_u32_to_u16();
+
+		@Override
+		public void apply( final int[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u16( from_u32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u32_to_i32 implements ConvertLoop< int[], int[] >
+	{
+		static final Convert_u32_to_i32 INSTANCE = new Convert_u32_to_i32();
+
+		@Override
+		public void apply( final int[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i32( from_u32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u32_to_u32 implements ConvertLoop< int[], int[] >
+	{
+		static final Convert_u32_to_u32 INSTANCE = new Convert_u32_to_u32();
+
+		@Override
+		public void apply( final int[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u32( from_u32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u32_to_i64 implements ConvertLoop< int[], long[] >
+	{
+		static final Convert_u32_to_i64 INSTANCE = new Convert_u32_to_i64();
+
+		@Override
+		public void apply( final int[] src, final long[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i64( from_u32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u32_to_f32 implements ConvertLoop< int[], float[] >
+	{
+		static final Convert_u32_to_f32 INSTANCE = new Convert_u32_to_f32();
+
+		@Override
+		public void apply( final int[] src, final float[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f32( from_u32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_u32_to_f64 implements ConvertLoop< int[], double[] >
+	{
+		static final Convert_u32_to_f64 INSTANCE = new Convert_u32_to_f64();
+
+		@Override
+		public void apply( final int[] src, final double[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f64( from_u32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i64_to_i8 implements ConvertLoop< long[], byte[] >
+	{
+		static final Convert_i64_to_i8 INSTANCE = new Convert_i64_to_i8();
+
+		@Override
+		public void apply( final long[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i8( from_i64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i64_to_u8 implements ConvertLoop< long[], byte[] >
+	{
+		static final Convert_i64_to_u8 INSTANCE = new Convert_i64_to_u8();
+
+		@Override
+		public void apply( final long[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u8( from_i64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i64_to_i16 implements ConvertLoop< long[], short[] >
+	{
+		static final Convert_i64_to_i16 INSTANCE = new Convert_i64_to_i16();
+
+		@Override
+		public void apply( final long[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i16( from_i64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i64_to_u16 implements ConvertLoop< long[], short[] >
+	{
+		static final Convert_i64_to_u16 INSTANCE = new Convert_i64_to_u16();
+
+		@Override
+		public void apply( final long[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u16( from_i64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i64_to_i32 implements ConvertLoop< long[], int[] >
+	{
+		static final Convert_i64_to_i32 INSTANCE = new Convert_i64_to_i32();
+
+		@Override
+		public void apply( final long[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i32( from_i64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i64_to_u32 implements ConvertLoop< long[], int[] >
+	{
+		static final Convert_i64_to_u32 INSTANCE = new Convert_i64_to_u32();
+
+		@Override
+		public void apply( final long[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u32( from_i64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i64_to_i64 implements ConvertLoop< long[], long[] >
+	{
+		static final Convert_i64_to_i64 INSTANCE = new Convert_i64_to_i64();
+
+		@Override
+		public void apply( final long[] src, final long[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i64( from_i64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i64_to_f32 implements ConvertLoop< long[], float[] >
+	{
+		static final Convert_i64_to_f32 INSTANCE = new Convert_i64_to_f32();
+
+		@Override
+		public void apply( final long[] src, final float[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f32( from_i64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_i64_to_f64 implements ConvertLoop< long[], double[] >
+	{
+		static final Convert_i64_to_f64 INSTANCE = new Convert_i64_to_f64();
+
+		@Override
+		public void apply( final long[] src, final double[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f64( from_i64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f32_to_i8 implements ConvertLoop< float[], byte[] >
+	{
+		static final Convert_f32_to_i8 INSTANCE = new Convert_f32_to_i8();
+
+		@Override
+		public void apply( final float[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i8( from_f32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f32_to_u8 implements ConvertLoop< float[], byte[] >
+	{
+		static final Convert_f32_to_u8 INSTANCE = new Convert_f32_to_u8();
+
+		@Override
+		public void apply( final float[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u8( from_f32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f32_to_i16 implements ConvertLoop< float[], short[] >
+	{
+		static final Convert_f32_to_i16 INSTANCE = new Convert_f32_to_i16();
+
+		@Override
+		public void apply( final float[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i16( from_f32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f32_to_u16 implements ConvertLoop< float[], short[] >
+	{
+		static final Convert_f32_to_u16 INSTANCE = new Convert_f32_to_u16();
+
+		@Override
+		public void apply( final float[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u16( from_f32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f32_to_i32 implements ConvertLoop< float[], int[] >
+	{
+		static final Convert_f32_to_i32 INSTANCE = new Convert_f32_to_i32();
+
+		@Override
+		public void apply( final float[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i32( from_f32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f32_to_u32 implements ConvertLoop< float[], int[] >
+	{
+		static final Convert_f32_to_u32 INSTANCE = new Convert_f32_to_u32();
+
+		@Override
+		public void apply( final float[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u32( from_f32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f32_to_i64 implements ConvertLoop< float[], long[] >
+	{
+		static final Convert_f32_to_i64 INSTANCE = new Convert_f32_to_i64();
+
+		@Override
+		public void apply( final float[] src, final long[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i64( from_f32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f32_to_f32 implements ConvertLoop< float[], float[] >
+	{
+		static final Convert_f32_to_f32 INSTANCE = new Convert_f32_to_f32();
+
+		@Override
+		public void apply( final float[] src, final float[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f32( from_f32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f32_to_f64 implements ConvertLoop< float[], double[] >
+	{
+		static final Convert_f32_to_f64 INSTANCE = new Convert_f32_to_f64();
+
+		@Override
+		public void apply( final float[] src, final double[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f64( from_f32( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f64_to_i8 implements ConvertLoop< double[], byte[] >
+	{
+		static final Convert_f64_to_i8 INSTANCE = new Convert_f64_to_i8();
+
+		@Override
+		public void apply( final double[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i8( from_f64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f64_to_u8 implements ConvertLoop< double[], byte[] >
+	{
+		static final Convert_f64_to_u8 INSTANCE = new Convert_f64_to_u8();
+
+		@Override
+		public void apply( final double[] src, final byte[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u8( from_f64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f64_to_i16 implements ConvertLoop< double[], short[] >
+	{
+		static final Convert_f64_to_i16 INSTANCE = new Convert_f64_to_i16();
+
+		@Override
+		public void apply( final double[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i16( from_f64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f64_to_u16 implements ConvertLoop< double[], short[] >
+	{
+		static final Convert_f64_to_u16 INSTANCE = new Convert_f64_to_u16();
+
+		@Override
+		public void apply( final double[] src, final short[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u16( from_f64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f64_to_i32 implements ConvertLoop< double[], int[] >
+	{
+		static final Convert_f64_to_i32 INSTANCE = new Convert_f64_to_i32();
+
+		@Override
+		public void apply( final double[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i32( from_f64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f64_to_u32 implements ConvertLoop< double[], int[] >
+	{
+		static final Convert_f64_to_u32 INSTANCE = new Convert_f64_to_u32();
+
+		@Override
+		public void apply( final double[] src, final int[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_u32( from_f64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f64_to_i64 implements ConvertLoop< double[], long[] >
+	{
+		static final Convert_f64_to_i64 INSTANCE = new Convert_f64_to_i64();
+
+		@Override
+		public void apply( final double[] src, final long[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_i64( from_f64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f64_to_f32 implements ConvertLoop< double[], float[] >
+	{
+		static final Convert_f64_to_f32 INSTANCE = new Convert_f64_to_f32();
+
+		@Override
+		public void apply( final double[] src, final float[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f32( from_f64( src[ i ] ) );
+		}
+	}
+
+	static class Convert_f64_to_f64 implements ConvertLoop< double[], double[] >
+	{
+		static final Convert_f64_to_f64 INSTANCE = new Convert_f64_to_f64();
+
+		@Override
+		public void apply( final double[] src, final double[] dest, final int length )
+		{
+			for ( int i = 0; i < length; ++i )
+				dest[ i ] = to_f64( from_f64( src[ i ] ) );
+		}
+	}
 }
