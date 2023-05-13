@@ -1,6 +1,10 @@
 package net.imglib2.blk.downsample;
 
 import java.util.Arrays;
+import net.imglib2.blk.downsample.GenericTypeConversionPlayground.TypeConvert;
+import net.imglib2.blk.downsample.algo.BlockProcessor;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.real.FloatType;
 
 import static net.imglib2.type.PrimitiveType.DOUBLE;
 import static net.imglib2.type.PrimitiveType.FLOAT;
@@ -74,14 +78,6 @@ public class Downsample
 			}
 		}
 
-		private static int mulDims( int[] dims, int from, int to )
-		{
-			int product = 1;
-			for ( int d = from; d < to; ++d )
-				product *= dims[ d ];
-			return product;
-		}
-
 		private static void line_X( final float[] source, final float[] dest,
 				final int destOffset,
 				final int srcOffset,
@@ -137,7 +133,16 @@ public class Downsample
 	}
 
 
-	// -- downsample --
+	public static < T extends NativeType< T >, P >
+	BlockProcessor< P, P > viaFloat( final T type, final boolean[] downsampleInDim )
+	{
+		final TypeConvert< T, FloatType, P, float[] > convertToFloat = new TypeConvert<>( type, new FloatType() );
+		final TypeConvert< FloatType, T, float[], P > convertFromFloat = new TypeConvert<>( new FloatType(), type );
+		return convertToFloat.andThen( new Float( downsampleInDim ) ).andThen( convertFromFloat );
+	}
+
+
+		// -- downsample --
 	// TODO: auto-generate
 
 	private static void downsample_double_double( final double[] source, final int[] destSize, final double[] dest, final int dim )
@@ -208,74 +213,9 @@ public class Downsample
 		return 0.25f * ( a + 2 * b + c );
 	}
 
-	private static float wavg_u8_float( final byte a, final byte b, final byte c )
-	{
-		return 0.25f * ( u8_to_int( a ) + 2 * u8_to_int( b ) + u8_to_int( c ) );
-	}
-
-	private static float wavg_u16_float( final short a, final short b, final short c )
-	{
-		return 0.25f * ( u16_to_int( a ) + 2 * u16_to_int( b ) + u16_to_int( c ) );
-	}
-
 	private static double wavg_double( final double a, final double b, final double c )
 	{
 		return 0.25 * ( a + 2 * b + c );
 	}
 
-	private static double wavg_u8_double( final byte a, final byte b, final byte c )
-	{
-		return 0.25 * ( u8_to_int( a ) + 2 * u8_to_int( b ) + u8_to_int( c ) );
-	}
-
-	private static double wavg_u16_double( final short a, final short b, final short c )
-	{
-		return 0.25 * ( u16_to_int( a ) + 2 * u16_to_int( b ) + u16_to_int( c ) );
-	}
-
-	// -- type conversion --
-
-
-
-	// (1) if input type is unsigned:
-	// convert unsigned inputs to signed int/long, using these:
-	private static int from_u8( final byte u8 ) {return u8 & 0xff;}
-	private static int from_u16( final short u16 ) {return u16 & 0xffff;}
-	private static long from_u32( final int u32 ) {return u32 & 0xffffffffL;}
-
-	// (2) if input type is x32: add a cast to (long) to avoid overflow of the addition
-
-	// (3) if output type is f32: use "*0.25f"
-	//     if output type is f64: use "*0.25"
-
-	//     if output type is integral, use rounding
-
-
-	private static int u8_to_int( final byte u8 )
-	{
-		return u8 & 0xff;
-	}
-
-	private static int u16_to_int( final short u16 )
-	{
-		return u16 & 0xffff;
-	}
-
-	private static byte i32_to_u8_clamp( final int i32 )
-	{
-		return ( byte ) ( Math.min( Math.max( i32, 0 ), 0xff ) & 0xff );
-	}
-
-	private static byte u32_to_u8_clamp( final int u32 )
-	{
-		if ( ( u32 & 0xffffff ) != 0 )
-			return ( byte ) 0xff;
-		else
-			return ( byte ) ( u32 & 0xff );
-	}
-
-	private static short i32_to_u16_clamp( final int i32 )
-	{
-		return ( byte ) ( Math.min( Math.max( i32, 0 ), 0xffff ) & 0xffff );
-	}
 }

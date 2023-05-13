@@ -11,16 +11,13 @@ import java.util.Arrays;
 import net.imglib2.blk.downsample.algo.AlgoUtils;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
-import net.imglib2.converter.Converters;
-import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 
-public class DownsampleMultiplePlayground
+public class DownsampleUnsignedBytePlayground
 {
 	public static void main( String[] args )
 	{
@@ -42,18 +39,19 @@ public class DownsampleMultiplePlayground
 		final boolean[] downsampleInDim = { true, true, true };
 		final long[] downsampledDimensions = Downsample.getDownsampledDimensions( img.dimensionsAsLongArray(), downsampleInDim );
 		final int[] cellDimensions = { 64, 64, 64 };
-//		final CachedCellImg< UnsignedByteType, ? > downsampled = AlgoUtils.cellImg(
-//				blocks, new DownsampleMultiple.UnsignedByteViaFloat( downsampleInDim ), new UnsignedByteType(), downsampledDimensions, cellDimensions );
-//
-//		final double[] calib = new double[ 3 ];
-//		Arrays.setAll(calib, d -> downsampleInDim[ d ] ? 2 : 1 );
-//		final BdvSource out = BdvFunctions.show(
-//				VolatileViews.wrapAsVolatile( downsampled ),
-//				"downsampled",
-//				Bdv.options()
-//						.addTo( bdv )
-//						.sourceTransform( calib ) );
-//		out.setDisplayRange( 0, 255 );
-//		out.setColor( new ARGBType( 0xff0000 ) );
+		final UnsignedByteType type = new UnsignedByteType();
+		final CachedCellImg< UnsignedByteType, ? > downsampled = AlgoUtils.cellImg(
+				blocks, Downsample.viaFloat( type, downsampleInDim ), type, downsampledDimensions, cellDimensions );
+
+		final double[] calib = new double[ 3 ];
+		Arrays.setAll(calib, d -> downsampleInDim[ d ] ? 2 : 1 );
+		final BdvSource out = BdvFunctions.show(
+				VolatileViews.wrapAsVolatile( downsampled ),
+				"downsampled",
+				Bdv.options()
+						.addTo( bdv )
+						.sourceTransform( calib ) );
+		out.setDisplayRange( 0, 255 );
+		out.setColor( new ARGBType( 0xff0000 ) );
 	}
 }
