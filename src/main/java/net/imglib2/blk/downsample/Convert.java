@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 import net.imglib2.Interval;
 import net.imglib2.blk.downsample.algo.BlockProcessor;
-import net.imglib2.blk.downsample.algo.BlockProcessorSourceInterval;
+import net.imglib2.blk.downsample.algo.PrimitiveBlockProcessorSourceInterval;
 import net.imglib2.blocks.TempArray;
 import net.imglib2.type.NativeType;
 import net.imglib2.util.Intervals;
@@ -36,7 +36,7 @@ public class Convert< S extends NativeType< S >, T extends NativeType< T >, I, O
 
 	private int sourceLength;
 
-	private final BlockProcessorSourceInterval sourceInterval;
+	private final PrimitiveBlockProcessorSourceInterval sourceInterval;
 
 	public Convert( final S sourceType, final T targetType )
 	{
@@ -49,7 +49,7 @@ public class Convert< S extends NativeType< S >, T extends NativeType< T >, I, O
 		this.targetType = targetType;
 		tempArray = TempArray.forPrimitiveType( sourceType.getNativeTypeFactory().getPrimitiveType() );
 		loop = ConvertLoops.get( UnaryOperatorType.of( sourceType, targetType ), clamp );
-		sourceInterval = new BlockProcessorSourceInterval( this );
+		sourceInterval = new PrimitiveBlockProcessorSourceInterval( this );
 	}
 
 	private Convert( Convert< S, T, I, O > convert )
@@ -58,7 +58,7 @@ public class Convert< S extends NativeType< S >, T extends NativeType< T >, I, O
 		targetType = convert.targetType;
 		tempArray = convert.tempArray.newInstance();
 		loop = convert.loop;
-		sourceInterval = new BlockProcessorSourceInterval( this );
+		sourceInterval = new PrimitiveBlockProcessorSourceInterval( this );
 		threadSafeSupplier = convert.threadSafeSupplier;
 	}
 

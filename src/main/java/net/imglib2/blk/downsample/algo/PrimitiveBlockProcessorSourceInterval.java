@@ -6,11 +6,11 @@ import net.imglib2.Interval;
  * Helper class that wraps {@link BlockProcessor#getSourcePos()} and {@link
  * BlockProcessor#getSourceSize()} as an {@code Interval}.
  */
-public class BlockProcessorSourceInterval implements Interval
+public class PrimitiveBlockProcessorSourceInterval implements Interval
 {
 	private BlockProcessor< ?, ? > p;
 
-	public BlockProcessorSourceInterval( BlockProcessor< ?, ? > blockProcessor )
+	public PrimitiveBlockProcessorSourceInterval( BlockProcessor< ?, ? > blockProcessor )
 	{
 		this.p = blockProcessor;
 	}
