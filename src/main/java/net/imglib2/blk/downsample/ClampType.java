@@ -1,6 +1,6 @@
 package net.imglib2.blk.downsample;
 
-enum ClampType
+public enum ClampType
 {
 	/**
 	 * don't clamp

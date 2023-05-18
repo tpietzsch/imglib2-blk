@@ -10,12 +10,15 @@ import net.imglib2.type.NativeType;
 import net.imglib2.util.Intervals;
 
 /**
+ * Convert primitive arrays between standard ImgLib2 {@code Type}s.
+ * Provides rounding, optional clamping, and handling unsigned types.
+ *
  * @param <I>
  * 		input primitive array type, e.g., float[]
  * @param <O>
  * 		output primitive array type, e.g., float[]
  */
-class TypeConvert< S extends NativeType< S >, T extends NativeType< T >, I, O > implements BlockProcessor< I, O >
+public class Convert< S extends NativeType< S >, T extends NativeType< T >, I, O > implements BlockProcessor< I, O >
 {
 	private final S sourceType;
 
@@ -25,7 +28,7 @@ class TypeConvert< S extends NativeType< S >, T extends NativeType< T >, I, O > 
 
 	private final ConvertLoop< I, O > loop;
 
-	private Supplier< TypeConvert< S, T, I, O > > threadSafeSupplier;
+	private Supplier< Convert< S, T, I, O > > threadSafeSupplier;
 
 	private long[] sourcePos;
 
@@ -35,12 +38,12 @@ class TypeConvert< S extends NativeType< S >, T extends NativeType< T >, I, O > 
 
 	private final BlockProcessorSourceInterval sourceInterval;
 
-	public TypeConvert( final S sourceType, final T targetType )
+	public Convert( final S sourceType, final T targetType )
 	{
 		this( sourceType, targetType, ClampType.NONE );
 	}
 
-	public TypeConvert( final S sourceType, final T targetType, final ClampType clamp )
+	public Convert( final S sourceType, final T targetType, final ClampType clamp )
 	{
 		this.sourceType = sourceType;
 		this.targetType = targetType;
@@ -49,7 +52,7 @@ class TypeConvert< S extends NativeType< S >, T extends NativeType< T >, I, O > 
 		sourceInterval = new BlockProcessorSourceInterval( this );
 	}
 
-	private TypeConvert( TypeConvert< S, T, I, O > convert )
+	private Convert( Convert< S, T, I, O > convert )
 	{
 		sourceType = convert.sourceType;
 		targetType = convert.targetType;
@@ -59,9 +62,9 @@ class TypeConvert< S extends NativeType< S >, T extends NativeType< T >, I, O > 
 		threadSafeSupplier = convert.threadSafeSupplier;
 	}
 
-	private TypeConvert< S, T, I, O > newInstance()
+	private Convert< S, T, I, O > newInstance()
 	{
-		return new TypeConvert<>( this );
+		return new Convert<>( this );
 	}
 
 	@Override

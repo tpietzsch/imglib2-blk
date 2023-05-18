@@ -8,6 +8,8 @@ import bdv.viewer.DisplayMode;
 import ij.IJ;
 import ij.ImagePlus;
 import java.util.Arrays;
+import net.imglib2.blk.downsample.Downsample.DownsampleFloat;
+import net.imglib2.blk.downsample.Downsample.DownsampleHalfPixelFloat;
 import net.imglib2.blk.downsample.algo.AlgoUtils;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
@@ -46,7 +48,7 @@ public class DownsampleFloatPlayground
 		final long[] downsampledDimensions = Downsample.getDownsampledDimensions( img.dimensionsAsLongArray(), downsampleInDim );
 		final int[] cellDimensions = { 64, 64, 64 };
 		final CachedCellImg< FloatType, ? > downsampled = AlgoUtils.cellImg(
-				blocks, new Downsample.DownsampleFloat( downsampleInDim ), new FloatType(), downsampledDimensions, cellDimensions );
+				blocks, new DownsampleFloat( downsampleInDim ), new FloatType(), downsampledDimensions, cellDimensions );
 
 		final double[] calib = new double[ 3 ];
 		Arrays.setAll(calib, d -> downsampleInDim[ d ] ? 2 : 1 );
@@ -60,7 +62,7 @@ public class DownsampleFloatPlayground
 		out.setColor( new ARGBType( 0xff0000 ) );
 
 		final CachedCellImg< FloatType, ? > downsampled2 = AlgoUtils.cellImg(
-				blocks, new DownsampleHalfPixel.DownsampleHalfPixelFloat( downsampleInDim ), new FloatType(), downsampledDimensions, cellDimensions );
+				blocks, new DownsampleHalfPixelFloat( downsampleInDim ), new FloatType(), downsampledDimensions, cellDimensions );
 		final BdvSource out2 = BdvFunctions.show(
 				VolatileViews.wrapAsVolatile( downsampled2 ),
 				"downsampled half-pixel",

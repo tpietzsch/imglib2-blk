@@ -4,6 +4,10 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import net.imglib2.FinalInterval;
+import net.imglib2.blk.downsample.Downsample.DownsampleDouble;
+import net.imglib2.blk.downsample.Downsample.DownsampleFloat;
+import net.imglib2.blk.downsample.Downsample.DownsampleHalfPixelDouble;
+import net.imglib2.blk.downsample.Downsample.DownsampleHalfPixelFloat;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -39,10 +43,10 @@ public class DownsampleBenchmarkFull
 	float[] outputF;
 	double[] inputD;
 	double[] outputD;
-	Downsample.DownsampleFloat downsampleFloat;
-	Downsample.DownsampleDouble downsampleDouble;
-	DownsampleHalfPixel.DownsampleHalfPixelFloat downsampleHalfDownsampleHalfPixelFloat;
-	DownsampleHalfPixel.DownsampleHalfPixelDouble downsampleHalfDownsampleHalfPixelDouble;
+	DownsampleFloat downsampleFloat;
+	DownsampleDouble downsampleDouble;
+	DownsampleHalfPixelFloat downsampleHalfDownsampleHalfPixelFloat;
+	DownsampleHalfPixelDouble downsampleHalfDownsampleHalfPixelDouble;
 
 //	@Param( { "X", "Y", "Z", "XYZ" } )
 	@Param( { "XYZ" } )
@@ -84,7 +88,7 @@ public class DownsampleBenchmarkFull
 		System.out.println( "destSize = " + Arrays.toString( destSize ) );
 		Arrays.setAll( outputSize, d -> ( int ) destSize[ d ] );
 
-		downsampleFloat = new Downsample.DownsampleFloat( downsampleInDim );
+		downsampleFloat = new DownsampleFloat( downsampleInDim );
 		downsampleFloat.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
 		System.arraycopy( downsampleFloat.getSourceSize(), 0, inputSize, 0, inputSize.length );
 		inputF = new float[ ( int ) Intervals.numElements( inputSize ) ];
@@ -92,17 +96,17 @@ public class DownsampleBenchmarkFull
 			inputF[ i ] = random.nextFloat();
 		outputF = new float[ ( int ) Intervals.numElements( outputSize ) ];
 
-		downsampleDouble = new Downsample.DownsampleDouble( downsampleInDim );
+		downsampleDouble = new DownsampleDouble( downsampleInDim );
 		downsampleDouble.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
 		inputD = new double[ ( int ) Intervals.numElements( inputSize ) ];
 		for ( int i = 0; i < inputD.length; i++ )
 			inputD[ i ] = random.nextDouble();
 		outputD = new double[ ( int ) Intervals.numElements( outputSize ) ];
 
-		downsampleHalfDownsampleHalfPixelFloat = new DownsampleHalfPixel.DownsampleHalfPixelFloat( downsampleInDim );
+		downsampleHalfDownsampleHalfPixelFloat = new DownsampleHalfPixelFloat( downsampleInDim );
 		downsampleHalfDownsampleHalfPixelFloat.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
 
-		downsampleHalfDownsampleHalfPixelDouble = new DownsampleHalfPixel.DownsampleHalfPixelDouble( downsampleInDim );
+		downsampleHalfDownsampleHalfPixelDouble = new DownsampleHalfPixelDouble( downsampleInDim );
 		downsampleHalfDownsampleHalfPixelDouble.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
 	}
 

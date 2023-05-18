@@ -74,9 +74,9 @@ public class Downsample
 		}
 		else
 		{
-			return new TypeConvert< T, S, P, Q >( type, processType )
+			return new Convert< T, S, P, Q >( type, processType )
 					.andThen( processor )
-					.andThen( new TypeConvert< S, T, Q, P >( processType, type ) );
+					.andThen( new Convert<>( processType, type ) );
 		}
 	}
 
