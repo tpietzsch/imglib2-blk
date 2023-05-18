@@ -17,6 +17,8 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.view.Views;
 
+import static net.imglib2.blk.downsample.Downsample.downsample;
+
 public class DownsampleUnsignedBytePlayground
 {
 	public static void main( String[] args )
@@ -41,7 +43,7 @@ public class DownsampleUnsignedBytePlayground
 		final int[] cellDimensions = { 64, 64, 64 };
 		final UnsignedByteType type = new UnsignedByteType();
 		final CachedCellImg< UnsignedByteType, ? > downsampled = AlgoUtils.cellImg(
-				blocks, Downsample.viaFloat( type, downsampleInDim ), type, downsampledDimensions, cellDimensions );
+				blocks, downsample( type, downsampleInDim ), type, downsampledDimensions, cellDimensions );
 
 		final double[] calib = new double[ 3 ];
 		Arrays.setAll(calib, d -> downsampleInDim[ d ] ? 2 : 1 );

@@ -4,5 +4,4 @@ package net.imglib2.blk.downsample;
 interface ConvertLoop< I, O >
 {
 	void apply( final I src, final O dest, final int length );
-
 }
