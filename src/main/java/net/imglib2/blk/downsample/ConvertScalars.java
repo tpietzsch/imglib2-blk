@@ -38,7 +38,7 @@ package net.imglib2.blk.downsample;
  * corresponding template in templates/ and rerun bin/generate.groovy.
  */
 
-class ConvertValues
+class ConvertScalars
 {
     /*
      * Methods to convert each pixel type (i8, u8, i16, u16, i32, u32, i64, f32, f64)

@@ -36,328 +36,322 @@ package net.imglib2.blk.downsample;
 import net.imglib2.type.NativeType;
 import net.imglib2.util.Cast;
 
-import static net.imglib2.blk.downsample.ConvertValues.from_i8;
-import static net.imglib2.blk.downsample.ConvertValues.to_i8;
-import static net.imglib2.blk.downsample.ConvertValues.to_i8_clamp;
-import static net.imglib2.blk.downsample.ConvertValues.to_i8_clamp_max;
-import static net.imglib2.blk.downsample.ConvertValues.from_u8;
-import static net.imglib2.blk.downsample.ConvertValues.to_u8;
-import static net.imglib2.blk.downsample.ConvertValues.to_u8_clamp;
-import static net.imglib2.blk.downsample.ConvertValues.to_u8_clamp_max;
-import static net.imglib2.blk.downsample.ConvertValues.from_i16;
-import static net.imglib2.blk.downsample.ConvertValues.to_i16;
-import static net.imglib2.blk.downsample.ConvertValues.to_i16_clamp;
-import static net.imglib2.blk.downsample.ConvertValues.to_i16_clamp_max;
-import static net.imglib2.blk.downsample.ConvertValues.from_u16;
-import static net.imglib2.blk.downsample.ConvertValues.to_u16;
-import static net.imglib2.blk.downsample.ConvertValues.to_u16_clamp;
-import static net.imglib2.blk.downsample.ConvertValues.to_u16_clamp_max;
-import static net.imglib2.blk.downsample.ConvertValues.from_i32;
-import static net.imglib2.blk.downsample.ConvertValues.to_i32;
-import static net.imglib2.blk.downsample.ConvertValues.to_i32_clamp;
-import static net.imglib2.blk.downsample.ConvertValues.to_i32_clamp_max;
-import static net.imglib2.blk.downsample.ConvertValues.from_u32;
-import static net.imglib2.blk.downsample.ConvertValues.to_u32;
-import static net.imglib2.blk.downsample.ConvertValues.to_u32_clamp;
-import static net.imglib2.blk.downsample.ConvertValues.to_u32_clamp_max;
-import static net.imglib2.blk.downsample.ConvertValues.from_i64;
-import static net.imglib2.blk.downsample.ConvertValues.to_i64;
-import static net.imglib2.blk.downsample.ConvertValues.to_i64_clamp;
-import static net.imglib2.blk.downsample.ConvertValues.to_i64_clamp_max;
-import static net.imglib2.blk.downsample.ConvertValues.from_f32;
-import static net.imglib2.blk.downsample.ConvertValues.to_f32;
-import static net.imglib2.blk.downsample.ConvertValues.to_f32_clamp;
-import static net.imglib2.blk.downsample.ConvertValues.to_f32_clamp_max;
-import static net.imglib2.blk.downsample.ConvertValues.from_f64;
-import static net.imglib2.blk.downsample.ConvertValues.to_f64;
-import static net.imglib2.blk.downsample.ConvertValues.to_f64_clamp;
-import static net.imglib2.blk.downsample.ConvertValues.to_f64_clamp_max;
+import static net.imglib2.blk.downsample.ConvertScalars.from_i8;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i8;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i8_clamp;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i8_clamp_max;
+import static net.imglib2.blk.downsample.ConvertScalars.from_u8;
+import static net.imglib2.blk.downsample.ConvertScalars.to_u8;
+import static net.imglib2.blk.downsample.ConvertScalars.to_u8_clamp;
+import static net.imglib2.blk.downsample.ConvertScalars.to_u8_clamp_max;
+import static net.imglib2.blk.downsample.ConvertScalars.from_i16;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i16;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i16_clamp;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i16_clamp_max;
+import static net.imglib2.blk.downsample.ConvertScalars.from_u16;
+import static net.imglib2.blk.downsample.ConvertScalars.to_u16;
+import static net.imglib2.blk.downsample.ConvertScalars.to_u16_clamp;
+import static net.imglib2.blk.downsample.ConvertScalars.to_u16_clamp_max;
+import static net.imglib2.blk.downsample.ConvertScalars.from_i32;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i32;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i32_clamp;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i32_clamp_max;
+import static net.imglib2.blk.downsample.ConvertScalars.from_u32;
+import static net.imglib2.blk.downsample.ConvertScalars.to_u32;
+import static net.imglib2.blk.downsample.ConvertScalars.to_u32_clamp;
+import static net.imglib2.blk.downsample.ConvertScalars.to_u32_clamp_max;
+import static net.imglib2.blk.downsample.ConvertScalars.from_i64;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i64;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i64_clamp;
+import static net.imglib2.blk.downsample.ConvertScalars.to_i64_clamp_max;
+import static net.imglib2.blk.downsample.ConvertScalars.from_f32;
+import static net.imglib2.blk.downsample.ConvertScalars.to_f32;
+import static net.imglib2.blk.downsample.ConvertScalars.to_f32_clamp;
+import static net.imglib2.blk.downsample.ConvertScalars.to_f32_clamp_max;
+import static net.imglib2.blk.downsample.ConvertScalars.from_f64;
+import static net.imglib2.blk.downsample.ConvertScalars.to_f64;
+import static net.imglib2.blk.downsample.ConvertScalars.to_f64_clamp;
+import static net.imglib2.blk.downsample.ConvertScalars.to_f64_clamp_max;
 
 /*
  * This is autogenerated source code -- DO NOT EDIT. Instead, edit the
  * corresponding template in templates/ and rerun bin/generate.groovy.
  */
 
-class TypeConversionGenerated
+class ConvertLoops
 {
-    @FunctionalInterface
-    interface ConvertLoop< I, O >
+    static < I, O > ConvertLoop< I, O > get( UnaryOperatorType type )
     {
-        void apply( final I src, final O dest, final int length );
+        return get( type, ClampType.NONE );
+    }
 
-		static < I, O > ConvertLoop< I, O > get( UnaryOperatorType type )
-		{
-			return get( type, ClampType.NONE );
-		}
-
-		static < I, O > ConvertLoop< I, O > get( UnaryOperatorType type, ClampType clampType )
-		{
-			switch ( clampType )
-			{
-			case NONE:
-				switch( type )
-				{
-                case I8_TO_I8: return Cast.unchecked( Convert_i8_to_i8.INSTANCE );
-                case I8_TO_U8: return Cast.unchecked( Convert_i8_to_u8.INSTANCE );
-                case I8_TO_I16: return Cast.unchecked( Convert_i8_to_i16.INSTANCE );
-                case I8_TO_U16: return Cast.unchecked( Convert_i8_to_u16.INSTANCE );
-                case I8_TO_I32: return Cast.unchecked( Convert_i8_to_i32.INSTANCE );
-                case I8_TO_U32: return Cast.unchecked( Convert_i8_to_u32.INSTANCE );
-                case I8_TO_I64: return Cast.unchecked( Convert_i8_to_i64.INSTANCE );
-                case I8_TO_F32: return Cast.unchecked( Convert_i8_to_f32.INSTANCE );
-                case I8_TO_F64: return Cast.unchecked( Convert_i8_to_f64.INSTANCE );
-                case U8_TO_I8: return Cast.unchecked( Convert_u8_to_i8.INSTANCE );
-                case U8_TO_U8: return Cast.unchecked( Convert_u8_to_u8.INSTANCE );
-                case U8_TO_I16: return Cast.unchecked( Convert_u8_to_i16.INSTANCE );
-                case U8_TO_U16: return Cast.unchecked( Convert_u8_to_u16.INSTANCE );
-                case U8_TO_I32: return Cast.unchecked( Convert_u8_to_i32.INSTANCE );
-                case U8_TO_U32: return Cast.unchecked( Convert_u8_to_u32.INSTANCE );
-                case U8_TO_I64: return Cast.unchecked( Convert_u8_to_i64.INSTANCE );
-                case U8_TO_F32: return Cast.unchecked( Convert_u8_to_f32.INSTANCE );
-                case U8_TO_F64: return Cast.unchecked( Convert_u8_to_f64.INSTANCE );
-                case I16_TO_I8: return Cast.unchecked( Convert_i16_to_i8.INSTANCE );
-                case I16_TO_U8: return Cast.unchecked( Convert_i16_to_u8.INSTANCE );
-                case I16_TO_I16: return Cast.unchecked( Convert_i16_to_i16.INSTANCE );
-                case I16_TO_U16: return Cast.unchecked( Convert_i16_to_u16.INSTANCE );
-                case I16_TO_I32: return Cast.unchecked( Convert_i16_to_i32.INSTANCE );
-                case I16_TO_U32: return Cast.unchecked( Convert_i16_to_u32.INSTANCE );
-                case I16_TO_I64: return Cast.unchecked( Convert_i16_to_i64.INSTANCE );
-                case I16_TO_F32: return Cast.unchecked( Convert_i16_to_f32.INSTANCE );
-                case I16_TO_F64: return Cast.unchecked( Convert_i16_to_f64.INSTANCE );
-                case U16_TO_I8: return Cast.unchecked( Convert_u16_to_i8.INSTANCE );
-                case U16_TO_U8: return Cast.unchecked( Convert_u16_to_u8.INSTANCE );
-                case U16_TO_I16: return Cast.unchecked( Convert_u16_to_i16.INSTANCE );
-                case U16_TO_U16: return Cast.unchecked( Convert_u16_to_u16.INSTANCE );
-                case U16_TO_I32: return Cast.unchecked( Convert_u16_to_i32.INSTANCE );
-                case U16_TO_U32: return Cast.unchecked( Convert_u16_to_u32.INSTANCE );
-                case U16_TO_I64: return Cast.unchecked( Convert_u16_to_i64.INSTANCE );
-                case U16_TO_F32: return Cast.unchecked( Convert_u16_to_f32.INSTANCE );
-                case U16_TO_F64: return Cast.unchecked( Convert_u16_to_f64.INSTANCE );
-                case I32_TO_I8: return Cast.unchecked( Convert_i32_to_i8.INSTANCE );
-                case I32_TO_U8: return Cast.unchecked( Convert_i32_to_u8.INSTANCE );
-                case I32_TO_I16: return Cast.unchecked( Convert_i32_to_i16.INSTANCE );
-                case I32_TO_U16: return Cast.unchecked( Convert_i32_to_u16.INSTANCE );
-                case I32_TO_I32: return Cast.unchecked( Convert_i32_to_i32.INSTANCE );
-                case I32_TO_U32: return Cast.unchecked( Convert_i32_to_u32.INSTANCE );
-                case I32_TO_I64: return Cast.unchecked( Convert_i32_to_i64.INSTANCE );
-                case I32_TO_F32: return Cast.unchecked( Convert_i32_to_f32.INSTANCE );
-                case I32_TO_F64: return Cast.unchecked( Convert_i32_to_f64.INSTANCE );
-                case U32_TO_I8: return Cast.unchecked( Convert_u32_to_i8.INSTANCE );
-                case U32_TO_U8: return Cast.unchecked( Convert_u32_to_u8.INSTANCE );
-                case U32_TO_I16: return Cast.unchecked( Convert_u32_to_i16.INSTANCE );
-                case U32_TO_U16: return Cast.unchecked( Convert_u32_to_u16.INSTANCE );
-                case U32_TO_I32: return Cast.unchecked( Convert_u32_to_i32.INSTANCE );
-                case U32_TO_U32: return Cast.unchecked( Convert_u32_to_u32.INSTANCE );
-                case U32_TO_I64: return Cast.unchecked( Convert_u32_to_i64.INSTANCE );
-                case U32_TO_F32: return Cast.unchecked( Convert_u32_to_f32.INSTANCE );
-                case U32_TO_F64: return Cast.unchecked( Convert_u32_to_f64.INSTANCE );
-                case I64_TO_I8: return Cast.unchecked( Convert_i64_to_i8.INSTANCE );
-                case I64_TO_U8: return Cast.unchecked( Convert_i64_to_u8.INSTANCE );
-                case I64_TO_I16: return Cast.unchecked( Convert_i64_to_i16.INSTANCE );
-                case I64_TO_U16: return Cast.unchecked( Convert_i64_to_u16.INSTANCE );
-                case I64_TO_I32: return Cast.unchecked( Convert_i64_to_i32.INSTANCE );
-                case I64_TO_U32: return Cast.unchecked( Convert_i64_to_u32.INSTANCE );
-                case I64_TO_I64: return Cast.unchecked( Convert_i64_to_i64.INSTANCE );
-                case I64_TO_F32: return Cast.unchecked( Convert_i64_to_f32.INSTANCE );
-                case I64_TO_F64: return Cast.unchecked( Convert_i64_to_f64.INSTANCE );
-                case F32_TO_I8: return Cast.unchecked( Convert_f32_to_i8.INSTANCE );
-                case F32_TO_U8: return Cast.unchecked( Convert_f32_to_u8.INSTANCE );
-                case F32_TO_I16: return Cast.unchecked( Convert_f32_to_i16.INSTANCE );
-                case F32_TO_U16: return Cast.unchecked( Convert_f32_to_u16.INSTANCE );
-                case F32_TO_I32: return Cast.unchecked( Convert_f32_to_i32.INSTANCE );
-                case F32_TO_U32: return Cast.unchecked( Convert_f32_to_u32.INSTANCE );
-                case F32_TO_I64: return Cast.unchecked( Convert_f32_to_i64.INSTANCE );
-                case F32_TO_F32: return Cast.unchecked( Convert_f32_to_f32.INSTANCE );
-                case F32_TO_F64: return Cast.unchecked( Convert_f32_to_f64.INSTANCE );
-                case F64_TO_I8: return Cast.unchecked( Convert_f64_to_i8.INSTANCE );
-                case F64_TO_U8: return Cast.unchecked( Convert_f64_to_u8.INSTANCE );
-                case F64_TO_I16: return Cast.unchecked( Convert_f64_to_i16.INSTANCE );
-                case F64_TO_U16: return Cast.unchecked( Convert_f64_to_u16.INSTANCE );
-                case F64_TO_I32: return Cast.unchecked( Convert_f64_to_i32.INSTANCE );
-                case F64_TO_U32: return Cast.unchecked( Convert_f64_to_u32.INSTANCE );
-                case F64_TO_I64: return Cast.unchecked( Convert_f64_to_i64.INSTANCE );
-                case F64_TO_F32: return Cast.unchecked( Convert_f64_to_f32.INSTANCE );
-                case F64_TO_F64: return Cast.unchecked( Convert_f64_to_f64.INSTANCE );
-				default:
-					throw new IllegalArgumentException();
-				}
-			case CLAMP:
-				switch( type )
-				{
-                case I8_TO_I8: return Cast.unchecked( Convert_i8_to_i8_clamp.INSTANCE );
-                case I8_TO_U8: return Cast.unchecked( Convert_i8_to_u8_clamp.INSTANCE );
-                case I8_TO_I16: return Cast.unchecked( Convert_i8_to_i16_clamp.INSTANCE );
-                case I8_TO_U16: return Cast.unchecked( Convert_i8_to_u16_clamp.INSTANCE );
-                case I8_TO_I32: return Cast.unchecked( Convert_i8_to_i32_clamp.INSTANCE );
-                case I8_TO_U32: return Cast.unchecked( Convert_i8_to_u32_clamp.INSTANCE );
-                case I8_TO_I64: return Cast.unchecked( Convert_i8_to_i64_clamp.INSTANCE );
-                case I8_TO_F32: return Cast.unchecked( Convert_i8_to_f32_clamp.INSTANCE );
-                case I8_TO_F64: return Cast.unchecked( Convert_i8_to_f64_clamp.INSTANCE );
-                case U8_TO_I8: return Cast.unchecked( Convert_u8_to_i8_clamp.INSTANCE );
-                case U8_TO_U8: return Cast.unchecked( Convert_u8_to_u8_clamp.INSTANCE );
-                case U8_TO_I16: return Cast.unchecked( Convert_u8_to_i16_clamp.INSTANCE );
-                case U8_TO_U16: return Cast.unchecked( Convert_u8_to_u16_clamp.INSTANCE );
-                case U8_TO_I32: return Cast.unchecked( Convert_u8_to_i32_clamp.INSTANCE );
-                case U8_TO_U32: return Cast.unchecked( Convert_u8_to_u32_clamp.INSTANCE );
-                case U8_TO_I64: return Cast.unchecked( Convert_u8_to_i64_clamp.INSTANCE );
-                case U8_TO_F32: return Cast.unchecked( Convert_u8_to_f32_clamp.INSTANCE );
-                case U8_TO_F64: return Cast.unchecked( Convert_u8_to_f64_clamp.INSTANCE );
-                case I16_TO_I8: return Cast.unchecked( Convert_i16_to_i8_clamp.INSTANCE );
-                case I16_TO_U8: return Cast.unchecked( Convert_i16_to_u8_clamp.INSTANCE );
-                case I16_TO_I16: return Cast.unchecked( Convert_i16_to_i16_clamp.INSTANCE );
-                case I16_TO_U16: return Cast.unchecked( Convert_i16_to_u16_clamp.INSTANCE );
-                case I16_TO_I32: return Cast.unchecked( Convert_i16_to_i32_clamp.INSTANCE );
-                case I16_TO_U32: return Cast.unchecked( Convert_i16_to_u32_clamp.INSTANCE );
-                case I16_TO_I64: return Cast.unchecked( Convert_i16_to_i64_clamp.INSTANCE );
-                case I16_TO_F32: return Cast.unchecked( Convert_i16_to_f32_clamp.INSTANCE );
-                case I16_TO_F64: return Cast.unchecked( Convert_i16_to_f64_clamp.INSTANCE );
-                case U16_TO_I8: return Cast.unchecked( Convert_u16_to_i8_clamp.INSTANCE );
-                case U16_TO_U8: return Cast.unchecked( Convert_u16_to_u8_clamp.INSTANCE );
-                case U16_TO_I16: return Cast.unchecked( Convert_u16_to_i16_clamp.INSTANCE );
-                case U16_TO_U16: return Cast.unchecked( Convert_u16_to_u16_clamp.INSTANCE );
-                case U16_TO_I32: return Cast.unchecked( Convert_u16_to_i32_clamp.INSTANCE );
-                case U16_TO_U32: return Cast.unchecked( Convert_u16_to_u32_clamp.INSTANCE );
-                case U16_TO_I64: return Cast.unchecked( Convert_u16_to_i64_clamp.INSTANCE );
-                case U16_TO_F32: return Cast.unchecked( Convert_u16_to_f32_clamp.INSTANCE );
-                case U16_TO_F64: return Cast.unchecked( Convert_u16_to_f64_clamp.INSTANCE );
-                case I32_TO_I8: return Cast.unchecked( Convert_i32_to_i8_clamp.INSTANCE );
-                case I32_TO_U8: return Cast.unchecked( Convert_i32_to_u8_clamp.INSTANCE );
-                case I32_TO_I16: return Cast.unchecked( Convert_i32_to_i16_clamp.INSTANCE );
-                case I32_TO_U16: return Cast.unchecked( Convert_i32_to_u16_clamp.INSTANCE );
-                case I32_TO_I32: return Cast.unchecked( Convert_i32_to_i32_clamp.INSTANCE );
-                case I32_TO_U32: return Cast.unchecked( Convert_i32_to_u32_clamp.INSTANCE );
-                case I32_TO_I64: return Cast.unchecked( Convert_i32_to_i64_clamp.INSTANCE );
-                case I32_TO_F32: return Cast.unchecked( Convert_i32_to_f32_clamp.INSTANCE );
-                case I32_TO_F64: return Cast.unchecked( Convert_i32_to_f64_clamp.INSTANCE );
-                case U32_TO_I8: return Cast.unchecked( Convert_u32_to_i8_clamp.INSTANCE );
-                case U32_TO_U8: return Cast.unchecked( Convert_u32_to_u8_clamp.INSTANCE );
-                case U32_TO_I16: return Cast.unchecked( Convert_u32_to_i16_clamp.INSTANCE );
-                case U32_TO_U16: return Cast.unchecked( Convert_u32_to_u16_clamp.INSTANCE );
-                case U32_TO_I32: return Cast.unchecked( Convert_u32_to_i32_clamp.INSTANCE );
-                case U32_TO_U32: return Cast.unchecked( Convert_u32_to_u32_clamp.INSTANCE );
-                case U32_TO_I64: return Cast.unchecked( Convert_u32_to_i64_clamp.INSTANCE );
-                case U32_TO_F32: return Cast.unchecked( Convert_u32_to_f32_clamp.INSTANCE );
-                case U32_TO_F64: return Cast.unchecked( Convert_u32_to_f64_clamp.INSTANCE );
-                case I64_TO_I8: return Cast.unchecked( Convert_i64_to_i8_clamp.INSTANCE );
-                case I64_TO_U8: return Cast.unchecked( Convert_i64_to_u8_clamp.INSTANCE );
-                case I64_TO_I16: return Cast.unchecked( Convert_i64_to_i16_clamp.INSTANCE );
-                case I64_TO_U16: return Cast.unchecked( Convert_i64_to_u16_clamp.INSTANCE );
-                case I64_TO_I32: return Cast.unchecked( Convert_i64_to_i32_clamp.INSTANCE );
-                case I64_TO_U32: return Cast.unchecked( Convert_i64_to_u32_clamp.INSTANCE );
-                case I64_TO_I64: return Cast.unchecked( Convert_i64_to_i64_clamp.INSTANCE );
-                case I64_TO_F32: return Cast.unchecked( Convert_i64_to_f32_clamp.INSTANCE );
-                case I64_TO_F64: return Cast.unchecked( Convert_i64_to_f64_clamp.INSTANCE );
-                case F32_TO_I8: return Cast.unchecked( Convert_f32_to_i8_clamp.INSTANCE );
-                case F32_TO_U8: return Cast.unchecked( Convert_f32_to_u8_clamp.INSTANCE );
-                case F32_TO_I16: return Cast.unchecked( Convert_f32_to_i16_clamp.INSTANCE );
-                case F32_TO_U16: return Cast.unchecked( Convert_f32_to_u16_clamp.INSTANCE );
-                case F32_TO_I32: return Cast.unchecked( Convert_f32_to_i32_clamp.INSTANCE );
-                case F32_TO_U32: return Cast.unchecked( Convert_f32_to_u32_clamp.INSTANCE );
-                case F32_TO_I64: return Cast.unchecked( Convert_f32_to_i64_clamp.INSTANCE );
-                case F32_TO_F32: return Cast.unchecked( Convert_f32_to_f32_clamp.INSTANCE );
-                case F32_TO_F64: return Cast.unchecked( Convert_f32_to_f64_clamp.INSTANCE );
-                case F64_TO_I8: return Cast.unchecked( Convert_f64_to_i8_clamp.INSTANCE );
-                case F64_TO_U8: return Cast.unchecked( Convert_f64_to_u8_clamp.INSTANCE );
-                case F64_TO_I16: return Cast.unchecked( Convert_f64_to_i16_clamp.INSTANCE );
-                case F64_TO_U16: return Cast.unchecked( Convert_f64_to_u16_clamp.INSTANCE );
-                case F64_TO_I32: return Cast.unchecked( Convert_f64_to_i32_clamp.INSTANCE );
-                case F64_TO_U32: return Cast.unchecked( Convert_f64_to_u32_clamp.INSTANCE );
-                case F64_TO_I64: return Cast.unchecked( Convert_f64_to_i64_clamp.INSTANCE );
-                case F64_TO_F32: return Cast.unchecked( Convert_f64_to_f32_clamp.INSTANCE );
-                case F64_TO_F64: return Cast.unchecked( Convert_f64_to_f64_clamp.INSTANCE );
-				default:
-					throw new IllegalArgumentException();
-				}
-			case CLAMP_MAX:
-				switch( type )
-				{
-                case I8_TO_I8: return Cast.unchecked( Convert_i8_to_i8_clamp_max.INSTANCE );
-                case I8_TO_U8: return Cast.unchecked( Convert_i8_to_u8_clamp_max.INSTANCE );
-                case I8_TO_I16: return Cast.unchecked( Convert_i8_to_i16_clamp_max.INSTANCE );
-                case I8_TO_U16: return Cast.unchecked( Convert_i8_to_u16_clamp_max.INSTANCE );
-                case I8_TO_I32: return Cast.unchecked( Convert_i8_to_i32_clamp_max.INSTANCE );
-                case I8_TO_U32: return Cast.unchecked( Convert_i8_to_u32_clamp_max.INSTANCE );
-                case I8_TO_I64: return Cast.unchecked( Convert_i8_to_i64_clamp_max.INSTANCE );
-                case I8_TO_F32: return Cast.unchecked( Convert_i8_to_f32_clamp_max.INSTANCE );
-                case I8_TO_F64: return Cast.unchecked( Convert_i8_to_f64_clamp_max.INSTANCE );
-                case U8_TO_I8: return Cast.unchecked( Convert_u8_to_i8_clamp_max.INSTANCE );
-                case U8_TO_U8: return Cast.unchecked( Convert_u8_to_u8_clamp_max.INSTANCE );
-                case U8_TO_I16: return Cast.unchecked( Convert_u8_to_i16_clamp_max.INSTANCE );
-                case U8_TO_U16: return Cast.unchecked( Convert_u8_to_u16_clamp_max.INSTANCE );
-                case U8_TO_I32: return Cast.unchecked( Convert_u8_to_i32_clamp_max.INSTANCE );
-                case U8_TO_U32: return Cast.unchecked( Convert_u8_to_u32_clamp_max.INSTANCE );
-                case U8_TO_I64: return Cast.unchecked( Convert_u8_to_i64_clamp_max.INSTANCE );
-                case U8_TO_F32: return Cast.unchecked( Convert_u8_to_f32_clamp_max.INSTANCE );
-                case U8_TO_F64: return Cast.unchecked( Convert_u8_to_f64_clamp_max.INSTANCE );
-                case I16_TO_I8: return Cast.unchecked( Convert_i16_to_i8_clamp_max.INSTANCE );
-                case I16_TO_U8: return Cast.unchecked( Convert_i16_to_u8_clamp_max.INSTANCE );
-                case I16_TO_I16: return Cast.unchecked( Convert_i16_to_i16_clamp_max.INSTANCE );
-                case I16_TO_U16: return Cast.unchecked( Convert_i16_to_u16_clamp_max.INSTANCE );
-                case I16_TO_I32: return Cast.unchecked( Convert_i16_to_i32_clamp_max.INSTANCE );
-                case I16_TO_U32: return Cast.unchecked( Convert_i16_to_u32_clamp_max.INSTANCE );
-                case I16_TO_I64: return Cast.unchecked( Convert_i16_to_i64_clamp_max.INSTANCE );
-                case I16_TO_F32: return Cast.unchecked( Convert_i16_to_f32_clamp_max.INSTANCE );
-                case I16_TO_F64: return Cast.unchecked( Convert_i16_to_f64_clamp_max.INSTANCE );
-                case U16_TO_I8: return Cast.unchecked( Convert_u16_to_i8_clamp_max.INSTANCE );
-                case U16_TO_U8: return Cast.unchecked( Convert_u16_to_u8_clamp_max.INSTANCE );
-                case U16_TO_I16: return Cast.unchecked( Convert_u16_to_i16_clamp_max.INSTANCE );
-                case U16_TO_U16: return Cast.unchecked( Convert_u16_to_u16_clamp_max.INSTANCE );
-                case U16_TO_I32: return Cast.unchecked( Convert_u16_to_i32_clamp_max.INSTANCE );
-                case U16_TO_U32: return Cast.unchecked( Convert_u16_to_u32_clamp_max.INSTANCE );
-                case U16_TO_I64: return Cast.unchecked( Convert_u16_to_i64_clamp_max.INSTANCE );
-                case U16_TO_F32: return Cast.unchecked( Convert_u16_to_f32_clamp_max.INSTANCE );
-                case U16_TO_F64: return Cast.unchecked( Convert_u16_to_f64_clamp_max.INSTANCE );
-                case I32_TO_I8: return Cast.unchecked( Convert_i32_to_i8_clamp_max.INSTANCE );
-                case I32_TO_U8: return Cast.unchecked( Convert_i32_to_u8_clamp_max.INSTANCE );
-                case I32_TO_I16: return Cast.unchecked( Convert_i32_to_i16_clamp_max.INSTANCE );
-                case I32_TO_U16: return Cast.unchecked( Convert_i32_to_u16_clamp_max.INSTANCE );
-                case I32_TO_I32: return Cast.unchecked( Convert_i32_to_i32_clamp_max.INSTANCE );
-                case I32_TO_U32: return Cast.unchecked( Convert_i32_to_u32_clamp_max.INSTANCE );
-                case I32_TO_I64: return Cast.unchecked( Convert_i32_to_i64_clamp_max.INSTANCE );
-                case I32_TO_F32: return Cast.unchecked( Convert_i32_to_f32_clamp_max.INSTANCE );
-                case I32_TO_F64: return Cast.unchecked( Convert_i32_to_f64_clamp_max.INSTANCE );
-                case U32_TO_I8: return Cast.unchecked( Convert_u32_to_i8_clamp_max.INSTANCE );
-                case U32_TO_U8: return Cast.unchecked( Convert_u32_to_u8_clamp_max.INSTANCE );
-                case U32_TO_I16: return Cast.unchecked( Convert_u32_to_i16_clamp_max.INSTANCE );
-                case U32_TO_U16: return Cast.unchecked( Convert_u32_to_u16_clamp_max.INSTANCE );
-                case U32_TO_I32: return Cast.unchecked( Convert_u32_to_i32_clamp_max.INSTANCE );
-                case U32_TO_U32: return Cast.unchecked( Convert_u32_to_u32_clamp_max.INSTANCE );
-                case U32_TO_I64: return Cast.unchecked( Convert_u32_to_i64_clamp_max.INSTANCE );
-                case U32_TO_F32: return Cast.unchecked( Convert_u32_to_f32_clamp_max.INSTANCE );
-                case U32_TO_F64: return Cast.unchecked( Convert_u32_to_f64_clamp_max.INSTANCE );
-                case I64_TO_I8: return Cast.unchecked( Convert_i64_to_i8_clamp_max.INSTANCE );
-                case I64_TO_U8: return Cast.unchecked( Convert_i64_to_u8_clamp_max.INSTANCE );
-                case I64_TO_I16: return Cast.unchecked( Convert_i64_to_i16_clamp_max.INSTANCE );
-                case I64_TO_U16: return Cast.unchecked( Convert_i64_to_u16_clamp_max.INSTANCE );
-                case I64_TO_I32: return Cast.unchecked( Convert_i64_to_i32_clamp_max.INSTANCE );
-                case I64_TO_U32: return Cast.unchecked( Convert_i64_to_u32_clamp_max.INSTANCE );
-                case I64_TO_I64: return Cast.unchecked( Convert_i64_to_i64_clamp_max.INSTANCE );
-                case I64_TO_F32: return Cast.unchecked( Convert_i64_to_f32_clamp_max.INSTANCE );
-                case I64_TO_F64: return Cast.unchecked( Convert_i64_to_f64_clamp_max.INSTANCE );
-                case F32_TO_I8: return Cast.unchecked( Convert_f32_to_i8_clamp_max.INSTANCE );
-                case F32_TO_U8: return Cast.unchecked( Convert_f32_to_u8_clamp_max.INSTANCE );
-                case F32_TO_I16: return Cast.unchecked( Convert_f32_to_i16_clamp_max.INSTANCE );
-                case F32_TO_U16: return Cast.unchecked( Convert_f32_to_u16_clamp_max.INSTANCE );
-                case F32_TO_I32: return Cast.unchecked( Convert_f32_to_i32_clamp_max.INSTANCE );
-                case F32_TO_U32: return Cast.unchecked( Convert_f32_to_u32_clamp_max.INSTANCE );
-                case F32_TO_I64: return Cast.unchecked( Convert_f32_to_i64_clamp_max.INSTANCE );
-                case F32_TO_F32: return Cast.unchecked( Convert_f32_to_f32_clamp_max.INSTANCE );
-                case F32_TO_F64: return Cast.unchecked( Convert_f32_to_f64_clamp_max.INSTANCE );
-                case F64_TO_I8: return Cast.unchecked( Convert_f64_to_i8_clamp_max.INSTANCE );
-                case F64_TO_U8: return Cast.unchecked( Convert_f64_to_u8_clamp_max.INSTANCE );
-                case F64_TO_I16: return Cast.unchecked( Convert_f64_to_i16_clamp_max.INSTANCE );
-                case F64_TO_U16: return Cast.unchecked( Convert_f64_to_u16_clamp_max.INSTANCE );
-                case F64_TO_I32: return Cast.unchecked( Convert_f64_to_i32_clamp_max.INSTANCE );
-                case F64_TO_U32: return Cast.unchecked( Convert_f64_to_u32_clamp_max.INSTANCE );
-                case F64_TO_I64: return Cast.unchecked( Convert_f64_to_i64_clamp_max.INSTANCE );
-                case F64_TO_F32: return Cast.unchecked( Convert_f64_to_f32_clamp_max.INSTANCE );
-                case F64_TO_F64: return Cast.unchecked( Convert_f64_to_f64_clamp_max.INSTANCE );
-				default:
-					throw new IllegalArgumentException();
-				}
-			default:
-				throw new IllegalArgumentException();
-			}
+    static < I, O > ConvertLoop< I, O > get( UnaryOperatorType type, ClampType clampType )
+    {
+        switch ( clampType )
+        {
+        case NONE:
+            switch( type )
+            {
+            case I8_TO_I8: return Cast.unchecked( Convert_i8_to_i8.INSTANCE );
+            case I8_TO_U8: return Cast.unchecked( Convert_i8_to_u8.INSTANCE );
+            case I8_TO_I16: return Cast.unchecked( Convert_i8_to_i16.INSTANCE );
+            case I8_TO_U16: return Cast.unchecked( Convert_i8_to_u16.INSTANCE );
+            case I8_TO_I32: return Cast.unchecked( Convert_i8_to_i32.INSTANCE );
+            case I8_TO_U32: return Cast.unchecked( Convert_i8_to_u32.INSTANCE );
+            case I8_TO_I64: return Cast.unchecked( Convert_i8_to_i64.INSTANCE );
+            case I8_TO_F32: return Cast.unchecked( Convert_i8_to_f32.INSTANCE );
+            case I8_TO_F64: return Cast.unchecked( Convert_i8_to_f64.INSTANCE );
+            case U8_TO_I8: return Cast.unchecked( Convert_u8_to_i8.INSTANCE );
+            case U8_TO_U8: return Cast.unchecked( Convert_u8_to_u8.INSTANCE );
+            case U8_TO_I16: return Cast.unchecked( Convert_u8_to_i16.INSTANCE );
+            case U8_TO_U16: return Cast.unchecked( Convert_u8_to_u16.INSTANCE );
+            case U8_TO_I32: return Cast.unchecked( Convert_u8_to_i32.INSTANCE );
+            case U8_TO_U32: return Cast.unchecked( Convert_u8_to_u32.INSTANCE );
+            case U8_TO_I64: return Cast.unchecked( Convert_u8_to_i64.INSTANCE );
+            case U8_TO_F32: return Cast.unchecked( Convert_u8_to_f32.INSTANCE );
+            case U8_TO_F64: return Cast.unchecked( Convert_u8_to_f64.INSTANCE );
+            case I16_TO_I8: return Cast.unchecked( Convert_i16_to_i8.INSTANCE );
+            case I16_TO_U8: return Cast.unchecked( Convert_i16_to_u8.INSTANCE );
+            case I16_TO_I16: return Cast.unchecked( Convert_i16_to_i16.INSTANCE );
+            case I16_TO_U16: return Cast.unchecked( Convert_i16_to_u16.INSTANCE );
+            case I16_TO_I32: return Cast.unchecked( Convert_i16_to_i32.INSTANCE );
+            case I16_TO_U32: return Cast.unchecked( Convert_i16_to_u32.INSTANCE );
+            case I16_TO_I64: return Cast.unchecked( Convert_i16_to_i64.INSTANCE );
+            case I16_TO_F32: return Cast.unchecked( Convert_i16_to_f32.INSTANCE );
+            case I16_TO_F64: return Cast.unchecked( Convert_i16_to_f64.INSTANCE );
+            case U16_TO_I8: return Cast.unchecked( Convert_u16_to_i8.INSTANCE );
+            case U16_TO_U8: return Cast.unchecked( Convert_u16_to_u8.INSTANCE );
+            case U16_TO_I16: return Cast.unchecked( Convert_u16_to_i16.INSTANCE );
+            case U16_TO_U16: return Cast.unchecked( Convert_u16_to_u16.INSTANCE );
+            case U16_TO_I32: return Cast.unchecked( Convert_u16_to_i32.INSTANCE );
+            case U16_TO_U32: return Cast.unchecked( Convert_u16_to_u32.INSTANCE );
+            case U16_TO_I64: return Cast.unchecked( Convert_u16_to_i64.INSTANCE );
+            case U16_TO_F32: return Cast.unchecked( Convert_u16_to_f32.INSTANCE );
+            case U16_TO_F64: return Cast.unchecked( Convert_u16_to_f64.INSTANCE );
+            case I32_TO_I8: return Cast.unchecked( Convert_i32_to_i8.INSTANCE );
+            case I32_TO_U8: return Cast.unchecked( Convert_i32_to_u8.INSTANCE );
+            case I32_TO_I16: return Cast.unchecked( Convert_i32_to_i16.INSTANCE );
+            case I32_TO_U16: return Cast.unchecked( Convert_i32_to_u16.INSTANCE );
+            case I32_TO_I32: return Cast.unchecked( Convert_i32_to_i32.INSTANCE );
+            case I32_TO_U32: return Cast.unchecked( Convert_i32_to_u32.INSTANCE );
+            case I32_TO_I64: return Cast.unchecked( Convert_i32_to_i64.INSTANCE );
+            case I32_TO_F32: return Cast.unchecked( Convert_i32_to_f32.INSTANCE );
+            case I32_TO_F64: return Cast.unchecked( Convert_i32_to_f64.INSTANCE );
+            case U32_TO_I8: return Cast.unchecked( Convert_u32_to_i8.INSTANCE );
+            case U32_TO_U8: return Cast.unchecked( Convert_u32_to_u8.INSTANCE );
+            case U32_TO_I16: return Cast.unchecked( Convert_u32_to_i16.INSTANCE );
+            case U32_TO_U16: return Cast.unchecked( Convert_u32_to_u16.INSTANCE );
+            case U32_TO_I32: return Cast.unchecked( Convert_u32_to_i32.INSTANCE );
+            case U32_TO_U32: return Cast.unchecked( Convert_u32_to_u32.INSTANCE );
+            case U32_TO_I64: return Cast.unchecked( Convert_u32_to_i64.INSTANCE );
+            case U32_TO_F32: return Cast.unchecked( Convert_u32_to_f32.INSTANCE );
+            case U32_TO_F64: return Cast.unchecked( Convert_u32_to_f64.INSTANCE );
+            case I64_TO_I8: return Cast.unchecked( Convert_i64_to_i8.INSTANCE );
+            case I64_TO_U8: return Cast.unchecked( Convert_i64_to_u8.INSTANCE );
+            case I64_TO_I16: return Cast.unchecked( Convert_i64_to_i16.INSTANCE );
+            case I64_TO_U16: return Cast.unchecked( Convert_i64_to_u16.INSTANCE );
+            case I64_TO_I32: return Cast.unchecked( Convert_i64_to_i32.INSTANCE );
+            case I64_TO_U32: return Cast.unchecked( Convert_i64_to_u32.INSTANCE );
+            case I64_TO_I64: return Cast.unchecked( Convert_i64_to_i64.INSTANCE );
+            case I64_TO_F32: return Cast.unchecked( Convert_i64_to_f32.INSTANCE );
+            case I64_TO_F64: return Cast.unchecked( Convert_i64_to_f64.INSTANCE );
+            case F32_TO_I8: return Cast.unchecked( Convert_f32_to_i8.INSTANCE );
+            case F32_TO_U8: return Cast.unchecked( Convert_f32_to_u8.INSTANCE );
+            case F32_TO_I16: return Cast.unchecked( Convert_f32_to_i16.INSTANCE );
+            case F32_TO_U16: return Cast.unchecked( Convert_f32_to_u16.INSTANCE );
+            case F32_TO_I32: return Cast.unchecked( Convert_f32_to_i32.INSTANCE );
+            case F32_TO_U32: return Cast.unchecked( Convert_f32_to_u32.INSTANCE );
+            case F32_TO_I64: return Cast.unchecked( Convert_f32_to_i64.INSTANCE );
+            case F32_TO_F32: return Cast.unchecked( Convert_f32_to_f32.INSTANCE );
+            case F32_TO_F64: return Cast.unchecked( Convert_f32_to_f64.INSTANCE );
+            case F64_TO_I8: return Cast.unchecked( Convert_f64_to_i8.INSTANCE );
+            case F64_TO_U8: return Cast.unchecked( Convert_f64_to_u8.INSTANCE );
+            case F64_TO_I16: return Cast.unchecked( Convert_f64_to_i16.INSTANCE );
+            case F64_TO_U16: return Cast.unchecked( Convert_f64_to_u16.INSTANCE );
+            case F64_TO_I32: return Cast.unchecked( Convert_f64_to_i32.INSTANCE );
+            case F64_TO_U32: return Cast.unchecked( Convert_f64_to_u32.INSTANCE );
+            case F64_TO_I64: return Cast.unchecked( Convert_f64_to_i64.INSTANCE );
+            case F64_TO_F32: return Cast.unchecked( Convert_f64_to_f32.INSTANCE );
+            case F64_TO_F64: return Cast.unchecked( Convert_f64_to_f64.INSTANCE );
+            default:
+                throw new IllegalArgumentException();
+            }
+        case CLAMP:
+            switch( type )
+            {
+            case I8_TO_I8: return Cast.unchecked( Convert_i8_to_i8_clamp.INSTANCE );
+            case I8_TO_U8: return Cast.unchecked( Convert_i8_to_u8_clamp.INSTANCE );
+            case I8_TO_I16: return Cast.unchecked( Convert_i8_to_i16_clamp.INSTANCE );
+            case I8_TO_U16: return Cast.unchecked( Convert_i8_to_u16_clamp.INSTANCE );
+            case I8_TO_I32: return Cast.unchecked( Convert_i8_to_i32_clamp.INSTANCE );
+            case I8_TO_U32: return Cast.unchecked( Convert_i8_to_u32_clamp.INSTANCE );
+            case I8_TO_I64: return Cast.unchecked( Convert_i8_to_i64_clamp.INSTANCE );
+            case I8_TO_F32: return Cast.unchecked( Convert_i8_to_f32_clamp.INSTANCE );
+            case I8_TO_F64: return Cast.unchecked( Convert_i8_to_f64_clamp.INSTANCE );
+            case U8_TO_I8: return Cast.unchecked( Convert_u8_to_i8_clamp.INSTANCE );
+            case U8_TO_U8: return Cast.unchecked( Convert_u8_to_u8_clamp.INSTANCE );
+            case U8_TO_I16: return Cast.unchecked( Convert_u8_to_i16_clamp.INSTANCE );
+            case U8_TO_U16: return Cast.unchecked( Convert_u8_to_u16_clamp.INSTANCE );
+            case U8_TO_I32: return Cast.unchecked( Convert_u8_to_i32_clamp.INSTANCE );
+            case U8_TO_U32: return Cast.unchecked( Convert_u8_to_u32_clamp.INSTANCE );
+            case U8_TO_I64: return Cast.unchecked( Convert_u8_to_i64_clamp.INSTANCE );
+            case U8_TO_F32: return Cast.unchecked( Convert_u8_to_f32_clamp.INSTANCE );
+            case U8_TO_F64: return Cast.unchecked( Convert_u8_to_f64_clamp.INSTANCE );
+            case I16_TO_I8: return Cast.unchecked( Convert_i16_to_i8_clamp.INSTANCE );
+            case I16_TO_U8: return Cast.unchecked( Convert_i16_to_u8_clamp.INSTANCE );
+            case I16_TO_I16: return Cast.unchecked( Convert_i16_to_i16_clamp.INSTANCE );
+            case I16_TO_U16: return Cast.unchecked( Convert_i16_to_u16_clamp.INSTANCE );
+            case I16_TO_I32: return Cast.unchecked( Convert_i16_to_i32_clamp.INSTANCE );
+            case I16_TO_U32: return Cast.unchecked( Convert_i16_to_u32_clamp.INSTANCE );
+            case I16_TO_I64: return Cast.unchecked( Convert_i16_to_i64_clamp.INSTANCE );
+            case I16_TO_F32: return Cast.unchecked( Convert_i16_to_f32_clamp.INSTANCE );
+            case I16_TO_F64: return Cast.unchecked( Convert_i16_to_f64_clamp.INSTANCE );
+            case U16_TO_I8: return Cast.unchecked( Convert_u16_to_i8_clamp.INSTANCE );
+            case U16_TO_U8: return Cast.unchecked( Convert_u16_to_u8_clamp.INSTANCE );
+            case U16_TO_I16: return Cast.unchecked( Convert_u16_to_i16_clamp.INSTANCE );
+            case U16_TO_U16: return Cast.unchecked( Convert_u16_to_u16_clamp.INSTANCE );
+            case U16_TO_I32: return Cast.unchecked( Convert_u16_to_i32_clamp.INSTANCE );
+            case U16_TO_U32: return Cast.unchecked( Convert_u16_to_u32_clamp.INSTANCE );
+            case U16_TO_I64: return Cast.unchecked( Convert_u16_to_i64_clamp.INSTANCE );
+            case U16_TO_F32: return Cast.unchecked( Convert_u16_to_f32_clamp.INSTANCE );
+            case U16_TO_F64: return Cast.unchecked( Convert_u16_to_f64_clamp.INSTANCE );
+            case I32_TO_I8: return Cast.unchecked( Convert_i32_to_i8_clamp.INSTANCE );
+            case I32_TO_U8: return Cast.unchecked( Convert_i32_to_u8_clamp.INSTANCE );
+            case I32_TO_I16: return Cast.unchecked( Convert_i32_to_i16_clamp.INSTANCE );
+            case I32_TO_U16: return Cast.unchecked( Convert_i32_to_u16_clamp.INSTANCE );
+            case I32_TO_I32: return Cast.unchecked( Convert_i32_to_i32_clamp.INSTANCE );
+            case I32_TO_U32: return Cast.unchecked( Convert_i32_to_u32_clamp.INSTANCE );
+            case I32_TO_I64: return Cast.unchecked( Convert_i32_to_i64_clamp.INSTANCE );
+            case I32_TO_F32: return Cast.unchecked( Convert_i32_to_f32_clamp.INSTANCE );
+            case I32_TO_F64: return Cast.unchecked( Convert_i32_to_f64_clamp.INSTANCE );
+            case U32_TO_I8: return Cast.unchecked( Convert_u32_to_i8_clamp.INSTANCE );
+            case U32_TO_U8: return Cast.unchecked( Convert_u32_to_u8_clamp.INSTANCE );
+            case U32_TO_I16: return Cast.unchecked( Convert_u32_to_i16_clamp.INSTANCE );
+            case U32_TO_U16: return Cast.unchecked( Convert_u32_to_u16_clamp.INSTANCE );
+            case U32_TO_I32: return Cast.unchecked( Convert_u32_to_i32_clamp.INSTANCE );
+            case U32_TO_U32: return Cast.unchecked( Convert_u32_to_u32_clamp.INSTANCE );
+            case U32_TO_I64: return Cast.unchecked( Convert_u32_to_i64_clamp.INSTANCE );
+            case U32_TO_F32: return Cast.unchecked( Convert_u32_to_f32_clamp.INSTANCE );
+            case U32_TO_F64: return Cast.unchecked( Convert_u32_to_f64_clamp.INSTANCE );
+            case I64_TO_I8: return Cast.unchecked( Convert_i64_to_i8_clamp.INSTANCE );
+            case I64_TO_U8: return Cast.unchecked( Convert_i64_to_u8_clamp.INSTANCE );
+            case I64_TO_I16: return Cast.unchecked( Convert_i64_to_i16_clamp.INSTANCE );
+            case I64_TO_U16: return Cast.unchecked( Convert_i64_to_u16_clamp.INSTANCE );
+            case I64_TO_I32: return Cast.unchecked( Convert_i64_to_i32_clamp.INSTANCE );
+            case I64_TO_U32: return Cast.unchecked( Convert_i64_to_u32_clamp.INSTANCE );
+            case I64_TO_I64: return Cast.unchecked( Convert_i64_to_i64_clamp.INSTANCE );
+            case I64_TO_F32: return Cast.unchecked( Convert_i64_to_f32_clamp.INSTANCE );
+            case I64_TO_F64: return Cast.unchecked( Convert_i64_to_f64_clamp.INSTANCE );
+            case F32_TO_I8: return Cast.unchecked( Convert_f32_to_i8_clamp.INSTANCE );
+            case F32_TO_U8: return Cast.unchecked( Convert_f32_to_u8_clamp.INSTANCE );
+            case F32_TO_I16: return Cast.unchecked( Convert_f32_to_i16_clamp.INSTANCE );
+            case F32_TO_U16: return Cast.unchecked( Convert_f32_to_u16_clamp.INSTANCE );
+            case F32_TO_I32: return Cast.unchecked( Convert_f32_to_i32_clamp.INSTANCE );
+            case F32_TO_U32: return Cast.unchecked( Convert_f32_to_u32_clamp.INSTANCE );
+            case F32_TO_I64: return Cast.unchecked( Convert_f32_to_i64_clamp.INSTANCE );
+            case F32_TO_F32: return Cast.unchecked( Convert_f32_to_f32_clamp.INSTANCE );
+            case F32_TO_F64: return Cast.unchecked( Convert_f32_to_f64_clamp.INSTANCE );
+            case F64_TO_I8: return Cast.unchecked( Convert_f64_to_i8_clamp.INSTANCE );
+            case F64_TO_U8: return Cast.unchecked( Convert_f64_to_u8_clamp.INSTANCE );
+            case F64_TO_I16: return Cast.unchecked( Convert_f64_to_i16_clamp.INSTANCE );
+            case F64_TO_U16: return Cast.unchecked( Convert_f64_to_u16_clamp.INSTANCE );
+            case F64_TO_I32: return Cast.unchecked( Convert_f64_to_i32_clamp.INSTANCE );
+            case F64_TO_U32: return Cast.unchecked( Convert_f64_to_u32_clamp.INSTANCE );
+            case F64_TO_I64: return Cast.unchecked( Convert_f64_to_i64_clamp.INSTANCE );
+            case F64_TO_F32: return Cast.unchecked( Convert_f64_to_f32_clamp.INSTANCE );
+            case F64_TO_F64: return Cast.unchecked( Convert_f64_to_f64_clamp.INSTANCE );
+            default:
+                throw new IllegalArgumentException();
+            }
+        case CLAMP_MAX:
+            switch( type )
+            {
+            case I8_TO_I8: return Cast.unchecked( Convert_i8_to_i8_clamp_max.INSTANCE );
+            case I8_TO_U8: return Cast.unchecked( Convert_i8_to_u8_clamp_max.INSTANCE );
+            case I8_TO_I16: return Cast.unchecked( Convert_i8_to_i16_clamp_max.INSTANCE );
+            case I8_TO_U16: return Cast.unchecked( Convert_i8_to_u16_clamp_max.INSTANCE );
+            case I8_TO_I32: return Cast.unchecked( Convert_i8_to_i32_clamp_max.INSTANCE );
+            case I8_TO_U32: return Cast.unchecked( Convert_i8_to_u32_clamp_max.INSTANCE );
+            case I8_TO_I64: return Cast.unchecked( Convert_i8_to_i64_clamp_max.INSTANCE );
+            case I8_TO_F32: return Cast.unchecked( Convert_i8_to_f32_clamp_max.INSTANCE );
+            case I8_TO_F64: return Cast.unchecked( Convert_i8_to_f64_clamp_max.INSTANCE );
+            case U8_TO_I8: return Cast.unchecked( Convert_u8_to_i8_clamp_max.INSTANCE );
+            case U8_TO_U8: return Cast.unchecked( Convert_u8_to_u8_clamp_max.INSTANCE );
+            case U8_TO_I16: return Cast.unchecked( Convert_u8_to_i16_clamp_max.INSTANCE );
+            case U8_TO_U16: return Cast.unchecked( Convert_u8_to_u16_clamp_max.INSTANCE );
+            case U8_TO_I32: return Cast.unchecked( Convert_u8_to_i32_clamp_max.INSTANCE );
+            case U8_TO_U32: return Cast.unchecked( Convert_u8_to_u32_clamp_max.INSTANCE );
+            case U8_TO_I64: return Cast.unchecked( Convert_u8_to_i64_clamp_max.INSTANCE );
+            case U8_TO_F32: return Cast.unchecked( Convert_u8_to_f32_clamp_max.INSTANCE );
+            case U8_TO_F64: return Cast.unchecked( Convert_u8_to_f64_clamp_max.INSTANCE );
+            case I16_TO_I8: return Cast.unchecked( Convert_i16_to_i8_clamp_max.INSTANCE );
+            case I16_TO_U8: return Cast.unchecked( Convert_i16_to_u8_clamp_max.INSTANCE );
+            case I16_TO_I16: return Cast.unchecked( Convert_i16_to_i16_clamp_max.INSTANCE );
+            case I16_TO_U16: return Cast.unchecked( Convert_i16_to_u16_clamp_max.INSTANCE );
+            case I16_TO_I32: return Cast.unchecked( Convert_i16_to_i32_clamp_max.INSTANCE );
+            case I16_TO_U32: return Cast.unchecked( Convert_i16_to_u32_clamp_max.INSTANCE );
+            case I16_TO_I64: return Cast.unchecked( Convert_i16_to_i64_clamp_max.INSTANCE );
+            case I16_TO_F32: return Cast.unchecked( Convert_i16_to_f32_clamp_max.INSTANCE );
+            case I16_TO_F64: return Cast.unchecked( Convert_i16_to_f64_clamp_max.INSTANCE );
+            case U16_TO_I8: return Cast.unchecked( Convert_u16_to_i8_clamp_max.INSTANCE );
+            case U16_TO_U8: return Cast.unchecked( Convert_u16_to_u8_clamp_max.INSTANCE );
+            case U16_TO_I16: return Cast.unchecked( Convert_u16_to_i16_clamp_max.INSTANCE );
+            case U16_TO_U16: return Cast.unchecked( Convert_u16_to_u16_clamp_max.INSTANCE );
+            case U16_TO_I32: return Cast.unchecked( Convert_u16_to_i32_clamp_max.INSTANCE );
+            case U16_TO_U32: return Cast.unchecked( Convert_u16_to_u32_clamp_max.INSTANCE );
+            case U16_TO_I64: return Cast.unchecked( Convert_u16_to_i64_clamp_max.INSTANCE );
+            case U16_TO_F32: return Cast.unchecked( Convert_u16_to_f32_clamp_max.INSTANCE );
+            case U16_TO_F64: return Cast.unchecked( Convert_u16_to_f64_clamp_max.INSTANCE );
+            case I32_TO_I8: return Cast.unchecked( Convert_i32_to_i8_clamp_max.INSTANCE );
+            case I32_TO_U8: return Cast.unchecked( Convert_i32_to_u8_clamp_max.INSTANCE );
+            case I32_TO_I16: return Cast.unchecked( Convert_i32_to_i16_clamp_max.INSTANCE );
+            case I32_TO_U16: return Cast.unchecked( Convert_i32_to_u16_clamp_max.INSTANCE );
+            case I32_TO_I32: return Cast.unchecked( Convert_i32_to_i32_clamp_max.INSTANCE );
+            case I32_TO_U32: return Cast.unchecked( Convert_i32_to_u32_clamp_max.INSTANCE );
+            case I32_TO_I64: return Cast.unchecked( Convert_i32_to_i64_clamp_max.INSTANCE );
+            case I32_TO_F32: return Cast.unchecked( Convert_i32_to_f32_clamp_max.INSTANCE );
+            case I32_TO_F64: return Cast.unchecked( Convert_i32_to_f64_clamp_max.INSTANCE );
+            case U32_TO_I8: return Cast.unchecked( Convert_u32_to_i8_clamp_max.INSTANCE );
+            case U32_TO_U8: return Cast.unchecked( Convert_u32_to_u8_clamp_max.INSTANCE );
+            case U32_TO_I16: return Cast.unchecked( Convert_u32_to_i16_clamp_max.INSTANCE );
+            case U32_TO_U16: return Cast.unchecked( Convert_u32_to_u16_clamp_max.INSTANCE );
+            case U32_TO_I32: return Cast.unchecked( Convert_u32_to_i32_clamp_max.INSTANCE );
+            case U32_TO_U32: return Cast.unchecked( Convert_u32_to_u32_clamp_max.INSTANCE );
+            case U32_TO_I64: return Cast.unchecked( Convert_u32_to_i64_clamp_max.INSTANCE );
+            case U32_TO_F32: return Cast.unchecked( Convert_u32_to_f32_clamp_max.INSTANCE );
+            case U32_TO_F64: return Cast.unchecked( Convert_u32_to_f64_clamp_max.INSTANCE );
+            case I64_TO_I8: return Cast.unchecked( Convert_i64_to_i8_clamp_max.INSTANCE );
+            case I64_TO_U8: return Cast.unchecked( Convert_i64_to_u8_clamp_max.INSTANCE );
+            case I64_TO_I16: return Cast.unchecked( Convert_i64_to_i16_clamp_max.INSTANCE );
+            case I64_TO_U16: return Cast.unchecked( Convert_i64_to_u16_clamp_max.INSTANCE );
+            case I64_TO_I32: return Cast.unchecked( Convert_i64_to_i32_clamp_max.INSTANCE );
+            case I64_TO_U32: return Cast.unchecked( Convert_i64_to_u32_clamp_max.INSTANCE );
+            case I64_TO_I64: return Cast.unchecked( Convert_i64_to_i64_clamp_max.INSTANCE );
+            case I64_TO_F32: return Cast.unchecked( Convert_i64_to_f32_clamp_max.INSTANCE );
+            case I64_TO_F64: return Cast.unchecked( Convert_i64_to_f64_clamp_max.INSTANCE );
+            case F32_TO_I8: return Cast.unchecked( Convert_f32_to_i8_clamp_max.INSTANCE );
+            case F32_TO_U8: return Cast.unchecked( Convert_f32_to_u8_clamp_max.INSTANCE );
+            case F32_TO_I16: return Cast.unchecked( Convert_f32_to_i16_clamp_max.INSTANCE );
+            case F32_TO_U16: return Cast.unchecked( Convert_f32_to_u16_clamp_max.INSTANCE );
+            case F32_TO_I32: return Cast.unchecked( Convert_f32_to_i32_clamp_max.INSTANCE );
+            case F32_TO_U32: return Cast.unchecked( Convert_f32_to_u32_clamp_max.INSTANCE );
+            case F32_TO_I64: return Cast.unchecked( Convert_f32_to_i64_clamp_max.INSTANCE );
+            case F32_TO_F32: return Cast.unchecked( Convert_f32_to_f32_clamp_max.INSTANCE );
+            case F32_TO_F64: return Cast.unchecked( Convert_f32_to_f64_clamp_max.INSTANCE );
+            case F64_TO_I8: return Cast.unchecked( Convert_f64_to_i8_clamp_max.INSTANCE );
+            case F64_TO_U8: return Cast.unchecked( Convert_f64_to_u8_clamp_max.INSTANCE );
+            case F64_TO_I16: return Cast.unchecked( Convert_f64_to_i16_clamp_max.INSTANCE );
+            case F64_TO_U16: return Cast.unchecked( Convert_f64_to_u16_clamp_max.INSTANCE );
+            case F64_TO_I32: return Cast.unchecked( Convert_f64_to_i32_clamp_max.INSTANCE );
+            case F64_TO_U32: return Cast.unchecked( Convert_f64_to_u32_clamp_max.INSTANCE );
+            case F64_TO_I64: return Cast.unchecked( Convert_f64_to_i64_clamp_max.INSTANCE );
+            case F64_TO_F32: return Cast.unchecked( Convert_f64_to_f32_clamp_max.INSTANCE );
+            case F64_TO_F64: return Cast.unchecked( Convert_f64_to_f64_clamp_max.INSTANCE );
+            default:
+                throw new IllegalArgumentException();
+            }
+        default:
+            throw new IllegalArgumentException();
         }
     }
 

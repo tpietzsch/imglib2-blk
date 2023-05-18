@@ -38,10 +38,10 @@ import net.imglib2.util.Cast;
 
 #parse( "PixelTypes.vm" )
 #foreach( $t1 in $types )
-import static net.imglib2.blk.downsample.ConvertValues.from_${t1};
-import static net.imglib2.blk.downsample.ConvertValues.to_${t1};
-import static net.imglib2.blk.downsample.ConvertValues.to_${t1}_clamp;
-import static net.imglib2.blk.downsample.ConvertValues.to_${t1}_clamp_max;
+import static net.imglib2.blk.downsample.ConvertScalars.from_${t1};
+import static net.imglib2.blk.downsample.ConvertScalars.to_${t1};
+import static net.imglib2.blk.downsample.ConvertScalars.to_${t1}_clamp;
+import static net.imglib2.blk.downsample.ConvertScalars.to_${t1}_clamp_max;
 #end
 
 /*
@@ -49,58 +49,52 @@ import static net.imglib2.blk.downsample.ConvertValues.to_${t1}_clamp_max;
  * corresponding template in templates/ and rerun bin/generate.groovy.
  */
 
-class TypeConversionGenerated
+class ConvertLoops
 {
-    @FunctionalInterface
-    interface ConvertLoop< I, O >
+    static < I, O > ConvertLoop< I, O > get( UnaryOperatorType type )
     {
-        void apply( final I src, final O dest, final int length );
+        return get( type, ClampType.NONE );
+    }
 
-		static < I, O > ConvertLoop< I, O > get( UnaryOperatorType type )
-		{
-			return get( type, ClampType.NONE );
-		}
-
-		static < I, O > ConvertLoop< I, O > get( UnaryOperatorType type, ClampType clampType )
-		{
-			switch ( clampType )
-			{
-			case NONE:
-				switch( type )
-				{
+    static < I, O > ConvertLoop< I, O > get( UnaryOperatorType type, ClampType clampType )
+    {
+        switch ( clampType )
+        {
+        case NONE:
+            switch( type )
+            {
 #foreach( $t1 in $types )
 #foreach( $t2 in $types )
-                case ${t1.toUpperCase()}_TO_${t2.toUpperCase()}: return Cast.unchecked( Convert_${t1}_to_${t2}.INSTANCE );
+            case ${t1.toUpperCase()}_TO_${t2.toUpperCase()}: return Cast.unchecked( Convert_${t1}_to_${t2}.INSTANCE );
 #end
 #end
-				default:
-					throw new IllegalArgumentException();
-				}
-			case CLAMP:
-				switch( type )
-				{
+            default:
+                throw new IllegalArgumentException();
+            }
+        case CLAMP:
+            switch( type )
+            {
 #foreach( $t1 in $types )
 #foreach( $t2 in $types )
-                case ${t1.toUpperCase()}_TO_${t2.toUpperCase()}: return Cast.unchecked( Convert_${t1}_to_${t2}_clamp.INSTANCE );
+            case ${t1.toUpperCase()}_TO_${t2.toUpperCase()}: return Cast.unchecked( Convert_${t1}_to_${t2}_clamp.INSTANCE );
 #end
 #end
-				default:
-					throw new IllegalArgumentException();
-				}
-			case CLAMP_MAX:
-				switch( type )
-				{
+            default:
+                throw new IllegalArgumentException();
+            }
+        case CLAMP_MAX:
+            switch( type )
+            {
 #foreach( $t1 in $types )
 #foreach( $t2 in $types )
-                case ${t1.toUpperCase()}_TO_${t2.toUpperCase()}: return Cast.unchecked( Convert_${t1}_to_${t2}_clamp_max.INSTANCE );
+            case ${t1.toUpperCase()}_TO_${t2.toUpperCase()}: return Cast.unchecked( Convert_${t1}_to_${t2}_clamp_max.INSTANCE );
 #end
 #end
-				default:
-					throw new IllegalArgumentException();
-				}
-			default:
-				throw new IllegalArgumentException();
-			}
+            default:
+                throw new IllegalArgumentException();
+            }
+        default:
+            throw new IllegalArgumentException();
         }
     }
 

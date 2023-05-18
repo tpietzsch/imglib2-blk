@@ -39,7 +39,7 @@ package net.imglib2.blk.downsample;
  */
 
 #parse( "PixelTypes.vm" )
-class ConvertValues
+class ConvertScalars
 {
 ##
 ## from_i8(), etc., with corresponding compute_primitive as result type

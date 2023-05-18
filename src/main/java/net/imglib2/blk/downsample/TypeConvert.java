@@ -3,7 +3,6 @@ package net.imglib2.blk.downsample;
 import java.util.Arrays;
 import java.util.function.Supplier;
 import net.imglib2.Interval;
-import net.imglib2.blk.downsample.TypeConversionGenerated.ConvertLoop;
 import net.imglib2.blk.downsample.algo.BlockProcessor;
 import net.imglib2.blk.downsample.algo.BlockProcessorSourceInterval;
 import net.imglib2.blocks.TempArray;
@@ -46,7 +45,7 @@ class TypeConvert< S extends NativeType< S >, T extends NativeType< T >, I, O > 
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		tempArray = TempArray.forPrimitiveType( sourceType.getNativeTypeFactory().getPrimitiveType() );
-		loop = ConvertLoop.get( UnaryOperatorType.of( sourceType, targetType ), clamp );
+		loop = ConvertLoops.get( UnaryOperatorType.of( sourceType, targetType ), clamp );
 		sourceInterval = new BlockProcessorSourceInterval( this );
 	}
 
