@@ -29,6 +29,23 @@ public class AlgoUtils
 		};
 	}
 
+	public static < S extends NativeType< S >, T extends NativeType< T >, I, O >
+	CellLoader< T > cellLoader( final PrimitiveBlocks< S > blocks, TypedBlockProcessor< S, T > blockProcessor )
+	{
+		final PrimitiveBlocks< S > threadSafeBlocks = blocks.threadSafe();
+		final BlockProcessor< I, O > processor1 = blockProcessor.processor();
+		final Supplier< ? extends BlockProcessor< I, O > > processorSupplier = processor1.threadSafeSupplier();
+		return cell -> {
+			final BlockProcessor< I, O > processor = processorSupplier.get();
+			processor.setTargetInterval( cell );
+			final I src = processor.getSourceBuffer();
+			threadSafeBlocks.copy( processor.getSourcePos(), src, processor.getSourceSize() );
+			@SuppressWarnings( { "unchecked" } )
+			final O dest = ( O ) cell.getStorageArray();
+			processor.compute( src, dest );
+		};
+	}
+
 	public static < T extends NativeType< T >, I, O >
 	CachedCellImg< T, ? > cellImg(
 			final PrimitiveBlocks< T > blocks,
