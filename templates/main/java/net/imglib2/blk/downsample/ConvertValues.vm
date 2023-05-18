@@ -31,7 +31,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-
 package net.imglib2.blk.downsample;
 
 /*

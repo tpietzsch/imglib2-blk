@@ -1,7 +1,6 @@
 package net.imglib2.blk.downsample;
 
 import java.util.Arrays;
-import net.imglib2.blk.downsample.GenericTypeConversionPlayground.TypeConvert;
 import net.imglib2.blk.downsample.algo.BlockProcessor;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.real.FloatType;
