@@ -42,9 +42,12 @@ public class DownsampleUnsignedBytePlayground
 		final boolean[] downsampleInDim = { true, true, true };
 		final long[] downsampledDimensions = Downsample.getDownsampledDimensions( img.dimensionsAsLongArray(), downsampleInDim );
 		final int[] cellDimensions = { 64, 64, 64 };
+
+		final PrimitiveBlocks< UnsignedByteType > blocks = PrimitiveBlocks.of( Views.extendBorder( img ) );
 		final UnsignedByteType type = new UnsignedByteType();
+
 		final CachedCellImg< UnsignedByteType, ? > downsampled = AlgoUtils.cellImg(
-				PrimitiveBlocks.of( Views.extendBorder( img ) ),
+				blocks,
 				downsample( type, ComputationType.AUTO, Offset.CENTERED, downsampleInDim ),
 				type,
 				downsampledDimensions,
@@ -60,5 +63,20 @@ public class DownsampleUnsignedBytePlayground
 						.sourceTransform( calib ) );
 		out.setDisplayRange( 0, 255 );
 		out.setColor( new ARGBType( 0xff0000 ) );
+
+		final CachedCellImg< UnsignedByteType, ? > downsampled2 = AlgoUtils.cellImg(
+				blocks,
+				downsample( type, ComputationType.AUTO, Offset.HALF_PIXEL, downsampleInDim ),
+				type,
+				downsampledDimensions,
+				cellDimensions );
+		final BdvSource out2 = BdvFunctions.show(
+				VolatileViews.wrapAsVolatile( downsampled2 ),
+				"downsampled half-pixel",
+				Bdv.options()
+						.addTo( bdv )
+						.sourceTransform( calib ) );
+		out2.setDisplayRange( 0, 255 );
+		out2.setColor( new ARGBType( 0x00ff00 ) );
 	}
 }
