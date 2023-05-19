@@ -8,6 +8,8 @@ import bdv.viewer.DisplayMode;
 import ij.IJ;
 import ij.ImagePlus;
 import java.util.Arrays;
+import net.imglib2.blk.downsample.Downsample.ComputationType;
+import net.imglib2.blk.downsample.Downsample.Offset;
 import net.imglib2.blk.downsample.algo.AlgoUtils;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
@@ -37,13 +39,16 @@ public class DownsampleUnsignedBytePlayground
 		bdv.setDisplayRange( 0, 255 );
 		bdv.getBdvHandle().getViewerPanel().setDisplayMode( DisplayMode.SINGLE );
 
-		final PrimitiveBlocks< UnsignedByteType > blocks = PrimitiveBlocks.of( Views.extendBorder( img ) );
 		final boolean[] downsampleInDim = { true, true, true };
 		final long[] downsampledDimensions = Downsample.getDownsampledDimensions( img.dimensionsAsLongArray(), downsampleInDim );
 		final int[] cellDimensions = { 64, 64, 64 };
 		final UnsignedByteType type = new UnsignedByteType();
 		final CachedCellImg< UnsignedByteType, ? > downsampled = AlgoUtils.cellImg(
-				blocks, downsample( type, downsampleInDim ), type, downsampledDimensions, cellDimensions );
+				PrimitiveBlocks.of( Views.extendBorder( img ) ),
+				downsample( type, ComputationType.AUTO, Offset.CENTERED, downsampleInDim ),
+				type,
+				downsampledDimensions,
+				cellDimensions );
 
 		final double[] calib = new double[ 3 ];
 		Arrays.setAll(calib, d -> downsampleInDim[ d ] ? 2 : 1 );

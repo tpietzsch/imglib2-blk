@@ -1,128 +1,20 @@
 package net.imglib2.blk.downsample;
 
-import java.util.Arrays;
-import java.util.function.Supplier;
-import net.imglib2.Interval;
-import net.imglib2.blk.downsample.algo.BlockProcessor;
-import net.imglib2.blk.downsample.algo.PrimitiveBlockProcessorSourceInterval;
-import net.imglib2.blocks.TempArray;
+import net.imglib2.blk.downsample.algo.DefaultUnaryBlockOperator;
+import net.imglib2.blk.downsample.algo.UnaryBlockOperator;
 import net.imglib2.type.NativeType;
-import net.imglib2.util.Intervals;
 
-/**
- * Convert primitive arrays between standard ImgLib2 {@code Type}s.
- * Provides rounding, optional clamping, and handling unsigned types.
- *
- * @param <I>
- * 		input primitive array type, e.g., float[]
- * @param <O>
- * 		output primitive array type, e.g., float[]
- */
-public class Convert< S extends NativeType< S >, T extends NativeType< T >, I, O > implements BlockProcessor< I, O >
+public class Convert
 {
-	private final S sourceType;
-
-	private final T targetType;
-
-	private final TempArray< I > tempArray;
-
-	private final ConvertLoop< I, O > loop;
-
-	private Supplier< Convert< S, T, I, O > > threadSafeSupplier;
-
-	private long[] sourcePos;
-
-	private int[] sourceSize;
-
-	private int sourceLength;
-
-	private final PrimitiveBlockProcessorSourceInterval sourceInterval;
-
-	public Convert( final S sourceType, final T targetType )
+	public static < S extends NativeType< S >, T extends NativeType< T > >
+	UnaryBlockOperator< S, T > convert( final S sourceType, final T targetType )
 	{
-		this( sourceType, targetType, ClampType.NONE );
+		return convert( sourceType, targetType, ClampType.NONE );
 	}
 
-	public Convert( final S sourceType, final T targetType, final ClampType clamp )
+	public static < S extends NativeType< S >, T extends NativeType< T > >
+	UnaryBlockOperator< S, T > convert( final S sourceType, final T targetType, final ClampType clamp )
 	{
-		this.sourceType = sourceType;
-		this.targetType = targetType;
-		tempArray = TempArray.forPrimitiveType( sourceType.getNativeTypeFactory().getPrimitiveType() );
-		loop = ConvertLoops.get( UnaryOperatorType.of( sourceType, targetType ), clamp );
-		sourceInterval = new PrimitiveBlockProcessorSourceInterval( this );
-	}
-
-	private Convert( Convert< S, T, I, O > convert )
-	{
-		sourceType = convert.sourceType;
-		targetType = convert.targetType;
-		tempArray = convert.tempArray.newInstance();
-		loop = convert.loop;
-		sourceInterval = new PrimitiveBlockProcessorSourceInterval( this );
-		threadSafeSupplier = convert.threadSafeSupplier;
-	}
-
-	private Convert< S, T, I, O > newInstance()
-	{
-		return new Convert<>( this );
-	}
-
-	@Override
-	public Supplier< ? extends BlockProcessor< I, O > > threadSafeSupplier()
-	{
-		if ( threadSafeSupplier == null )
-			threadSafeSupplier = ThreadLocal.withInitial( this::newInstance )::get;
-		return threadSafeSupplier;
-	}
-
-	@Override
-	public void setTargetInterval( final Interval interval )
-	{
-		final int n = interval.numDimensions();
-		if ( sourcePos == null || sourcePos.length != n )
-		{
-			sourcePos = new long[ n ];
-			sourceSize = new int[ n ];
-		}
-		interval.min( sourcePos );
-		Arrays.setAll( sourceSize, d -> safeInt( interval.dimension( d ) ) );
-		sourceLength = safeInt( Intervals.numElements( sourceSize ) );
-	}
-
-	private static int safeInt( final long value )
-	{
-		if ( value > Integer.MAX_VALUE )
-			throw new IllegalArgumentException( "value too large" );
-		return ( int ) value;
-	}
-
-	@Override
-	public long[] getSourcePos()
-	{
-		return sourcePos;
-	}
-
-	@Override
-	public int[] getSourceSize()
-	{
-		return sourceSize;
-	}
-
-	@Override
-	public Interval getSourceInterval()
-	{
-		return sourceInterval;
-	}
-
-	@Override
-	public I getSourceBuffer()
-	{
-		return tempArray.get( sourceLength );
-	}
-
-	@Override
-	public void compute( final I src, final O dest )
-	{
-		loop.apply( src, dest, sourceLength );
+		return new DefaultUnaryBlockOperator<>( sourceType, targetType, new ConvertBlockProcessor<>( sourceType, targetType, clamp ) );
 	}
 }

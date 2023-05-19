@@ -1,9 +1,10 @@
 package net.imglib2.blk.downsample.algo;
 
 import net.imglib2.blk.downsample.ClampType;
-import net.imglib2.blk.downsample.Convert;
 import net.imglib2.type.NativeType;
 import net.imglib2.util.Cast;
+
+import static net.imglib2.blk.downsample.Convert.convert;
 
 public interface UnaryBlockOperator< S extends NativeType< S >, T extends NativeType< T > >
 {
@@ -50,11 +51,5 @@ public interface UnaryBlockOperator< S extends NativeType< S >, T extends Native
 			return Cast.unchecked( this );
 		else
 			return this.andThen( convert( getTargetType(), newTargetType, clamp ) );
-	}
-
-	// TODO: MOVE somewhere else
-	static < S extends NativeType< S >, T extends NativeType< T > > UnaryBlockOperator< S, T > convert( S sourceType, T targetType, ClampType clamp )
-	{
-		return new DefaultUnaryBlockOperator<>( sourceType, targetType, new Convert<>( sourceType, targetType, clamp ) );
 	}
 }

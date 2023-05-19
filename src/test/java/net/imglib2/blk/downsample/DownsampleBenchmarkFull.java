@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import net.imglib2.FinalInterval;
-import net.imglib2.blk.downsample.Downsample.DownsampleDouble;
-import net.imglib2.blk.downsample.Downsample.DownsampleFloat;
-import net.imglib2.blk.downsample.Downsample.DownsampleHalfPixelDouble;
-import net.imglib2.blk.downsample.Downsample.DownsampleHalfPixelFloat;
+import net.imglib2.blk.downsample.DownsampleBlockProcessors.CenterDouble;
+import net.imglib2.blk.downsample.DownsampleBlockProcessors.CenterFloat;
+import net.imglib2.blk.downsample.DownsampleBlockProcessors.HalfPixelDouble;
+import net.imglib2.blk.downsample.DownsampleBlockProcessors.HalfPixelFloat;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -43,10 +43,10 @@ public class DownsampleBenchmarkFull
 	float[] outputF;
 	double[] inputD;
 	double[] outputD;
-	DownsampleFloat downsampleFloat;
-	DownsampleDouble downsampleDouble;
-	DownsampleHalfPixelFloat downsampleHalfDownsampleHalfPixelFloat;
-	DownsampleHalfPixelDouble downsampleHalfDownsampleHalfPixelDouble;
+	CenterFloat centerFloat;
+	CenterDouble centerDouble;
+	HalfPixelFloat halfPixelFloat;
+	HalfPixelDouble halfPixelDouble;
 
 //	@Param( { "X", "Y", "Z", "XYZ" } )
 	@Param( { "XYZ" } )
@@ -88,57 +88,50 @@ public class DownsampleBenchmarkFull
 		System.out.println( "destSize = " + Arrays.toString( destSize ) );
 		Arrays.setAll( outputSize, d -> ( int ) destSize[ d ] );
 
-		downsampleFloat = new DownsampleFloat( downsampleInDim );
-		downsampleFloat.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
-		System.arraycopy( downsampleFloat.getSourceSize(), 0, inputSize, 0, inputSize.length );
+		centerFloat = new CenterFloat( downsampleInDim );
+		centerFloat.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
+		System.arraycopy( centerFloat.getSourceSize(), 0, inputSize, 0, inputSize.length );
 		inputF = new float[ ( int ) Intervals.numElements( inputSize ) ];
 		for ( int i = 0; i < inputF.length; i++ )
 			inputF[ i ] = random.nextFloat();
 		outputF = new float[ ( int ) Intervals.numElements( outputSize ) ];
 
-		downsampleDouble = new DownsampleDouble( downsampleInDim );
-		downsampleDouble.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
+		centerDouble = new CenterDouble( downsampleInDim );
+		centerDouble.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
 		inputD = new double[ ( int ) Intervals.numElements( inputSize ) ];
 		for ( int i = 0; i < inputD.length; i++ )
 			inputD[ i ] = random.nextDouble();
 		outputD = new double[ ( int ) Intervals.numElements( outputSize ) ];
 
-		downsampleHalfDownsampleHalfPixelFloat = new DownsampleHalfPixelFloat( downsampleInDim );
-		downsampleHalfDownsampleHalfPixelFloat.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
+		halfPixelFloat = new HalfPixelFloat( downsampleInDim );
+		halfPixelFloat.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
 
-		downsampleHalfDownsampleHalfPixelDouble = new DownsampleHalfPixelDouble( downsampleInDim );
-		downsampleHalfDownsampleHalfPixelDouble.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
+		halfPixelDouble = new HalfPixelDouble( downsampleInDim );
+		halfPixelDouble.setTargetInterval( new FinalInterval( Util.int2long( outputSize ) ) );
 	}
 
 	@Benchmark
-	public void benchmarkDownsampleFloat()
+	public void benchmarkCenterFloat()
 	{
-		downsampleFloat.compute( inputF, outputF );
+		centerFloat.compute( inputF, outputF );
 	}
 
 	@Benchmark
-	public void benchmarkDownsampleDouble()
+	public void benchmarkCenterDouble()
 	{
-		downsampleDouble.compute( inputD, outputD );
+		centerDouble.compute( inputD, outputD );
 	}
 
 	@Benchmark
-	public void benchmarkDownsampleBoth()
+	public void benchmarkHalfPixelFloat()
 	{
-		downsampleFloat.compute( inputF, outputF );
-		downsampleDouble.compute( inputD, outputD );
+		halfPixelFloat.compute( inputF, outputF );
 	}
 
 	@Benchmark
-	public void benchmarkDownsampleHalfPixelFloat()
+	public void benchmarkHalfPixelDouble()
 	{
-		downsampleHalfDownsampleHalfPixelFloat.compute( inputF, outputF );
-	}
-
-	@Benchmark
-	public void benchmarkDownsampleHalfPixelDouble()
-	{
-		downsampleHalfDownsampleHalfPixelDouble.compute( inputD, outputD );
+		halfPixelDouble.compute( inputD, outputD );
 	}
 
 	public static void main( String... args ) throws RunnerException
