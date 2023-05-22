@@ -54,15 +54,8 @@ public class DownsampleMemProfile
 		final CachedCellImg< UnsignedByteType, ? > downsampleFloat = AlgoUtils.cellImg(
 				blocksFloat, Downsample.downsample( new UnsignedByteType(), ComputationType.FLOAT, Offset.CENTERED, downsampleInDim ), new UnsignedByteType(), downsampledDimensions, cellDimensions );
 
-		touchAllCellsSingleThreaded( downsampleFloat );
-		try
-		{
-			Thread.sleep( 100 );
-		}
-		catch ( InterruptedException e )
-		{
-			throw new RuntimeException( e );
-		}
+//		touchAllCellsSingleThreaded( downsampleFloat );
+		touchAllCells( downsampleFloat );
 		downsampleFloat.getCache().invalidateAll();
 	}
 
@@ -96,7 +89,6 @@ public class DownsampleMemProfile
 	public static void main( String... args ) throws InterruptedException
 	{
 		final DownsampleMemProfile benchmark = new DownsampleMemProfile();
-//		Thread.sleep( 5000 );
 		while ( true )
 		{
 			benchmark.benchmarkDownsampleFloat();
