@@ -7,6 +7,7 @@ import net.imglib2.blk.downsample.algo.BlockProcessor;
 import net.imglib2.blk.downsample.algo.PrimitiveBlockProcessorSourceInterval;
 import net.imglib2.blocks.TempArray;
 import net.imglib2.type.NativeType;
+import net.imglib2.util.CloseableThreadLocal;
 import net.imglib2.util.Intervals;
 
 /**
@@ -66,7 +67,7 @@ public class ConvertBlockProcessor< S extends NativeType< S >, T extends NativeT
 	public Supplier< ? extends BlockProcessor< I, O > > threadSafeSupplier()
 	{
 		if ( threadSafeSupplier == null )
-			threadSafeSupplier = ThreadLocal.withInitial( this::newInstance )::get;
+			threadSafeSupplier = CloseableThreadLocal.withInitial( this::newInstance )::get;
 		return threadSafeSupplier;
 	}
 

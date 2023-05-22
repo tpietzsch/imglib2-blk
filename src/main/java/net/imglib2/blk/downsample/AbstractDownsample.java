@@ -7,6 +7,7 @@ import net.imglib2.blk.downsample.algo.BlockProcessor;
 import net.imglib2.blk.downsample.algo.PrimitiveBlockProcessorSourceInterval;
 import net.imglib2.blocks.TempArray;
 import net.imglib2.type.PrimitiveType;
+import net.imglib2.util.CloseableThreadLocal;
 import net.imglib2.util.Intervals;
 
 abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P > implements BlockProcessor< P, P >
@@ -105,7 +106,7 @@ abstract class AbstractDownsample< T extends AbstractDownsample< T, P >, P > imp
 	public synchronized Supplier< T > threadSafeSupplier()
 	{
 		if ( threadSafeSupplier == null )
-			threadSafeSupplier = ThreadLocal.withInitial( this::newInstance )::get;
+			threadSafeSupplier = CloseableThreadLocal.withInitial( this::newInstance )::get;
 		return threadSafeSupplier;
 	}
 

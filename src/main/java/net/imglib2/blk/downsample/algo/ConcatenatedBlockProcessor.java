@@ -2,6 +2,7 @@ package net.imglib2.blk.downsample.algo;
 
 import java.util.function.Supplier;
 import net.imglib2.Interval;
+import net.imglib2.util.CloseableThreadLocal;
 
 class ConcatenatedBlockProcessor< I, K, O > implements BlockProcessor< I, O >
 {
@@ -30,7 +31,7 @@ class ConcatenatedBlockProcessor< I, K, O > implements BlockProcessor< I, O >
 	public Supplier< ? extends BlockProcessor< I, O > > threadSafeSupplier()
 	{
 		if ( threadSafeSupplier == null )
-			threadSafeSupplier = ThreadLocal.withInitial( () -> new ConcatenatedBlockProcessor<>( this ) )::get;
+			threadSafeSupplier = CloseableThreadLocal.withInitial( () -> new ConcatenatedBlockProcessor<>( this ) )::get;
 		return threadSafeSupplier;
 	}
 
