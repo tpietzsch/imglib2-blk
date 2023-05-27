@@ -1,10 +1,10 @@
 package net.imglib2.algorithm.blocks;
 
-import net.imglib2.blk.downsample.ClampType;
+import net.imglib2.algorithm.blocks.convert.ClampType;
 import net.imglib2.type.NativeType;
 import net.imglib2.util.Cast;
 
-import static net.imglib2.blk.downsample.Convert.convert;
+import static net.imglib2.algorithm.blocks.convert.Convert.convert;
 
 public interface UnaryBlockOperator< S extends NativeType< S >, T extends NativeType< T > >
 {

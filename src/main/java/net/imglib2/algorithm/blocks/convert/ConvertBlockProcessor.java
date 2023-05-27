@@ -1,4 +1,4 @@
-package net.imglib2.blk.downsample;
+package net.imglib2.algorithm.blocks.convert;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -20,7 +20,7 @@ import net.imglib2.util.Intervals;
  * @param <O>
  * 		output primitive array type, e.g., float[]
  */
-public class ConvertBlockProcessor< S extends NativeType< S >, T extends NativeType< T >, I, O > implements BlockProcessor< I, O >
+class ConvertBlockProcessor< S extends NativeType< S >, T extends NativeType< T >, I, O > implements BlockProcessor< I, O >
 {
 	private final S sourceType;
 

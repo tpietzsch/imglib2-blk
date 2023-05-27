@@ -31,47 +31,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.blk.downsample;
+package net.imglib2.algorithm.blocks.convert;
 
 import net.imglib2.algorithm.blocks.UnaryOperatorType;
 import net.imglib2.util.Cast;
 
-import static net.imglib2.blk.downsample.ConvertScalars.from_i8;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i8;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i8_clamp;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i8_clamp_max;
-import static net.imglib2.blk.downsample.ConvertScalars.from_u8;
-import static net.imglib2.blk.downsample.ConvertScalars.to_u8;
-import static net.imglib2.blk.downsample.ConvertScalars.to_u8_clamp;
-import static net.imglib2.blk.downsample.ConvertScalars.to_u8_clamp_max;
-import static net.imglib2.blk.downsample.ConvertScalars.from_i16;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i16;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i16_clamp;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i16_clamp_max;
-import static net.imglib2.blk.downsample.ConvertScalars.from_u16;
-import static net.imglib2.blk.downsample.ConvertScalars.to_u16;
-import static net.imglib2.blk.downsample.ConvertScalars.to_u16_clamp;
-import static net.imglib2.blk.downsample.ConvertScalars.to_u16_clamp_max;
-import static net.imglib2.blk.downsample.ConvertScalars.from_i32;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i32;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i32_clamp;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i32_clamp_max;
-import static net.imglib2.blk.downsample.ConvertScalars.from_u32;
-import static net.imglib2.blk.downsample.ConvertScalars.to_u32;
-import static net.imglib2.blk.downsample.ConvertScalars.to_u32_clamp;
-import static net.imglib2.blk.downsample.ConvertScalars.to_u32_clamp_max;
-import static net.imglib2.blk.downsample.ConvertScalars.from_i64;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i64;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i64_clamp;
-import static net.imglib2.blk.downsample.ConvertScalars.to_i64_clamp_max;
-import static net.imglib2.blk.downsample.ConvertScalars.from_f32;
-import static net.imglib2.blk.downsample.ConvertScalars.to_f32;
-import static net.imglib2.blk.downsample.ConvertScalars.to_f32_clamp;
-import static net.imglib2.blk.downsample.ConvertScalars.to_f32_clamp_max;
-import static net.imglib2.blk.downsample.ConvertScalars.from_f64;
-import static net.imglib2.blk.downsample.ConvertScalars.to_f64;
-import static net.imglib2.blk.downsample.ConvertScalars.to_f64_clamp;
-import static net.imglib2.blk.downsample.ConvertScalars.to_f64_clamp_max;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.from_i8;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i8;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i8_clamp;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i8_clamp_max;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.from_u8;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_u8;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_u8_clamp;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_u8_clamp_max;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.from_i16;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i16;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i16_clamp;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i16_clamp_max;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.from_u16;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_u16;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_u16_clamp;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_u16_clamp_max;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.from_i32;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i32;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i32_clamp;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i32_clamp_max;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.from_u32;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_u32;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_u32_clamp;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_u32_clamp_max;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.from_i64;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i64;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i64_clamp;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_i64_clamp_max;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.from_f32;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_f32;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_f32_clamp;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_f32_clamp_max;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.from_f64;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_f64;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_f64_clamp;
+import static net.imglib2.algorithm.blocks.convert.ConvertScalars.to_f64_clamp_max;
 
 /*
  * This is autogenerated source code -- DO NOT EDIT. Instead, edit the

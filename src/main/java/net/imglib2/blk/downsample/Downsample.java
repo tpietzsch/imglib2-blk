@@ -1,6 +1,7 @@
 package net.imglib2.blk.downsample;
 
 import java.util.Arrays;
+import net.imglib2.algorithm.blocks.convert.ClampType;
 import net.imglib2.blk.downsample.DownsampleBlockProcessors.CenterDouble;
 import net.imglib2.blk.downsample.DownsampleBlockProcessors.CenterFloat;
 import net.imglib2.blk.downsample.DownsampleBlockProcessors.HalfPixelDouble;
