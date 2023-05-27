@@ -1,4 +1,4 @@
-package net.imglib2.blk.downsample.algo;
+package net.imglib2.algorithm.blocks;
 
 import java.util.function.Supplier;
 import net.imglib2.blocks.PrimitiveBlocks;

@@ -8,7 +8,7 @@ import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.blk.downsample.Downsample.ComputationType;
 import net.imglib2.blk.downsample.Downsample.Offset;
-import net.imglib2.blk.downsample.algo.AlgoUtils;
+import net.imglib2.algorithm.blocks.AlgoUtils;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.array.ArrayImgs;

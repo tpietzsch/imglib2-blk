@@ -1,7 +1,7 @@
 package net.imglib2.blk.downsample;
 
-import net.imglib2.blk.downsample.algo.DefaultUnaryBlockOperator;
-import net.imglib2.blk.downsample.algo.UnaryBlockOperator;
+import net.imglib2.algorithm.blocks.DefaultUnaryBlockOperator;
+import net.imglib2.algorithm.blocks.UnaryBlockOperator;
 import net.imglib2.type.NativeType;
 
 public class Convert

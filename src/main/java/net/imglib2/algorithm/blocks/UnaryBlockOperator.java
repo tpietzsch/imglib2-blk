@@ -1,4 +1,4 @@
-package net.imglib2.blk.downsample.algo;
+package net.imglib2.algorithm.blocks;
 
 import net.imglib2.blk.downsample.ClampType;
 import net.imglib2.type.NativeType;

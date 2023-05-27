@@ -10,7 +10,7 @@ import ij.ImagePlus;
 import java.util.Arrays;
 import net.imglib2.blk.downsample.DownsampleBlockProcessors.CenterDouble;
 import net.imglib2.blk.downsample.DownsampleBlockProcessors.HalfPixelDouble;
-import net.imglib2.blk.downsample.algo.AlgoUtils;
+import net.imglib2.algorithm.blocks.AlgoUtils;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.converter.Converters;
