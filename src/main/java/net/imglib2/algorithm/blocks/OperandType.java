@@ -1,4 +1,4 @@
-package net.imglib2.blk.downsample;
+package net.imglib2.algorithm.blocks;
 
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.integer.ByteType;

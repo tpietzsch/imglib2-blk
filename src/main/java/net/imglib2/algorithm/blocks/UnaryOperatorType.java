@@ -31,7 +31,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.blk.downsample;
+package net.imglib2.algorithm.blocks;
 
 import net.imglib2.type.NativeType;
 
@@ -53,12 +53,12 @@ public enum UnaryOperatorType
     F64_TO_I8, F64_TO_U8, F64_TO_I16, F64_TO_U16, F64_TO_I32, F64_TO_U32, F64_TO_I64, F64_TO_F32, F64_TO_F64, 
     ;
 
-	static UnaryOperatorType of( NativeType< ? > source, NativeType<?> target )
+	public static UnaryOperatorType of( NativeType< ? > source, NativeType<?> target )
 	{
 		return of( OperandType.of( source ), OperandType.of( target ) );
 	}
 
-	static UnaryOperatorType of( OperandType source, OperandType target )
+	public static UnaryOperatorType of( OperandType source, OperandType target )
 	{
 		switch ( source )
 		{

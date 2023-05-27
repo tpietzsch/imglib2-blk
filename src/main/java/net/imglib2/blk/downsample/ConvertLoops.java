@@ -33,7 +33,7 @@
  */
 package net.imglib2.blk.downsample;
 
-import net.imglib2.type.NativeType;
+import net.imglib2.algorithm.blocks.UnaryOperatorType;
 import net.imglib2.util.Cast;
 
 import static net.imglib2.blk.downsample.ConvertScalars.from_i8;
