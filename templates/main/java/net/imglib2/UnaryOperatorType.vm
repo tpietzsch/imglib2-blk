@@ -31,9 +31,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.algorithm.blocks;
+package net.imglib2.algorithm.blocks.util;
 
-import net.imglib2.algorithm.blocks.util.OperandType;
 import net.imglib2.type.NativeType;
 
 /*
