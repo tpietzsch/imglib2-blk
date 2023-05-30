@@ -1,4 +1,4 @@
-package net.imglib2.blk.downsample;
+package net.imglib2.algorithm.blocks.downsample;
 
 import static net.imglib2.type.PrimitiveType.DOUBLE;
 import static net.imglib2.type.PrimitiveType.FLOAT;

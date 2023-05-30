@@ -1,4 +1,4 @@
-package net.imglib2.blk.downsample;
+package net.imglib2.algorithm.blocks.downsample;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -6,8 +6,8 @@ import java.util.stream.IntStream;
 import net.imglib2.Cursor;
 import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.blk.downsample.Downsample.ComputationType;
-import net.imglib2.blk.downsample.Downsample.Offset;
+import net.imglib2.algorithm.blocks.downsample.Downsample.ComputationType;
+import net.imglib2.algorithm.blocks.downsample.Downsample.Offset;
 import net.imglib2.algorithm.blocks.AlgoUtils;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
@@ -45,7 +45,7 @@ public class DownsampleMemProfile
 	{
 		final PrimitiveBlocks< UnsignedByteType > blocksFloat = PrimitiveBlocks.of( Views.extendBorder( raw ) );
 
-//		final CellLoader< FloatType> loader = cellLoader( blocksFloat, net.imglib2.blk.downsample.Downsample.downsample( new FloatType(), ComputationType.AUTO, Offset.CENTERED, downsampleInDim ) );
+//		final CellLoader< FloatType> loader = cellLoader( blocksFloat, net.imglib2.algorithm.blocks.downsample.Downsample.downsample( new FloatType(), ComputationType.AUTO, Offset.CENTERED, downsampleInDim ) );
 //		final CachedCellImg< FloatType, ? > downsampleFloat =  new ReadOnlyCachedCellImgFactory().create(
 //				downsampledDimensions,
 //				new FloatType(),

@@ -1,4 +1,4 @@
-package net.imglib2.blk.downsample;
+package net.imglib2.algorithm.blocks.downsample;
 
 import net.imglib2.Interval;
 import net.imglib2.type.PrimitiveType;

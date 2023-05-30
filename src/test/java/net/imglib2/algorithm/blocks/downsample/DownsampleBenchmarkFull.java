@@ -1,13 +1,13 @@
-package net.imglib2.blk.downsample;
+package net.imglib2.algorithm.blocks.downsample;
 
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import net.imglib2.FinalInterval;
-import net.imglib2.blk.downsample.DownsampleBlockProcessors.CenterDouble;
-import net.imglib2.blk.downsample.DownsampleBlockProcessors.CenterFloat;
-import net.imglib2.blk.downsample.DownsampleBlockProcessors.HalfPixelDouble;
-import net.imglib2.blk.downsample.DownsampleBlockProcessors.HalfPixelFloat;
+import net.imglib2.algorithm.blocks.downsample.DownsampleBlockProcessors.CenterDouble;
+import net.imglib2.algorithm.blocks.downsample.DownsampleBlockProcessors.CenterFloat;
+import net.imglib2.algorithm.blocks.downsample.DownsampleBlockProcessors.HalfPixelDouble;
+import net.imglib2.algorithm.blocks.downsample.DownsampleBlockProcessors.HalfPixelFloat;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import org.openjdk.jmh.annotations.Benchmark;

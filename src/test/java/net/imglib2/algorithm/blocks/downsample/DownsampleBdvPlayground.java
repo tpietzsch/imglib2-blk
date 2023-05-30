@@ -1,4 +1,4 @@
-package net.imglib2.blk.downsample;
+package net.imglib2.algorithm.blocks.downsample;
 
 import bdv.export.DownsampleBlock;
 import bdv.util.Bdv;
@@ -10,8 +10,9 @@ import ij.IJ;
 import ij.ImagePlus;
 import java.util.Arrays;
 import net.imglib2.RandomAccess;
-import net.imglib2.blk.downsample.Downsample.ComputationType;
-import net.imglib2.blk.downsample.Downsample.Offset;
+import net.imglib2.algorithm.blocks.downsample.Downsample;
+import net.imglib2.algorithm.blocks.downsample.Downsample.ComputationType;
+import net.imglib2.algorithm.blocks.downsample.Downsample.Offset;
 import net.imglib2.algorithm.blocks.AlgoUtils;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
@@ -25,7 +26,7 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
-import static net.imglib2.blk.downsample.Downsample.downsample;
+import static net.imglib2.algorithm.blocks.downsample.Downsample.downsample;
 
 public class DownsampleBdvPlayground
 {

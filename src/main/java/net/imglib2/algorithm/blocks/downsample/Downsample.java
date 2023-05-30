@@ -1,11 +1,11 @@
-package net.imglib2.blk.downsample;
+package net.imglib2.algorithm.blocks.downsample;
 
 import java.util.Arrays;
 import net.imglib2.algorithm.blocks.convert.ClampType;
-import net.imglib2.blk.downsample.DownsampleBlockProcessors.CenterDouble;
-import net.imglib2.blk.downsample.DownsampleBlockProcessors.CenterFloat;
-import net.imglib2.blk.downsample.DownsampleBlockProcessors.HalfPixelDouble;
-import net.imglib2.blk.downsample.DownsampleBlockProcessors.HalfPixelFloat;
+import net.imglib2.algorithm.blocks.downsample.DownsampleBlockProcessors.CenterDouble;
+import net.imglib2.algorithm.blocks.downsample.DownsampleBlockProcessors.CenterFloat;
+import net.imglib2.algorithm.blocks.downsample.DownsampleBlockProcessors.HalfPixelDouble;
+import net.imglib2.algorithm.blocks.downsample.DownsampleBlockProcessors.HalfPixelFloat;
 import net.imglib2.algorithm.blocks.DefaultUnaryBlockOperator;
 import net.imglib2.algorithm.blocks.UnaryBlockOperator;
 import net.imglib2.type.NativeType;

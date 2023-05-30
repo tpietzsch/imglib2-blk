@@ -1,4 +1,4 @@
-package net.imglib2.blk.downsample;
+package net.imglib2.algorithm.blocks.downsample;
 
 import bdv.export.DownsampleBlock;
 import java.util.Arrays;
@@ -11,8 +11,8 @@ import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.blk.downsample.Downsample.ComputationType;
-import net.imglib2.blk.downsample.Downsample.Offset;
+import net.imglib2.algorithm.blocks.downsample.Downsample.ComputationType;
+import net.imglib2.algorithm.blocks.downsample.Downsample.Offset;
 import net.imglib2.algorithm.blocks.AlgoUtils;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
@@ -99,7 +99,7 @@ public class DownsampleBdvBenchmark
 	{
 		final PrimitiveBlocks< UnsignedByteType > blocks = PrimitiveBlocks.of( Views.extendBorder( raw ) );
 
-//		final CellLoader< DoubleType> loader = cellLoader( blocks, net.imglib2.blk.downsample.Downsample.downsample( new DoubleType(), ComputationType.AUTO, Offset.CENTERED, downsampleInDim ) );
+//		final CellLoader< DoubleType> loader = cellLoader( blocks, net.imglib2.algorithm.blocks.downsample.Downsample.downsample( new DoubleType(), ComputationType.AUTO, Offset.CENTERED, downsampleInDim ) );
 //		final CachedCellImg< DoubleType, ? > downsampleDouble =  new ReadOnlyCachedCellImgFactory().create(
 //				downsampledDimensions,
 //				new DoubleType(),
@@ -117,7 +117,7 @@ public class DownsampleBdvBenchmark
 	{
 		final PrimitiveBlocks< UnsignedByteType > blocksFloat = PrimitiveBlocks.of( Views.extendBorder( raw ) );
 
-//		final CellLoader< FloatType> loader = cellLoader( blocksFloat, net.imglib2.blk.downsample.Downsample.downsample( new FloatType(), ComputationType.AUTO, Offset.CENTERED, downsampleInDim ) );
+//		final CellLoader< FloatType> loader = cellLoader( blocksFloat, net.imglib2.algorithm.blocks.downsample.Downsample.downsample( new FloatType(), ComputationType.AUTO, Offset.CENTERED, downsampleInDim ) );
 //		final CachedCellImg< FloatType, ? > downsampleFloat =  new ReadOnlyCachedCellImgFactory().create(
 //				downsampledDimensions,
 //				new FloatType(),
