@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 import net.imglib2.Interval;
 import net.imglib2.algorithm.blocks.BlockProcessor;
-import net.imglib2.algorithm.blocks.BlockProcessorSourceInterval;
+import net.imglib2.algorithm.blocks.util.BlockProcessorSourceInterval;
 import net.imglib2.blocks.TempArray;
 import net.imglib2.type.PrimitiveType;
 import net.imglib2.util.CloseableThreadLocal;

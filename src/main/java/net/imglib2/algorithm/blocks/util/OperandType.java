@@ -1,4 +1,4 @@
-package net.imglib2.algorithm.blocks;
+package net.imglib2.algorithm.blocks.util;
 
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.integer.ByteType;
@@ -12,6 +12,9 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 
+/**
+ * Enumerates operand types corresponding to the standard {@code RealType}s.
+ */
 public enum OperandType
 {
 	I8,

@@ -8,10 +8,9 @@ import bdv.viewer.DisplayMode;
 import ij.IJ;
 import ij.ImagePlus;
 import java.util.Arrays;
-import net.imglib2.algorithm.blocks.downsample.Downsample;
 import net.imglib2.algorithm.blocks.downsample.DownsampleBlockProcessors.CenterDouble;
 import net.imglib2.algorithm.blocks.downsample.DownsampleBlockProcessors.HalfPixelDouble;
-import net.imglib2.algorithm.blocks.AlgoUtils;
+import net.imglib2.algorithm.blocks.BlockAlgoUtils;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.converter.Converters;
@@ -48,7 +47,7 @@ public class DownsampleDoublePlayground
 		final boolean[] downsampleInDim = { true, true, true };
 		final long[] downsampledDimensions = Downsample.getDownsampledDimensions( img.dimensionsAsLongArray(), downsampleInDim );
 		final int[] cellDimensions = { 64, 64, 64 };
-		final CachedCellImg< DoubleType, ? > downsampled = AlgoUtils.cellImg(
+		final CachedCellImg< DoubleType, ? > downsampled = BlockAlgoUtils.cellImg(
 				blocks, new CenterDouble( downsampleInDim ), new DoubleType(), downsampledDimensions, cellDimensions );
 
 		final double[] calib = new double[ 3 ];
@@ -62,7 +61,7 @@ public class DownsampleDoublePlayground
 		out.setDisplayRange( 0, 255 );
 //		out.setColor( new ARGBType( 0xff0000 ) );
 
-		final CachedCellImg< DoubleType, ? > downsampled2 = AlgoUtils.cellImg(
+		final CachedCellImg< DoubleType, ? > downsampled2 = BlockAlgoUtils.cellImg(
 				blocks, new HalfPixelDouble( downsampleInDim ), new DoubleType(), downsampledDimensions, cellDimensions );
 		final BdvSource out2 = BdvFunctions.show(
 				VolatileViews.wrapAsVolatile( downsampled2 ),

@@ -1,6 +1,7 @@
-package net.imglib2.algorithm.blocks;
+package net.imglib2.algorithm.blocks.util;
 
 import net.imglib2.Interval;
+import net.imglib2.algorithm.blocks.BlockProcessor;
 
 /**
  * Helper class that wraps {@link BlockProcessor#getSourcePos()} and {@link

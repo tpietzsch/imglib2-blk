@@ -8,10 +8,14 @@ import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions;
 import net.imglib2.type.NativeType;
 
-// TODO rename
-// TODO rename package
-// TODO javadoc
-public class AlgoUtils
+/**
+ * Utilities for applying block algorithms images.
+ * <p>
+ * For example, {@link #cellImg(PrimitiveBlocks, UnaryBlockOperator, NativeType,
+ * long[], int[]) cellImg(...)} creates a {@code CachedCellImg} which computes
+ * cells using a given {@code UnaryBlockOperator}.
+ */
+public class BlockAlgoUtils
 {
 	public static < S extends NativeType< S >, T extends NativeType< T >, I, O >
 	CellLoader< T > cellLoader( final PrimitiveBlocks< S > blocks, final UnaryBlockOperator< S, T > operator )
@@ -29,6 +33,28 @@ public class AlgoUtils
 		};
 	}
 
+	/**
+	 * Creates a {@code CachedCellImg} which computes cells using the specified
+	 * {@code operator}, where input data is obtained from the specified {@code
+	 * blocks}.
+	 *
+	 * @param blocks
+	 * 		copies blocks from source data
+	 * @param operator
+	 * 		computes output blocks
+	 * @param type
+	 * 		instance of the type of the {@code CachedCellImg} to create
+	 * @param dimensions
+	 * 		dimensions of the {@code CachedCellImg} to create
+	 * @param cellDimensions
+	 * 		block size of the {@code CachedCellImg} to create
+	 * @param <S>
+	 * 		source type (type of the image which we take inputs from)
+	 * @param <T>
+	 * 		target type (type of the returned CachedCellImg)
+	 *
+	 * @return a {@code CachedCellImg} which computes cells by applying {@code operator} to input {@code blocks}.
+	 */
 	public static < S extends NativeType< S >, T extends NativeType< T >, I, O >
 	CachedCellImg< T, ? > cellImg(
 			final PrimitiveBlocks< S > blocks,
@@ -45,8 +71,6 @@ public class AlgoUtils
 				ReadOnlyCachedCellImgOptions.options().cellDimensions( cellDimensions) );
 	}
 
-	// TODO remove
-	@Deprecated
 	public static < S extends NativeType< S >, T extends NativeType< T >, I, O >
 	CellLoader< T > cellLoader( final PrimitiveBlocks< S > blocks, BlockProcessor< I, O > blockProcessor )
 	{
@@ -63,8 +87,6 @@ public class AlgoUtils
 		};
 	}
 
-	// TODO remove
-	@Deprecated
 	public static < S extends NativeType< S >, T extends NativeType< T >, I, O >
 	CachedCellImg< T, ? > cellImg(
 			final PrimitiveBlocks< S > blocks,

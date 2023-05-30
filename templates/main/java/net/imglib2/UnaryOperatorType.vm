@@ -33,6 +33,7 @@
  */
 package net.imglib2.algorithm.blocks;
 
+import net.imglib2.algorithm.blocks.util.OperandType;
 import net.imglib2.type.NativeType;
 
 /*
@@ -41,6 +42,11 @@ import net.imglib2.type.NativeType;
  */
 
 #parse( "PixelTypes.vm" )
+/**
+ * Enumerates unary operator types corresponding to mappings between the
+ * standard {@code RealType}s, that is, every combination of {@link
+ * OperandType}s.
+ */
 public enum UnaryOperatorType
 {
 #foreach( $t1 in $types )

@@ -31,7 +31,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.algorithm.blocks;
+package net.imglib2.algorithm.blocks.util;
 
 import net.imglib2.type.NativeType;
 
@@ -40,6 +40,11 @@ import net.imglib2.type.NativeType;
  * corresponding template in templates/ and rerun bin/generate.groovy.
  */
 
+/**
+ * Enumerates unary operator types corresponding to mappings between the
+ * standard {@code RealType}s, that is, every combination of {@link
+ * OperandType}s.
+ */
 public enum UnaryOperatorType
 {
     I8_TO_I8, I8_TO_U8, I8_TO_I16, I8_TO_U16, I8_TO_I32, I8_TO_U32, I8_TO_I64, I8_TO_F32, I8_TO_F64, 

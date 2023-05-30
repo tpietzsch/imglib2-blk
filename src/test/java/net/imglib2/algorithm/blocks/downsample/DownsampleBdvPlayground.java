@@ -10,10 +10,9 @@ import ij.IJ;
 import ij.ImagePlus;
 import java.util.Arrays;
 import net.imglib2.RandomAccess;
-import net.imglib2.algorithm.blocks.downsample.Downsample;
 import net.imglib2.algorithm.blocks.downsample.Downsample.ComputationType;
 import net.imglib2.algorithm.blocks.downsample.Downsample.Offset;
-import net.imglib2.algorithm.blocks.AlgoUtils;
+import net.imglib2.algorithm.blocks.BlockAlgoUtils;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.cache.img.CellLoader;
@@ -90,7 +89,7 @@ public class DownsampleBdvPlayground
 
 
 
-		final CachedCellImg< UnsignedByteType, ? > downsampled2 = AlgoUtils.cellImg(
+		final CachedCellImg< UnsignedByteType, ? > downsampled2 = BlockAlgoUtils.cellImg(
 				blocks,
 				downsample( type, ComputationType.AUTO, Offset.HALF_PIXEL, downsampleInDim ),
 				type,
