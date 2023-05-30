@@ -1,5 +1,8 @@
 package net.imglib2.algorithm.blocks.convert;
 
+/**
+ * How to clamp values when converting between {@link net.imglib2.algorithm.blocks.util.OperandType}.
+ */
 public enum ClampType
 {
 	/**
