@@ -3,7 +3,7 @@ package net.imglib2.algorithm.blocks.downsample;
 import static net.imglib2.type.PrimitiveType.DOUBLE;
 import static net.imglib2.type.PrimitiveType.FLOAT;
 
-public class DownsampleBlockProcessors
+class DownsampleBlockProcessors
 {
 	static class CenterFloat extends AbstractDownsample< CenterFloat, float[] >
 	{
