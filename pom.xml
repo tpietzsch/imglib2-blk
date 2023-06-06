@@ -86,6 +86,7 @@
 		<skipTests>true</skipTests> <!-- because maven-surefire-plugin is too old? -->
 
 		<net.imglib2.imglib2.version>6.1.1-SNAPSHOT</net.imglib2.imglib2.version>
+		<net.imglib2.imglib2-algorithm.version>0.14.0-SNAPSHOT</net.imglib2.imglib2-algorithm.version>
 	</properties>
 
 	<repositories>
