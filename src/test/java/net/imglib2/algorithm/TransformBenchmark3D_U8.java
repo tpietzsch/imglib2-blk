@@ -10,6 +10,7 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
 import net.imglib2.algorithm.TransformPlayground3D.Affine3DBlockProcessor;
+import net.imglib2.algorithm.TransformPlayground3D_U8.Affine3DBlockProcessor_U8;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealFloatConverter;
@@ -45,7 +46,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @BenchmarkMode( Mode.AverageTime )
 @OutputTimeUnit( TimeUnit.MILLISECONDS )
 @Fork( 1 )
-public class TransformBenchmark3D
+public class TransformBenchmark3D_U8
 {
 
 //	TransformBenchmark3D.blocksnaive  avgt   30   17,605 ± 0,100  ms/op
@@ -68,7 +69,7 @@ public class TransformBenchmark3D
 	final AffineTransform3D affine = new AffineTransform3D();
 	final RandomAccessibleInterval< UnsignedByteType > img;
 
-	public TransformBenchmark3D()
+	public TransformBenchmark3D_U8()
 	{
 		final String fn = "/Users/pietzsch/workspace/data/e002_stack_fused-8bit.tif";
 		final ImagePlus imp = IJ.openImage( fn );
@@ -101,17 +102,14 @@ public class TransformBenchmark3D
 		return copy;
 	}
 
-	PrimitiveBlocks< FloatType > blocks;
-	Affine3DBlockProcessor processor;
+	PrimitiveBlocks< UnsignedByteType > blocks;
+	Affine3DBlockProcessor_U8 processor;
 
 	public void blocksnaiveSetup()
 	{
 		blocks = PrimitiveBlocks.of(
-				Converters.convert(
-						Views.extendZero( img ),
-						new RealFloatConverter<>(),
-						new FloatType() ) );
-		processor = new Affine3DBlockProcessor( affine.inverse() );
+						Views.extendZero( img ) );
+		processor = new Affine3DBlockProcessor_U8( affine.inverse() );
 	}
 
 	@Benchmark
@@ -121,16 +119,16 @@ public class TransformBenchmark3D
 		Arrays.setAll( max, d -> min[ d ] + size[ d ] - 1 );
 		processor.setTargetInterval( FinalInterval.wrap( min, max ) );
 		blocks.copy( processor.getSourcePos(), processor.getSourceBuffer(), processor.getSourceSize() );
-		final float[] dest = new float[ ( int ) Intervals.numElements( size ) ];
+		final byte[] dest = new byte[ ( int ) Intervals.numElements( size ) ];
 		processor.compute( processor.getSourceBuffer(), dest );
-		final RandomAccessibleInterval< FloatType > destImg = ArrayImgs.floats( dest, size[ 0 ], size[ 1 ], size[ 2 ] );
+		final RandomAccessibleInterval< UnsignedByteType > destImg = ArrayImgs.unsignedBytes( dest, size[ 0 ], size[ 1 ], size[ 2 ] );
 		return destImg;
 	}
 
 
 	public static void main( String[] args ) throws RunnerException
 	{
-		Options options = new OptionsBuilder().include( TransformBenchmark3D.class.getSimpleName() + "\\." ).build();
+		Options options = new OptionsBuilder().include( TransformBenchmark3D_U8.class.getSimpleName() + "\\." ).build();
 		new Runner( options ).run();
 	}
 
