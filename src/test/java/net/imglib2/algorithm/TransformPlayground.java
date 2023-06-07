@@ -3,14 +3,12 @@ package net.imglib2.algorithm;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvSource;
-import bdv.viewer.Interpolation;
 import ij.IJ;
 import ij.ImagePlus;
 import java.util.Arrays;
 import java.util.function.Supplier;
 import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
-import net.imglib2.FinalRealInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -100,7 +98,7 @@ public class TransformPlayground
 						Views.extendZero( img ),
 						new RealFloatConverter<>(),
 						new FloatType() ) );
-		AffineBlockProcessor processor = new AffineBlockProcessor( affine.inverse() );
+		Affine2DBlockProcessor processor = new Affine2DBlockProcessor( affine.inverse() );
 		long[] max = new long[ size.length ];
 		Arrays.setAll( max, d -> min[ d ] + size[ d ] - 1 );
 		processor.setTargetInterval( FinalInterval.wrap( min, max ) );
@@ -118,7 +116,7 @@ public class TransformPlayground
 	}
 
 
-	static class AffineBlockProcessor implements BlockProcessor< float[], float[] >
+	static class Affine2DBlockProcessor implements BlockProcessor< float[], float[] >
 	{
 		private static final int n = 2;
 
@@ -134,9 +132,9 @@ public class TransformPlayground
 
 		private final TempArray< float[] > tempArray;
 
-		private Supplier< AffineBlockProcessor > threadSafeSupplier;
+		private Supplier< Affine2DBlockProcessor > threadSafeSupplier;
 
-		public AffineBlockProcessor( final AffineTransform2D transformToSource )
+		public Affine2DBlockProcessor( final AffineTransform2D transformToSource )
 		{
 			this.transformToSource = transformToSource;
 			destPos = new long[ n ];
@@ -147,7 +145,7 @@ public class TransformPlayground
 			tempArray = TempArray.forPrimitiveType( PrimitiveType.FLOAT );
 		}
 
-		private AffineBlockProcessor( final AffineBlockProcessor affine )
+		private Affine2DBlockProcessor( final Affine2DBlockProcessor affine )
 		{
 			transformToSource = affine.transformToSource;
 			destPos = new long[ n ];
@@ -159,13 +157,13 @@ public class TransformPlayground
 			threadSafeSupplier = affine.threadSafeSupplier;
 		}
 
-		private AffineBlockProcessor newInstance()
+		private Affine2DBlockProcessor newInstance()
 		{
-			return new AffineBlockProcessor( this );
+			return new Affine2DBlockProcessor( this );
 		}
 
 		@Override
-		public synchronized Supplier< AffineBlockProcessor > threadSafeSupplier()
+		public synchronized Supplier< Affine2DBlockProcessor > threadSafeSupplier()
 		{
 			if ( threadSafeSupplier == null )
 				threadSafeSupplier = CloseableThreadLocal.withInitial( this::newInstance )::get;
@@ -223,65 +221,35 @@ public class TransformPlayground
 		@Override
 		public void compute( final float[] src, final float[] dest )
 		{
-			// straightforward implementation first ...
-
 			double pdest[] = new double[ 2 ];
 			double psrc[] = new double[ 2 ];
+			final float dx = transformToSource.d( 0 ).getFloatPosition( 0 );
+			final float dy = transformToSource.d( 0 ).getFloatPosition( 1 );
+			pdest[ 0 ] = destPos[ 0 ];
 			for ( int y = 0; y < destSize[ 1 ]; ++y )
 			{
+				pdest[ 1 ] = y + destPos[ 1 ];
+				transformToSource.apply( pdest, psrc );
+				float sfx = ( float ) ( psrc[ 0 ] - sourcePos[ 0 ] );
+				float sfy = ( float ) ( psrc[ 1 ] - sourcePos[ 1 ] );
 				for ( int x = 0; x < destSize[ 0 ]; ++x )
 				{
-					pdest[ 0 ] = x + destPos[ 0 ];
-					pdest[ 1 ] = y + destPos[ 1 ];
-					transformToSource.apply( pdest, psrc );
-					psrc[ 0 ] -= sourcePos[ 0 ];
-					psrc[ 1 ] -= sourcePos[ 1 ];
-					final int sx = ( int ) Math.floor( psrc[ 0 ] );
-					final int sy = ( int ) Math.floor( psrc[ 1 ] );
-					final double rx = psrc[ 0 ] - sx;
-					final double ry = psrc[ 1 ] - sy;
-
-					final int odst = y * destSize[ 0 ] + x;
-
-					// offset (0,0)
-					int osrc = sy * sourceSize[ 0 ] + sx;
-					double w = ( 1.0 - rx ) * ( 1.0 - ry );
-					dest[ odst ] = ( float ) ( src[ osrc ] * w );
-
-					// offset (1,0)
-					osrc = sy * sourceSize[ 0 ] + sx + 1;
-					w = rx * ( 1.0 - ry );
-					dest[ odst ] += ( float ) ( src[ osrc ] * w );
-
-					// offset (0,1)
-					osrc = (sy + 1 ) * sourceSize[ 0 ] + sx;
-					w = ( 1.0 - rx ) * ry;
-					dest[ odst ] += ( float ) ( src[ osrc ] * w );
-
-					// offset (1,1)
-					osrc = (sy + 1 ) * sourceSize[ 0 ] + sx + 1;
-					w = rx * ry;
-					dest[ odst ] += ( float ) ( src[ osrc ] * w );
+					final int sx = ( int ) sfx;
+					final int sy = ( int ) sfy;
+					final float rx = sfx - sx;
+					final float ry = sfy - sy;
+					final int o = sy * sourceSize[ 0 ] + sx;
+					final float a = src[ o ];
+					final float b = src[ o + 1 ];
+					final float c = src[ o + sourceSize[ 0 ] ];
+					final float d = src[ o + sourceSize[ 0 ] + 1];
+					dest[ y * destSize[ 0 ] + x ] = a + rx * ( b - a ) + ry * ( c - a ) + rx * ry * ( a - c - b + d );
+					sfx += dx;
+					sfy += dy;
 				}
 			}
-
-
-			// ==> This should basically all work now:
-			//
-			// iterate dest (x,y)
-			// add destMin[0,1] to (x,y)
-			//  --> store destMin
-			// apply transformToSource ==> (sx,sy)
-			// subtract sourcePos[0,1] from (sx,sy)
-			// floor (sx,sy), store remainder (rx, ry)
-			// iterate (sbx, sby) source block around (sx,sy)
-			// translate (sbx,sby) into src[] offset
-			// translate (x,y) into dest[] offset
-			// weighted sum
 		}
 	}
-
-
 
 
 

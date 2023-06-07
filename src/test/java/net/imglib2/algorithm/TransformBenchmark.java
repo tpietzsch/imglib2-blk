@@ -1,28 +1,18 @@
 package net.imglib2.algorithm;
 
-import bdv.util.Bdv;
-import bdv.util.BdvFunctions;
-import bdv.util.BdvSource;
 import ij.IJ;
 import ij.ImagePlus;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
-import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.RealInterval;
 import net.imglib2.RealRandomAccessible;
-import net.imglib2.algorithm.TransformPlayground.AffineBlockProcessor;
-import net.imglib2.algorithm.blocks.BlockProcessor;
-import net.imglib2.algorithm.blocks.util.BlockProcessorSourceInterval;
+import net.imglib2.algorithm.TransformPlayground.Affine2DBlockProcessor;
 import net.imglib2.blocks.PrimitiveBlocks;
-import net.imglib2.blocks.TempArray;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealFloatConverter;
-import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.array.ArrayImgs;
@@ -31,11 +21,8 @@ import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.PrimitiveType;
-import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.CloseableThreadLocal;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -53,8 +40,8 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 @State( Scope.Benchmark )
-@Warmup( iterations = 3, time = 100, timeUnit = TimeUnit.MILLISECONDS )
-@Measurement( iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS )
+@Warmup( iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS )
+@Measurement( iterations = 30, time = 100, timeUnit = TimeUnit.MILLISECONDS )
 @BenchmarkMode( Mode.AverageTime )
 @OutputTimeUnit( TimeUnit.MILLISECONDS )
 @Fork( 1 )
@@ -93,7 +80,7 @@ public class TransformBenchmark
 	}
 
 	PrimitiveBlocks< FloatType > blocks;
-	AffineBlockProcessor processor;
+	Affine2DBlockProcessor processor;
 
 	public void blocksnaiveSetup()
 	{
@@ -102,7 +89,7 @@ public class TransformBenchmark
 						Views.extendZero( img ),
 						new RealFloatConverter<>(),
 						new FloatType() ) );
-		processor = new AffineBlockProcessor( affine.inverse() );
+		processor = new Affine2DBlockProcessor( affine.inverse() );
 	}
 
 	@Benchmark
