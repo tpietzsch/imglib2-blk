@@ -4,24 +4,16 @@ import ij.IJ;
 import ij.ImagePlus;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.RealRandomAccessible;
-import net.imglib2.algorithm.TransformPlayground3D.Affine3DBlockProcessor;
-import net.imglib2.algorithm.TransformPlayground3D_U8.Affine3DBlockProcessor_U8;
+import net.imglib2.algorithm.UnifyPlayground.Interpolation;
+import net.imglib2.algorithm.UnifyPlayground.Affine3DProcessor;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealFloatConverter;
-import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.RealViews;
-import net.imglib2.type.NativeType;
+import net.imglib2.type.PrimitiveType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -42,11 +34,11 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 @State( Scope.Benchmark )
 @Warmup( iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS )
-@Measurement( iterations = 30, time = 100, timeUnit = TimeUnit.MILLISECONDS )
+@Measurement( iterations = 20, time = 100, timeUnit = TimeUnit.MILLISECONDS )
 @BenchmarkMode( Mode.AverageTime )
 @OutputTimeUnit( TimeUnit.MILLISECONDS )
 @Fork( 1 )
-public class TransformBenchmark3D_U8
+public class TransformBenchmark3DonlyCompute
 {
 
 //	TransformBenchmark3D.blocksnaive  avgt   30   17,605 ± 0,100  ms/op
@@ -69,7 +61,7 @@ public class TransformBenchmark3D_U8
 	final AffineTransform3D affine = new AffineTransform3D();
 	final RandomAccessibleInterval< UnsignedByteType > img;
 
-	public TransformBenchmark3D_U8()
+	public TransformBenchmark3DonlyCompute()
 	{
 		final String fn = "/Users/pietzsch/workspace/data/e002_stack_fused-8bit.tif";
 		final ImagePlus imp = IJ.openImage( fn );
@@ -83,72 +75,37 @@ public class TransformBenchmark3D_U8
 		affine.rotate( 0,1.5 );
 		affine.scale( 1.4 );
 
-		realviewsSetup();
 		blocksnaiveSetup();
 	}
 
-	RandomAccessible< UnsignedByteType > transformed;
-
-	public void realviewsSetup()
-	{
-		RealRandomAccessible< UnsignedByteType > interpolated = Views.interpolate( Views.extendZero( img ), new ClampingNLinearInterpolatorFactory<>() );
-		transformed = RealViews.affine( interpolated, affine );
-	}
-
-	@Benchmark
-	public Object realviews()
-	{
-		final RandomAccessibleInterval< UnsignedByteType > copy = copy( transformed, new UnsignedByteType(), min, size );
-		return copy;
-	}
-
-	PrimitiveBlocks< UnsignedByteType > blocks;
-	Affine3DBlockProcessor_U8 processor;
+	PrimitiveBlocks< FloatType > blocks;
+	Affine3DProcessor< float[] > processor;
+	float[] dest;
 
 	public void blocksnaiveSetup()
 	{
 		blocks = PrimitiveBlocks.of(
-						Views.extendZero( img ) );
-		processor = new Affine3DBlockProcessor_U8( affine.inverse() );
-	}
-
-	@Benchmark
-	public Object blocksnaive()
-	{
+				Converters.convert(
+						Views.extendZero( img ),
+						new RealFloatConverter<>(),
+						new FloatType() ) );
+		processor = new Affine3DProcessor<>( affine.inverse(), Interpolation.NLINEAR, PrimitiveType.FLOAT );
 		long[] max = new long[ size.length ];
 		Arrays.setAll( max, d -> min[ d ] + size[ d ] - 1 );
 		processor.setTargetInterval( FinalInterval.wrap( min, max ) );
 		blocks.copy( processor.getSourcePos(), processor.getSourceBuffer(), processor.getSourceSize() );
-		final byte[] dest = new byte[ ( int ) Intervals.numElements( size ) ];
-		processor.compute( processor.getSourceBuffer(), dest );
-		final RandomAccessibleInterval< UnsignedByteType > destImg = ArrayImgs.unsignedBytes( dest, size[ 0 ], size[ 1 ], size[ 2 ] );
-		return destImg;
+		dest = new float[ ( int ) Intervals.numElements( size ) ];
 	}
 
+	@Benchmark
+	public void compute()
+	{
+		processor.compute( processor.getSourceBuffer(), dest );
+	}
 
 	public static void main( String[] args ) throws RunnerException
 	{
-		Options options = new OptionsBuilder().include( TransformBenchmark3D_U8.class.getSimpleName() + "\\." ).build();
+		Options options = new OptionsBuilder().include( TransformBenchmark3DonlyCompute.class.getSimpleName() + "\\." ).build();
 		new Runner( options ).run();
-	}
-
-
-	// ------------------------------------------------------------------------
-
-
-	private static < T extends NativeType< T > > RandomAccessibleInterval< T > copy(
-			final RandomAccessible< T > ra,
-			final T type,
-			final long[] min,
-			final int[] size )
-	{
-		final ArrayImg< T, ? > img = new ArrayImgFactory<>( type ).create( size );
-		long[] max = new long[ size.length ];
-		Arrays.setAll( max, d -> min[ d ] + size[ d ] - 1 );
-		final Cursor< T > cin = Views.flatIterable( Views.interval( ra, min, max ) ).cursor();
-		final Cursor< T > cout = img.cursor();
-		while ( cout.hasNext() )
-			cout.next().set( cin.next() );
-		return img;
 	}
 }

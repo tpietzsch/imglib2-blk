@@ -9,9 +9,11 @@ import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
-import net.imglib2.algorithm.TransformPlayground3D.Affine3DBlockProcessor;
+import net.imglib2.algorithm.UnifyPlayground.Affine3DProcessor;
+import net.imglib2.algorithm.UnifyPlayground.Interpolation;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.converter.Converters;
+import net.imglib2.converter.RealDoubleConverter;
 import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgFactory;
@@ -21,7 +23,9 @@ import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.PrimitiveType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
@@ -59,9 +63,9 @@ public class TransformBenchmark3D
 //	final int[] size = { 8, 8, 8 }; // 12
 
 	final long[] min = { 200, -330, 120 };
-	final int[] size = { 256, 256, 256 };
+//	final int[] size = { 256, 256, 256 };
 //	final int[] size = { 128, 128, 128 };
-//	final int[] size = { 64, 64, 64 }; // 16
+	final int[] size = { 64, 64, 64 }; // 16
 //	final int[] size = { 32, 32, 32 }; // 15
 //	final int[] size = { 16, 16, 16 }; // 15
 //	final int[] size = { 8, 8, 8 }; // 14
@@ -102,7 +106,9 @@ public class TransformBenchmark3D
 	}
 
 	PrimitiveBlocks< FloatType > blocks;
-	Affine3DBlockProcessor processor;
+	Affine3DProcessor< float[] > processor;
+	PrimitiveBlocks< DoubleType > blocksDouble;
+	Affine3DProcessor< double[] > processorDouble;
 
 	public void blocksnaiveSetup()
 	{
@@ -111,11 +117,21 @@ public class TransformBenchmark3D
 						Views.extendZero( img ),
 						new RealFloatConverter<>(),
 						new FloatType() ) );
-		processor = new Affine3DBlockProcessor( affine.inverse() );
+		processor = new Affine3DProcessor<>( affine.inverse(), Interpolation.NLINEAR, PrimitiveType.FLOAT );
+		blocksDouble = PrimitiveBlocks.of(
+				Converters.convert(
+						Views.extendZero( img ),
+						new RealDoubleConverter<>(),
+						new DoubleType() ) );
+		processorDouble = new Affine3DProcessor<>( affine.inverse(), Interpolation.NLINEAR, PrimitiveType.DOUBLE );
+		blocksFloat();
+		blocksDouble();
+		blocksFloat();
+		blocksDouble();
 	}
 
 	@Benchmark
-	public Object blocksnaive()
+	public Object blocksFloat()
 	{
 		long[] max = new long[ size.length ];
 		Arrays.setAll( max, d -> min[ d ] + size[ d ] - 1 );
@@ -124,6 +140,19 @@ public class TransformBenchmark3D
 		final float[] dest = new float[ ( int ) Intervals.numElements( size ) ];
 		processor.compute( processor.getSourceBuffer(), dest );
 		final RandomAccessibleInterval< FloatType > destImg = ArrayImgs.floats( dest, size[ 0 ], size[ 1 ], size[ 2 ] );
+		return destImg;
+	}
+
+	@Benchmark
+	public Object blocksDouble()
+	{
+		long[] max = new long[ size.length ];
+		Arrays.setAll( max, d -> min[ d ] + size[ d ] - 1 );
+		processorDouble.setTargetInterval( FinalInterval.wrap( min, max ) );
+		blocksDouble.copy( processorDouble.getSourcePos(), processorDouble.getSourceBuffer(), processorDouble.getSourceSize() );
+		final double[] dest = new double[ ( int ) Intervals.numElements( size ) ];
+		processorDouble.compute( processorDouble.getSourceBuffer(), dest );
+		final RandomAccessibleInterval< DoubleType > destImg = ArrayImgs.doubles( dest, size[ 0 ], size[ 1 ], size[ 2 ] );
 		return destImg;
 	}
 

@@ -10,7 +10,7 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
 import net.imglib2.algorithm.TransformPlayground3D.Affine3DBlockProcessor;
-import net.imglib2.algorithm.TransformPlayground3D_U8.Affine3DBlockProcessor_U8;
+import net.imglib2.algorithm.TransformPlayground3D_NN.Affine3DBlockProcessor_NN;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealFloatConverter;
@@ -19,6 +19,7 @@ import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory;
+import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.NativeType;
@@ -46,7 +47,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @BenchmarkMode( Mode.AverageTime )
 @OutputTimeUnit( TimeUnit.MILLISECONDS )
 @Fork( 1 )
-public class TransformBenchmark3D_U8
+public class TransformBenchmark3D_NN
 {
 
 //	TransformBenchmark3D.blocksnaive  avgt   30   17,605 ± 0,100  ms/op
@@ -60,16 +61,16 @@ public class TransformBenchmark3D_U8
 //	final int[] size = { 8, 8, 8 }; // 12
 
 	final long[] min = { 200, -330, 120 };
-//	final int[] size = { 256, 256, 256 };
+	final int[] size = { 256, 256, 256 };
 //	final int[] size = { 128, 128, 128 };
-	final int[] size = { 64, 64, 64 }; // 16
-//	final int[] size = { 32, 32, 32 }; // 15
-//	final int[] size = { 16, 16, 16 }; // 15
-//	final int[] size = { 8, 8, 8 }; // 14
+//	final int[] size = { 64, 64, 64 };
+//	final int[] size = { 32, 32, 32 };
+//	final int[] size = { 16, 16, 16 };
+//	final int[] size = { 8, 8, 8 };
 	final AffineTransform3D affine = new AffineTransform3D();
 	final RandomAccessibleInterval< UnsignedByteType > img;
 
-	public TransformBenchmark3D_U8()
+	public TransformBenchmark3D_NN()
 	{
 		final String fn = "/Users/pietzsch/workspace/data/e002_stack_fused-8bit.tif";
 		final ImagePlus imp = IJ.openImage( fn );
@@ -91,7 +92,7 @@ public class TransformBenchmark3D_U8
 
 	public void realviewsSetup()
 	{
-		RealRandomAccessible< UnsignedByteType > interpolated = Views.interpolate( Views.extendZero( img ), new ClampingNLinearInterpolatorFactory<>() );
+		RealRandomAccessible< UnsignedByteType > interpolated = Views.interpolate( Views.extendZero( img ), new NearestNeighborInterpolatorFactory<>() );
 		transformed = RealViews.affine( interpolated, affine );
 	}
 
@@ -102,14 +103,17 @@ public class TransformBenchmark3D_U8
 		return copy;
 	}
 
-	PrimitiveBlocks< UnsignedByteType > blocks;
-	Affine3DBlockProcessor_U8 processor;
+	PrimitiveBlocks< FloatType > blocks;
+	Affine3DBlockProcessor_NN processor;
 
 	public void blocksnaiveSetup()
 	{
 		blocks = PrimitiveBlocks.of(
-						Views.extendZero( img ) );
-		processor = new Affine3DBlockProcessor_U8( affine.inverse() );
+				Converters.convert(
+						Views.extendZero( img ),
+						new RealFloatConverter<>(),
+						new FloatType() ) );
+		processor = new Affine3DBlockProcessor_NN( affine.inverse() );
 	}
 
 	@Benchmark
@@ -119,16 +123,16 @@ public class TransformBenchmark3D_U8
 		Arrays.setAll( max, d -> min[ d ] + size[ d ] - 1 );
 		processor.setTargetInterval( FinalInterval.wrap( min, max ) );
 		blocks.copy( processor.getSourcePos(), processor.getSourceBuffer(), processor.getSourceSize() );
-		final byte[] dest = new byte[ ( int ) Intervals.numElements( size ) ];
+		final float[] dest = new float[ ( int ) Intervals.numElements( size ) ];
 		processor.compute( processor.getSourceBuffer(), dest );
-		final RandomAccessibleInterval< UnsignedByteType > destImg = ArrayImgs.unsignedBytes( dest, size[ 0 ], size[ 1 ], size[ 2 ] );
+		final RandomAccessibleInterval< FloatType > destImg = ArrayImgs.floats( dest, size[ 0 ], size[ 1 ], size[ 2 ] );
 		return destImg;
 	}
 
 
 	public static void main( String[] args ) throws RunnerException
 	{
-		Options options = new OptionsBuilder().include( TransformBenchmark3D_U8.class.getSimpleName() + "\\." ).build();
+		Options options = new OptionsBuilder().include( TransformBenchmark3D_NN.class.getSimpleName() + "\\." ).build();
 		new Runner( options ).run();
 	}
 

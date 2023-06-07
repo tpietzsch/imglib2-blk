@@ -14,8 +14,6 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.RealRandomAccessible;
-import net.imglib2.algorithm.UnifyPlayground.Affine3DProcessor;
-import net.imglib2.algorithm.UnifyPlayground.Interpolation;
 import net.imglib2.algorithm.blocks.BlockProcessor;
 import net.imglib2.algorithm.blocks.util.BlockProcessorSourceInterval;
 import net.imglib2.blocks.PrimitiveBlocks;
@@ -28,6 +26,7 @@ import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory;
+import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.NativeType;
@@ -39,7 +38,7 @@ import net.imglib2.util.CloseableThreadLocal;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
-public class TransformPlayground3D
+public class TransformPlayground3D_NN
 {
 
 
@@ -70,7 +69,7 @@ public class TransformPlayground3D
 		affine.rotate( 0,1.5 );
 		affine.scale( 1.4 );
 
-		final RealRandomAccessible< UnsignedByteType > interpolated = Views.interpolate( Views.extendZero( img ), new ClampingNLinearInterpolatorFactory<>() );
+		final RealRandomAccessible< UnsignedByteType > interpolated = Views.interpolate( Views.extendZero( img ), new NearestNeighborInterpolatorFactory<>() );
 		final RandomAccessible< UnsignedByteType > transformed = RealViews.affine( interpolated, affine );
 
 
@@ -100,7 +99,7 @@ public class TransformPlayground3D
 						Views.extendZero( img ),
 						new RealFloatConverter<>(),
 						new FloatType() ) );
-		Affine3DProcessor<float[]> processor = new Affine3DProcessor<>( affine.inverse(), Interpolation.NLINEAR, PrimitiveType.FLOAT );
+		Affine3DBlockProcessor_NN processor = new Affine3DBlockProcessor_NN( affine.inverse() );
 		long[] max = new long[ size.length ];
 		Arrays.setAll( max, d -> min[ d ] + size[ d ] - 1 );
 		processor.setTargetInterval( FinalInterval.wrap( min, max ) );
@@ -132,7 +131,7 @@ public class TransformPlayground3D
 	}
 
 
-	static class Affine3DBlockProcessor implements BlockProcessor< float[], float[] >
+	static class Affine3DBlockProcessor_NN implements BlockProcessor< float[], float[] >
 	{
 		private static final int n = 3;
 
@@ -148,9 +147,9 @@ public class TransformPlayground3D
 
 		private final TempArray< float[] > tempArray;
 
-		private Supplier< Affine3DBlockProcessor > threadSafeSupplier;
+		private Supplier< Affine3DBlockProcessor_NN > threadSafeSupplier;
 
-		public Affine3DBlockProcessor( final AffineTransform3D transformToSource )
+		public Affine3DBlockProcessor_NN( final AffineTransform3D transformToSource )
 		{
 			this.transformToSource = transformToSource;
 			destPos = new long[ n ];
@@ -161,7 +160,7 @@ public class TransformPlayground3D
 			tempArray = TempArray.forPrimitiveType( PrimitiveType.FLOAT );
 		}
 
-		private Affine3DBlockProcessor( final Affine3DBlockProcessor affine )
+		private Affine3DBlockProcessor_NN( final Affine3DBlockProcessor_NN affine )
 		{
 			transformToSource = affine.transformToSource;
 			destPos = new long[ n ];
@@ -173,13 +172,13 @@ public class TransformPlayground3D
 			threadSafeSupplier = affine.threadSafeSupplier;
 		}
 
-		private Affine3DBlockProcessor newInstance()
+		private Affine3DBlockProcessor_NN newInstance()
 		{
-			return new Affine3DBlockProcessor( this );
+			return new Affine3DBlockProcessor_NN( this );
 		}
 
 		@Override
-		public synchronized Supplier< Affine3DBlockProcessor > threadSafeSupplier()
+		public synchronized Supplier< Affine3DBlockProcessor_NN > threadSafeSupplier()
 		{
 			if ( threadSafeSupplier == null )
 				threadSafeSupplier = CloseableThreadLocal.withInitial( this::newInstance )::get;
@@ -197,12 +196,18 @@ public class TransformPlayground3D
 			destSize[ 2 ] = ( int ) interval.dimension( 2 );
 
 			final RealInterval bounds = transformToSource.estimateBounds( interval );
-			sourcePos[ 0 ] = ( long ) Math.floor( bounds.realMin( 0 ) );
-			sourcePos[ 1 ] = ( long ) Math.floor( bounds.realMin( 1 ) );
-			sourcePos[ 2 ] = ( long ) Math.floor( bounds.realMin( 2 ) );
-			sourceSize[ 0 ] = ( int ) ( ( long ) Math.floor( bounds.realMax( 0 ) ) - sourcePos[ 0 ] ) + 2;
-			sourceSize[ 1 ] = ( int ) ( ( long ) Math.floor( bounds.realMax( 1 ) ) - sourcePos[ 1 ] ) + 2;
-			sourceSize[ 2 ] = ( int ) ( ( long ) Math.floor( bounds.realMax( 2 ) ) - sourcePos[ 2 ] ) + 2;
+//			sourcePos[ 0 ] = ( long ) Math.floor( bounds.realMin( 0 ) );
+//			sourcePos[ 1 ] = ( long ) Math.floor( bounds.realMin( 1 ) );
+//			sourcePos[ 2 ] = ( long ) Math.floor( bounds.realMin( 2 ) );
+//			sourceSize[ 0 ] = ( int ) ( ( long ) Math.floor( bounds.realMax( 0 ) ) - sourcePos[ 0 ] ) + 2;
+//			sourceSize[ 1 ] = ( int ) ( ( long ) Math.floor( bounds.realMax( 1 ) ) - sourcePos[ 1 ] ) + 2;
+//			sourceSize[ 2 ] = ( int ) ( ( long ) Math.floor( bounds.realMax( 2 ) ) - sourcePos[ 2 ] ) + 2;
+			sourcePos[ 0 ] = Math.round( bounds.realMin( 0 ) );
+			sourcePos[ 1 ] = Math.round( bounds.realMin( 1 ) );
+			sourcePos[ 2 ] = Math.round( bounds.realMin( 2 ) );
+			sourceSize[ 0 ] = ( int ) ( Math.round( bounds.realMax( 0 ) ) - sourcePos[ 0 ] ) + 1;
+			sourceSize[ 1 ] = ( int ) ( Math.round( bounds.realMax( 1 ) ) - sourcePos[ 1 ] ) + 1;
+			sourceSize[ 2 ] = ( int ) ( Math.round( bounds.realMax( 2 ) ) - sourcePos[ 2 ] ) + 1;
 
 			sourceLength = safeInt( Intervals.numElements( sourceSize ) );
 		}
@@ -243,8 +248,13 @@ public class TransformPlayground3D
 		{
 			double pdest[] = new double[ 3 ];
 			double psrc[] = new double[ 3 ];
+			final float dx = transformToSource.d( 0 ).getFloatPosition( 0 );
+			final float dy = transformToSource.d( 0 ).getFloatPosition( 1 );
+			final float dz = transformToSource.d( 0 ).getFloatPosition( 2 );
+			final int ss0 = sourceSize[ 0 ];
+			final int ss1 = sourceSize[ 1 ] * ss0;
 			pdest[ 0 ] = destPos[ 0 ];
-			int j = 0;
+			int i = 0;
 			for ( int z = 0; z < destSize[ 2 ]; ++z )
 			{
 				pdest[ 2 ] = z + destPos[ 2 ];
@@ -252,47 +262,19 @@ public class TransformPlayground3D
 				{
 					pdest[ 1 ] = y + destPos[ 1 ];
 					transformToSource.apply( pdest, psrc );
-
-					float sfx = ( float ) ( psrc[ 0 ] - sourcePos[ 0 ] );
-					float sfy = ( float ) ( psrc[ 1 ] - sourcePos[ 1 ] );
-					float sfz = ( float ) ( psrc[ 2 ] - sourcePos[ 2 ] );
-					final float dx = transformToSource.d( 0 ).getFloatPosition( 0 );
-					final float dy = transformToSource.d( 0 ).getFloatPosition( 1 );
-					final float dz = transformToSource.d( 0 ).getFloatPosition( 2 );
-					int i = j;
-					final int ss0 = sourceSize[ 0 ];
-					final int ss1 = sourceSize[ 1 ] * ss0;
+					float sfx = ( float ) ( psrc[ 0 ] - sourcePos[ 0 ] + 0.5 );
+					float sfy = ( float ) ( psrc[ 1 ] - sourcePos[ 1 ] + 0.5 );
+					float sfz = ( float ) ( psrc[ 2 ] - sourcePos[ 2 ] + 0.5 );
 					for ( int x = 0; x < destSize[ 0 ]; ++x )
 					{
 						final int sx = ( int ) sfx;
 						final int sy = ( int ) sfy;
 						final int sz = ( int ) sfz;
-						final float r0 = sfx - sx;
-						final float r1 = sfy - sy;
-						final float r2 = sfz - sz;
-						final int o = sz * ss1 + sy * ss0 + sx;
-						final float a000 = src[ o ];
-						final float a001 = src[ o + 1 ];
-						final float a010 = src[ o + ss0 ];
-						final float a011 = src[ o + ss0 + 1 ];
-						final float a100 = src[ o + ss1 ];
-						final float a101 = src[ o + ss1 + 1 ];
-						final float a110 = src[ o + ss1 + ss0 ];
-						final float a111 = src[ o + ss1 + ss0 + 1 ];
-						dest[ i++ ] = a000 +
-								r0 * ( -a000 + a001 ) +
-								r1 * ( ( -a000 + a010 ) +
-										r0 * ( a000 - a001 - a010 + a011 ) ) +
-								r2 * ( ( -a000 + a100 ) +
-										r0 * ( a000 - a001 - a100 + a101 ) +
-										r1 * ( ( a000 - a010 - a100 + a110 ) +
-												r0 * ( -a000 + a001 + a010 - a011 + a100 - a101 - a110 + a111 ) ) );
-
+						dest[ i++ ] = src[ sz * ss1 + sy * ss0 + sx ];
 						sfx += dx;
 						sfy += dy;
 						sfz += dz;
 					}
-					j += destSize[ 0 ];
 				}
 			}
 		}
