@@ -9,6 +9,7 @@ import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
+import net.imglib2.algorithm.blocks.BlockProcessor;
 import net.imglib2.algorithm.blocks.transform.Transform.Interpolation;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.converter.Converters;
@@ -22,7 +23,6 @@ import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.PrimitiveType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -105,9 +105,11 @@ public class TransformBenchmark3D
 	}
 
 	PrimitiveBlocks< FloatType > blocks;
-	Affine3DProcessor< float[] > processor;
+	BlockProcessor< float[], float[] > processor;
 	PrimitiveBlocks< DoubleType > blocksDouble;
-	Affine3DProcessor< double[] > processorDouble;
+	BlockProcessor< double[], double[] > processorDouble;
+	PrimitiveBlocks< UnsignedByteType > blocksUnsignedByte;
+	BlockProcessor< byte[], byte[] > processorUnsignedByte;
 
 	public void blocksnaiveSetup()
 	{
@@ -116,17 +118,21 @@ public class TransformBenchmark3D
 						Views.extendZero( img ),
 						new RealFloatConverter<>(),
 						new FloatType() ) );
-		processor = new Affine3DProcessor<>( affine.inverse(), Interpolation.NLINEAR, PrimitiveType.FLOAT );
+		processor = Transform.affine( new FloatType(), affine, Interpolation.NLINEAR ).blockProcessor();
 		blocksDouble = PrimitiveBlocks.of(
 				Converters.convert(
 						Views.extendZero( img ),
 						new RealDoubleConverter<>(),
 						new DoubleType() ) );
-		processorDouble = new Affine3DProcessor<>( affine.inverse(), Interpolation.NLINEAR, PrimitiveType.DOUBLE );
+		processorDouble = Transform.affine( new DoubleType(), affine, Interpolation.NLINEAR ).blockProcessor();
+		blocksUnsignedByte = PrimitiveBlocks.of( Views.extendZero( img ) );
+		processorUnsignedByte = Transform.affine( new UnsignedByteType(), affine, Interpolation.NLINEAR ).blockProcessor();
 		blocksFloat();
 		blocksDouble();
+		blocksUnsignedByte();
 		blocksFloat();
 		blocksDouble();
+		blocksUnsignedByte();
 	}
 
 	@Benchmark
@@ -152,6 +158,19 @@ public class TransformBenchmark3D
 		final double[] dest = new double[ ( int ) Intervals.numElements( size ) ];
 		processorDouble.compute( processorDouble.getSourceBuffer(), dest );
 		final RandomAccessibleInterval< DoubleType > destImg = ArrayImgs.doubles( dest, size[ 0 ], size[ 1 ], size[ 2 ] );
+		return destImg;
+	}
+
+	@Benchmark
+	public Object blocksUnsignedByte()
+	{
+		long[] max = new long[ size.length ];
+		Arrays.setAll( max, d -> min[ d ] + size[ d ] - 1 );
+		processorUnsignedByte.setTargetInterval( FinalInterval.wrap( min, max ) );
+		blocksUnsignedByte.copy( processorUnsignedByte.getSourcePos(), processorUnsignedByte.getSourceBuffer(), processorUnsignedByte.getSourceSize() );
+		final byte[] dest = new byte[ ( int ) Intervals.numElements( size ) ];
+		processorUnsignedByte.compute( processorUnsignedByte.getSourceBuffer(), dest );
+		final RandomAccessibleInterval< UnsignedByteType > destImg = ArrayImgs.unsignedBytes( dest, size[ 0 ], size[ 1 ], size[ 2 ] );
 		return destImg;
 	}
 

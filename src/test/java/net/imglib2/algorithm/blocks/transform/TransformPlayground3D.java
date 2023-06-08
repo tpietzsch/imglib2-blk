@@ -11,6 +11,7 @@ import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
+import net.imglib2.algorithm.blocks.BlockProcessor;
 import net.imglib2.algorithm.blocks.transform.Transform.Interpolation;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.converter.Converters;
@@ -76,20 +77,15 @@ public class TransformPlayground3D
 		final RandomAccessibleInterval< UnsignedByteType > copy = copy( transformed, new UnsignedByteType(), min, size );
 
 
-
-		final PrimitiveBlocks< FloatType > blocks = PrimitiveBlocks.of(
-				Converters.convert(
-						Views.extendZero( img ),
-						new RealFloatConverter<>(),
-						new FloatType() ) );
-		Affine3DProcessor<float[]> processor = new Affine3DProcessor<>( affine.inverse(), Interpolation.NLINEAR, PrimitiveType.FLOAT );
+		final PrimitiveBlocks< UnsignedByteType > blocks = PrimitiveBlocks.of( Views.extendZero( img ) );
+		BlockProcessor< byte[], byte[] > processor = Transform.affine( new UnsignedByteType(), affine, Interpolation.NLINEAR ).blockProcessor();
 		long[] max = new long[ size.length ];
 		Arrays.setAll( max, d -> min[ d ] + size[ d ] - 1 );
 		processor.setTargetInterval( FinalInterval.wrap( min, max ) );
 		blocks.copy( processor.getSourcePos(), processor.getSourceBuffer(), processor.getSourceSize() );
-		final float[] dest = new float[ ( int ) Intervals.numElements( size ) ];
+		final byte[] dest = new byte[ ( int ) Intervals.numElements( size ) ];
 		processor.compute( processor.getSourceBuffer(), dest );
-		final RandomAccessibleInterval< FloatType > destImg = ArrayImgs.floats( dest, size[ 0 ], size[ 1 ], size[ 2 ] );
+		final RandomAccessibleInterval< UnsignedByteType > destImg = ArrayImgs.unsignedBytes( dest, size[ 0 ], size[ 1 ], size[ 2 ] );
 
 
 

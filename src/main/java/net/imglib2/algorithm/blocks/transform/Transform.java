@@ -40,6 +40,13 @@ public class Transform
 
 	// only 2D and 3D !
 
+	public static < T extends NativeType< T > >
+	UnaryBlockOperator< T, T > affine( final T type, final AffineGet transformFromSource, Interpolation interpolation )
+	{
+		return affine( type, transformFromSource, interpolation, ComputationType.AUTO );
+	}
+
+
 	/**
 	 * TODO: javadoc
 	 *
