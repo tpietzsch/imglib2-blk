@@ -1,4 +1,4 @@
-package net.imglib2.algorithm;
+package net.imglib2.algorithm.blocks.transform;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -6,8 +6,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.UnifyPlayground.Interpolation;
-import net.imglib2.algorithm.UnifyPlayground.Affine3DProcessor;
+import net.imglib2.algorithm.blocks.transform.Transform.Interpolation;
 import net.imglib2.blocks.PrimitiveBlocks;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealFloatConverter;
