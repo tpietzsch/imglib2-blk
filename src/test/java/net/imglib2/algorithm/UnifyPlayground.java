@@ -522,19 +522,130 @@ public class UnifyPlayground
 				switch ( primitiveType )
 				{
 				case FLOAT:
-					TODO make these implementations:
-//					return Cast.unchecked( interpolation == Interpolation.NLINEAR
-//							? NLinearFloat.INSTANCE
-//							: NearestNeighborFloat.INSTANCE );
+					return Cast.unchecked( interpolation == Interpolation.NLINEAR
+							? NLinearFloat.INSTANCE
+							: NearestNeighborFloat.INSTANCE );
 				case DOUBLE:
-//					return Cast.unchecked( interpolation == Interpolation.NLINEAR
-//							? NLinearDouble.INSTANCE
-//							: NearestNeighborDouble.INSTANCE );
+					return Cast.unchecked( interpolation == Interpolation.NLINEAR
+							? NLinearDouble.INSTANCE
+							: NearestNeighborDouble.INSTANCE );
 				default:
 					throw new IllegalArgumentException();
 				}
 			}
 		}
+
+		private static class NearestNeighborFloat implements TransformLine2D< float[] >
+		{
+			private NearestNeighborFloat() {}
+
+			static final NearestNeighborFloat INSTANCE = new NearestNeighborFloat();
+
+			@Override
+			public void apply( final float[] src, final float[] dest, int offset, final int length,
+					final float d0, final float d1,
+					final int ss0,
+					float sf0, float sf1 )
+			{
+				sf0 += .5f;
+				sf1 += .5f;
+				for ( int x = 0; x < length; ++x )
+				{
+					final int s0 = ( int ) sf0;
+					final int s1 = ( int ) sf1;
+					dest[ offset++ ] = src[ s1 * ss0 + s0 ];
+					sf0 += d0;
+					sf1 += d1;
+				}
+			}
+		}
+
+		private static class NLinearFloat implements TransformLine2D< float[] >
+		{
+			private NLinearFloat() {}
+
+			static final NLinearFloat INSTANCE = new NLinearFloat();
+
+			@Override
+			public void apply( final float[] src, final float[] dest, int offset, final int length,
+					final float d0, final float d1,
+					final int ss0,
+					float sf0, float sf1 )
+			{
+				for ( int x = 0; x < length; ++x )
+				{
+					final int s0 = ( int ) sf0;
+					final int s1 = ( int ) sf1;
+					final float r0 = sf0 - s0;
+					final float r1 = sf1 - s1;
+					final int o = s1 * ss0 + s0;
+					final float a00 = src[ o ];
+					final float a01 = src[ o + 1 ];
+					final float a10 = src[ o + ss0 ];
+					final float a11 = src[ o + ss0 + 1 ];
+					dest[ offset++ ] = a00 + r0 * ( a01 - a00 ) + r1 * ( a10 - a00 + r0 * ( a00 - a10 - a01 + a11 ) );
+					sf0 += d0;
+					sf1 += d1;
+				}
+			}
+		}
+
+		private static class NearestNeighborDouble implements TransformLine2D< double[] >
+		{
+			private NearestNeighborDouble() {}
+
+			static final NearestNeighborDouble INSTANCE = new NearestNeighborDouble();
+
+			@Override
+			public void apply( final double[] src, final double[] dest, int offset, final int length,
+					final float d0, final float d1,
+					final int ss0,
+					float sf0, float sf1 )
+			{
+				sf0 += .5f;
+				sf1 += .5f;
+				for ( int x = 0; x < length; ++x )
+				{
+					final int s0 = ( int ) sf0;
+					final int s1 = ( int ) sf1;
+					dest[ offset++ ] = src[ s1 * ss0 + s0 ];
+					sf0 += d0;
+					sf1 += d1;
+				}
+			}
+		}
+
+		private static class NLinearDouble implements TransformLine2D< double[] >
+		{
+			private NLinearDouble() {}
+
+			static final NLinearDouble INSTANCE = new NLinearDouble();
+
+			@Override
+			public void apply( final double[] src, final double[] dest, int offset, final int length,
+					final float d0, final float d1,
+					final int ss0,
+					float sf0, float sf1 )
+			{
+				for ( int x = 0; x < length; ++x )
+				{
+					final int s0 = ( int ) sf0;
+					final int s1 = ( int ) sf1;
+					final float r0 = sf0 - s0;
+					final float r1 = sf1 - s1;
+					final int o = s1 * ss0 + s0;
+					final double a00 = src[ o ];
+					final double a01 = src[ o + 1 ];
+					final double a10 = src[ o + ss0 ];
+					final double a11 = src[ o + ss0 + 1 ];
+					dest[ offset++ ] = a00 + r0 * ( a01 - a00 ) + r1 * ( a10 - a00 + r0 * ( a00 - a10 - a01 + a11 ) );
+					sf0 += d0;
+					sf1 += d1;
+				}
+			}
+		}
+
+
 	}
 
 }

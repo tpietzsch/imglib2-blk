@@ -14,6 +14,8 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealInterval;
 import net.imglib2.RealRandomAccessible;
+import net.imglib2.algorithm.UnifyPlayground.Affine2DProcessor;
+import net.imglib2.algorithm.UnifyPlayground.Interpolation;
 import net.imglib2.algorithm.blocks.BlockProcessor;
 import net.imglib2.algorithm.blocks.util.BlockProcessorSourceInterval;
 import net.imglib2.blocks.PrimitiveBlocks;
@@ -98,7 +100,7 @@ public class TransformPlayground
 						Views.extendZero( img ),
 						new RealFloatConverter<>(),
 						new FloatType() ) );
-		Affine2DBlockProcessor processor = new Affine2DBlockProcessor( affine.inverse() );
+		Affine2DProcessor<float[]> processor = new Affine2DProcessor<>( affine.inverse(), Interpolation.NLINEAR, PrimitiveType.FLOAT );
 		long[] max = new long[ size.length ];
 		Arrays.setAll( max, d -> min[ d ] + size[ d ] - 1 );
 		processor.setTargetInterval( FinalInterval.wrap( min, max ) );
