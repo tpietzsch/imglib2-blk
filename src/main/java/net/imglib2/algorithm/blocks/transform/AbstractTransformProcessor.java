@@ -89,12 +89,12 @@ abstract class AbstractTransformProcessor< T extends AbstractTransformProcessor<
 		switch ( interpolation )
 		{
 		case NEARESTNEIGHBOR:
-			Arrays.setAll( sourcePos, d -> Math.round( bounds.realMin( d ) ) );
-			Arrays.setAll( sourceSize, d -> ( int ) ( Math.round( bounds.realMax( d ) ) - sourcePos[ d ] ) + 1 );
+			Arrays.setAll( sourcePos, d -> Math.round( bounds.realMin( d ) - 0.5 ) );
+			Arrays.setAll( sourceSize, d -> ( int ) ( Math.round( bounds.realMax( d ) + 0.5 ) - sourcePos[ d ] ) + 1 );
 			break;
 		case NLINEAR:
-			Arrays.setAll( sourcePos, d -> ( long ) Math.floor( bounds.realMin( d ) ) );
-			Arrays.setAll( sourceSize, d -> ( int ) ( ( long ) Math.floor( bounds.realMax( d ) ) - sourcePos[ d ] ) + 2 );
+			Arrays.setAll( sourcePos, d -> ( long ) Math.floor( bounds.realMin( d ) - 0.5 ) );
+			Arrays.setAll( sourceSize, d -> ( int ) ( ( long ) Math.floor( bounds.realMax( d ) + 0.5 ) - sourcePos[ d ] ) + 2 );
 			break;
 		}
 		sourceLength = safeInt( Intervals.numElements( sourceSize ) );
